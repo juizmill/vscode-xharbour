@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **xHarbour Tools** (this fork) are documented here.
+All notable changes to **vscode xHarbour** (this fork) are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 For the pre-fork history of the base extension (`harbourCodeExtension`),

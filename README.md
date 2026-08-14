@@ -1,4 +1,4 @@
-# xHarbour Tools
+# vscode xHarbour
 
 Language support for **Harbour** and **xHarbour** (`.prg`, `.ch`, `.hbx`, `.hb`)
 in Visual Studio Code: syntax highlighting, diagnostics, hover, go to
@@ -292,8 +292,8 @@ npm install                            # single node_modules for both the
                                         # server (src/client, src/server)
 npx webpack --mode production          # builds dist/extension.js,
                                         # dist/debugger.js, dist/hb_server.js
-npx vsce package --no-dependencies     # -> vscode-xharbour.vsix
-code --install-extension vscode-xharbour.vsix
+npx vsce package --no-dependencies     # -> vscode-xharbour-lang.vsix
+code --install-extension vscode-xharbour-lang.vsix
 ```
 
 `npm run prelanch` (`webpack --mode development`) is the pre-launch task

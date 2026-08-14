@@ -4,4 +4,4 @@ extra/
 *.vsix
 *.vsix.map
 .vscode-test/
-.vscode-xharbour-command-rules.ch
+.vscode-xharbour-lang-command-rules.ch

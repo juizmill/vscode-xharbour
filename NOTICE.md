@@ -1,6 +1,6 @@
 # Notice
 
-This project ("xHarbour Tools") is a fork of
+This project ("vscode xHarbour") is a fork of
 [harbourCodeExtension](https://github.com/APerricone/harbourCodeExtension)
 by **Antonino Perricone**.
 

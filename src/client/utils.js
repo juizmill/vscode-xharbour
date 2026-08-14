@@ -58,7 +58,7 @@ function getAliasCommandArgs(fileCwd) {
         .map(r => "#command " + r.match + " => " + r.replace);
     if (lines.length == 0)
         return [];
-    const chPath = path.join(fileCwd, ".vscode-xharbour-command-rules.ch");
+    const chPath = path.join(fileCwd, ".vscode-xharbour-lang-command-rules.ch");
     fs.writeFileSync(chPath, lines.join("\n") + "\n");
     return ["-u+" + chPath];
 }
