@@ -13,9 +13,12 @@
 // harbour.aliases.customKeywords doesn't need a separate entry for it.
 
 FUNCTION Main()
-    LOCAL cNome := ""
+    LOCAL cNome      := ""
+    LOCAL cSobreNome := ""
 
     Default cNome := "mundo"
+    default(cSobreNome, "bar")
+
     default cZZ := "abc"
 
     // Isso tem que dar erro porque não tem Local definido

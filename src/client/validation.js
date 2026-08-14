@@ -26,6 +26,21 @@ function deactivate()
 
 var valRegEx = /^\r?(?:([^\(]*)\((\d+)\)\s+)?(Warning|Error)\s+([^\r\n]*)/
 var lineContRegEx = /;(\s*(\/\/|&&|\/\*))?/
+/**
+ * Whether the text right after a matched identifier is ":<suffix>(", where
+ * <suffix> is one of harbour.aliases.callSuffixes -- i.e. the identifier is
+ * being called through our own editor-only "Foo:Exec()" convention, not
+ * used as an actual undeclared variable/ambiguous 0-arg call.
+ * @param {string} lineText
+ * @param {number} afterIndex
+ * @param {string[]} callSuffixesLower
+ */
+function isCallSuffixUsage(lineText, afterIndex, callSuffixesLower)
+{
+	if(callSuffixesLower.length == 0) return false;
+	var m = /^\s*:\s*([A-Za-z_]\w*)\s*\(/.exec(lineText.substring(afterIndex));
+	return m ? callSuffixesLower.indexOf(m[1].toLowerCase()) >= 0 : false;
+}
 function validate(textDocument)
 {
 	if(textDocument.languageId !== 'harbour' )
@@ -33,6 +48,7 @@ function validate(textDocument)
 	var section = vscode.workspace.getConfiguration('harbour');
 	if(!section.validating)
 		return;
+	var callSuffixesLower = ((section.aliases && section.aliases.callSuffixes) || []).map(function(s) {return s.toLowerCase();});
 	var args = ["-s", "-q0", "-m", "-n0", "-w"+section.warningLevel, textDocument.fileName ];
 	var file_cwd = path.dirname(textDocument.fileName);
 	for (var i = 0; i < section.extraIncludePaths.length; i++) {
@@ -84,6 +100,10 @@ function validate(textDocument)
 					while(m=rr.exec(testLine.text))
 					{
 						putAll = false;
+						if(r[4].indexOf("Ambiguous reference")>=0 &&
+							isCallSuffixUsage(testLine.text, m.index+subject[0].length, callSuffixesLower)) {
+							continue;
+						}
 						var diag = new vscode.Diagnostic(new vscode.Range(lineNr,m.index,lineNr,m.index+subject[0].length), r[4],
 							r[3]=="Warning"? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error)
 						if(r[4].indexOf("not used")>0) {

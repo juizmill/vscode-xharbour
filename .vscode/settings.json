@@ -9,6 +9,7 @@
     },
     "harbour.warningLevel": 3,
     "harbour.checkUndefinedFunctions": true,
+    "harbour.workspaceDepth": 2,
     "harbour.compilerExecutable": "/home/juizmill/projetos/Jesus/xharbour/harbour-docker.sh",
     "harbour.aliases.callSuffixes": [
         "Exec"
