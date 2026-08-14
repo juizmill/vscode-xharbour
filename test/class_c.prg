@@ -79,6 +79,8 @@ void Init_ClassTest() { int i=0;
       ClassTestData.nOrder    = hb_clsGetVarIndex(ClassTestData.classId,hb_dynsymGet("nOrder"));
       ClassTestData.nWidthMin = hb_clsGetVarIndex(ClassTestData.classId,hb_dynsymGet("nWidthMin"));
    }
+
+   Saudacao:Exec()
 }
 
 HB_FUNC( CALLMEMBER )

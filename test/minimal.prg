@@ -2,7 +2,7 @@ REQUEST HB_CODEPAGE_ITWIN
 
 proc test(n)
    LOCAL c := {1,2,3,{4,5,6}}
-   local a := 100, cPrice:="€ 199,99"
+   local a := 100, cPrice:="ï¿½ 199,99"
    hb_cdpSelect("ITWIN")
    subProc()
 
@@ -17,6 +17,8 @@ proc test(n)
    if a=1
 
    endif
+
+   Saudacao:Exec()
 
 return
 

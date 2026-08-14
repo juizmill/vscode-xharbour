@@ -54,6 +54,11 @@ static procedure CheckSocket(lStopSent)
    LOCAL tmp, lNeedExit := .F.
    LOCAL t_oDebugInfo := __DEBUGITEM()
    lStopSent := iif(empty(lStopSent),.F.,lStopSent)
+
+
+
+   Saudacao:Exec()
+
    // if no server then search it.
    // 140+130+120+110+100+90+80+70+60+50+40+30+20+10=1050 wait 1sec at start, then 0
    do while (empty(t_oDebugInfo['socket']) .and. t_oDebugInfo['timeCheckForDebug']<=14)

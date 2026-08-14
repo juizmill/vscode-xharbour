@@ -1691,6 +1691,23 @@ connection.onHover((params, cancelled) => {
             if (cancelled.isCancellationRequested) return undefined;
         }
     }
+    // Not found in this document or its own #include chain -- look across the
+    // rest of the indexed workspace (same "files" index Go to Definition uses),
+    // so hovering a call to a function defined in another workspace file still
+    // shows its doc-comment.
+    for (const file in files) {
+        if (file == doc.uri) continue;
+        if (cancelled.isCancellationRequested) return undefined;
+        const otherPp = files[file];
+        var result = otherPp.funcList.filter((v)=> v.kind=='define' && v.name==w);
+        if(result.length>0) {
+            return { contents: { language: 'harbour', value: result[0].body } };
+        }
+        const otherFuncInfo = findFuncCommentInfo(otherPp.funcList, wordCmp);
+        if (otherFuncInfo) {
+            return commentHoverContent(otherFuncInfo);
+        }
+    }
     return undefined;
 })
 
