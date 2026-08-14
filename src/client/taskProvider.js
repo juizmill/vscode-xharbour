@@ -65,7 +65,7 @@ class HRBTask {
             var pathVal = resolvePredefinedVariables(section.extraIncludePaths[i]);
             args.push("-I"+pathVal);
         }
-        return args.concat(section.extraOptions.split(" ").filter(function(el) {return el.length != 0})).concat(getAliasCommandArgs());
+        return args.concat(section.extraOptions.split(" ").filter(function(el) {return el.length != 0})).concat(getAliasCommandArgs(path.dirname(fileName)));
     }
 
     provideTasks(token) {
@@ -309,8 +309,8 @@ class HBMK2Terminal {
         if(Array.isArray(task.definition.extraArgs)) args=args.concat(task.definition.extraArgs);
         if(task.definition.platform) args.push("-plat="+task.definition.platform);
         if(task.definition.compiler) args.push("-comp="+task.definition.compiler);
-        args = args.concat(getAliasCommandArgs());
         var file_cwd = path.dirname(inputFile);
+        args = args.concat(getAliasCommandArgs(file_cwd));
         var hbmk2Path = path.join(path.dirname(section.compilerExecutable), "hbmk2")
         this.write(localize("harbour.task.HBMK2.start")+"\r\n")
         this.p = cp.spawn(hbmk2Path,args,{cwd:file_cwd,env:this.env});

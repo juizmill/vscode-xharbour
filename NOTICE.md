@@ -4,7 +4,7 @@ This project ("xHarbour Tools") is a fork of
 [harbourCodeExtension](https://github.com/APerricone/harbourCodeExtension)
 by **Antonino Perricone**.
 
-- Original `client/` package: MIT License (see `client/LICENSE.txt`, kept unmodified).
+- Original `client/` package: MIT License (see `LICENSE-MIT-client-original.txt`, kept unmodified).
 - Original `server/` package: licensed `"GPL"` (no version specified, no
   `LICENSE`/`COPYING` file in the upstream repository at the time of forking).
 

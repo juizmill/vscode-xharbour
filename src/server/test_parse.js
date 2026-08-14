@@ -1,9 +1,10 @@
-var provider = require('./src/provider.js');
+var path = require('path');
+var provider = require('./provider.js');
 
 var p = new provider.Provider();
 p.doGroups = true;
-var src = "..\\test\\minimal.prg";
-src="..\\test\\class_c.prg"
+var src = path.join(__dirname, '..', '..', 'test', 'minimal.prg');
+src = path.join(__dirname, '..', '..', 'test', 'class_c.prg');
 //src="C:\\Perry\\beta\\c_artmod.prg"
 //src = "c:\\fwh\\include\\fivewin.ch"
 //src="C:\\Harbour32\\tests\\hbpp\\hbpptest.prg"

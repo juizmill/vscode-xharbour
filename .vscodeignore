@@ -1,0 +1,9 @@
+.vscode
+.gitignore
+.vscodeignore
+debugger.md
+*.svg
+node_modules
+src
+test
+webpack.config.js

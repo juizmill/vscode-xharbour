@@ -19,12 +19,11 @@ function activate(context) {
 	});
 	validation.activate(context);
 
-	var serverModuleDbg = context.asAbsolutePath(path.join('..','server'));
-	var serverModule = context.asAbsolutePath('server');
+	var serverModule = context.asAbsolutePath(path.join('dist','hb_server.js'));
 	var debugOptions = { execArgv: ["--nolazy", "--inspect-brk=21780"] };
 	var serverOptions = {
 		run : { module: serverModule, transport: client.TransportKind.ipc },
-		debug: { module: serverModuleDbg, transport: client.TransportKind.ipc , options: debugOptions }
+		debug: { module: serverModule, transport: client.TransportKind.ipc , options: debugOptions }
 	}
 	var clientOptions = {
 		documentSelector: ['harbour'],

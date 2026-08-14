@@ -1,0 +1,22 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/.hbmk": true
+    },
+    "harbour.warningLevel": 3,
+    "harbour.checkUndefinedFunctions": true,
+    "harbour.compilerExecutable": "/home/juizmill/projetos/Jesus/xharbour/harbour-docker.sh",
+    "harbour.aliases.callSuffixes": [
+        "Exec"
+    ],
+    "harbour.aliases.commandRules": [
+        {
+            "match": "DEFAULT <v> := <x>",
+            "replace": "Default( <v>, <x> )"
+        }
+    ]
+}

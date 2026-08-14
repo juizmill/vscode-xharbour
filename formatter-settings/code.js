@@ -1,10 +1,22 @@
 /* eslint-env browser */
 const vscode = acquireVsCodeApi();
 
+function deepMerge(target, source) {
+    for (const key in source) {
+        if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key])) {
+            if (!target[key] || typeof target[key] !== "object") target[key] = {};
+            deepMerge(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+    return target;
+}
+
 var harbour = {};
 function readConfig() {
     harbour = {};
-    $(".config").each((idx,ele) => {
+    document.querySelectorAll(".config").forEach((ele) => {
         ele.onchange = onChange;
         var depth = ele.id.split(".");
         if(depth[0]!="harbour") return;
@@ -28,7 +40,7 @@ function readConfig() {
             default:
                 break;
         }
-        $.extend(true,harbour,obj);
+        deepMerge(harbour,obj);
         //console.log(ele);
     })
     var changeCmd = {"command":"currConfig","value":harbour}
@@ -143,7 +155,7 @@ function naiveSyntaxHightlight(code) {
 }
 
 function setPreview(code) {
-    $("#preview").html(naiveSyntaxHightlight(naiveFormat(code)));
+    document.getElementById("preview").innerHTML = naiveSyntaxHightlight(naiveFormat(code));
 }
 
 // remember do NOT put spaces at beginning of lines!!
@@ -181,7 +193,7 @@ function onChange(e) {
     setPreview(code);
 }
 
-$(()=>{
+document.addEventListener("DOMContentLoaded", () => {
     readConfig();
     //console.log(harbour);
     setPreview(code);

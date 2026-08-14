@@ -18,11 +18,22 @@ FUNCTION Main()
     Default cNome := "mundo"
     default cZZ := "abc"
 
+    // Isso tem que dar erro porque não tem Local definido
+    ZugZug := "asdf"
+
+    ff  := "asdfa"
+
+
+    dd = "asdf"
+
     ? Saudacao( cNome )
 
     // With harbour.aliases.callSuffixes = ["Exec"], typing inside
     // Saudacao:Exec( ) should show the same signature help as Saudacao( ).
     ? Saudacao:Exec( cNome )
+
+    // Isso tem que dar erro porque não existe
+    clientedeErro()
 
     // Uncomment to test validate-on-save (undeclared function):
     // ? FuncaoQueNaoExiste( cNome )

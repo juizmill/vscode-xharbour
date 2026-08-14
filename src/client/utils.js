@@ -1,8 +1,6 @@
 const vscode = require('vscode');
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
-const crypto = require("crypto");
 
 
 /**
@@ -43,9 +41,16 @@ function getAllWorkspaceFiles(token) {
  * "#command <match> => <replace>" at the top of every .prg. Returns the
  * extra compiler args needed to pick it up (-u+<file>), or [] if there are
  * no rules configured.
+ *
+ * The file is written inside fileCwd (the directory of the file being
+ * compiled) rather than the OS temp dir: harbour.compilerExecutable can be a
+ * wrapper (e.g. a Docker container) that only mounts/sees that directory, so
+ * anything outside it -- like /tmp -- may not exist from the compiler's
+ * point of view.
+ * @param {string} fileCwd
  * @return {Array<string>}
  */
-function getAliasCommandArgs() {
+function getAliasCommandArgs(fileCwd) {
     var section = vscode.workspace.getConfiguration('harbour');
     var rules = (section.aliases && section.aliases.commandRules) || [];
     var lines = rules
@@ -53,10 +58,7 @@ function getAliasCommandArgs() {
         .map(r => "#command " + r.match + " => " + r.replace);
     if (lines.length == 0)
         return [];
-    var workspaceKey = (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0])
-        ? vscode.workspace.workspaceFolders[0].uri.fsPath : "default";
-    var hash = crypto.createHash("md5").update(workspaceKey).digest("hex").slice(0, 12);
-    var chPath = path.join(os.tmpdir(), "xharbour-tools-alias-" + hash + ".ch");
+    var chPath = path.join(fileCwd, ".xharbour-tools-command-rules.ch");
     fs.writeFileSync(chPath, lines.join("\n") + "\n");
     return ["-u+" + chPath];
 }

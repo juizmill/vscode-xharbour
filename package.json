@@ -32,10 +32,20 @@
         "@yagisumi/win-output-debug-string": "^1.0.0",
         "true-case-path": "^2.2.1",
         "vscode-languageclient": "^8.0.2",
-        "vscode-nls": "^5.2.0"
+        "vscode-languageserver": "^8.0.2",
+        "vscode-languageserver-textdocument": "^1.0.4",
+        "vscode-nls": "^5.2.0",
+        "vscode-uri": "^3.0.6"
+    },
+    "devDependencies": {
+        "@types/node": "^18.8.4",
+        "copy-webpack-plugin": "^11.0.0",
+        "node-loader": "^2.0.0",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0"
     },
     "scripts": {
-        "vscode:prepublish": "node copy.js",
+        "vscode:prepublish": "webpack --mode production",
         "prelanch": "webpack --mode development",
         "webpack2": "webpack --mode production"
     },
@@ -103,9 +113,14 @@
                     "default": true,
                     "description": "%harbour.decorator%"
                 },
+                "harbour.checkUndefinedFunctions": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%harbour.checkUndefinedFunctions%"
+                },
                 "harbour.workspaceDepth": {
                     "type": "number",
-                    "default": 0,
+                    "default": 2,
                     "minimum": 0,
                     "description": "%harbour.workspaceDepth%"
                 },
@@ -604,10 +619,5 @@
                 }
             }
         ]
-    },
-    "devDependencies": {
-        "node-loader": "^2.0.0",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
     }
 }

@@ -43,7 +43,7 @@ function validate(textDocument)
 		args.push("-I"+pathVal);
 	}
 	args = args.concat(section.extraOptions.split(" ").filter(function(el) {return el.length != 0 || el=="-ge1"}));
-	args = args.concat(getAliasCommandArgs());
+	args = args.concat(getAliasCommandArgs(file_cwd));
 	var diagnostics = {};
 	diagnostics[textDocument.fileName] = [];
 	var doneSubjects = {};
@@ -52,7 +52,7 @@ function validate(textDocument)
 		var r = valRegEx.exec(subLine);
 		if(r)
 		{
-			if(!r[1]) r[1]="";
+			if(!r[1]) r[1]=textDocument.fileName;
 			var lineNr = r[2]? parseInt(r[2])-1 : 0;
 			var subject = r[4].match(/'([^']+)'/g);
 			if(subject && subject.length>1 && subject[1].indexOf("(")>=0)

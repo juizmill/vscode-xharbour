@@ -24,14 +24,13 @@ function showEditor(context) {
     var section = vscode.workspace.getConfiguration('harbour').formatter;
     // And set its HTML content
     const localResources = vscode.Uri.file(path.join(context.extensionPath,"formatter-settings"));
-    const codiconsUri = vscode.Uri.joinPath(context.extensionUri, 'node_modules', '@vscode/codicons', 'dist');
+    const codiconsUri = vscode.Uri.joinPath(context.extensionUri, 'dist', 'codicons');
     panel.webview.options = {
         localResourceRoots: [localResources,codiconsUri],
         enableScripts: true
     }
     const baseUri = panel.webview.asWebviewUri(localResources);
     const cspSource = panel.webview.cspSource;
-    var debug = typeof v8debug === 'object';
     var html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none';
         font-src ${cspSource};
@@ -41,7 +40,6 @@ function showEditor(context) {
     <title>Cat Coding</title>
     <link href="${panel.webview.asWebviewUri(codiconsUri)}/codicon.css" rel="stylesheet" />
     <link href="${baseUri}/style.css" rel="stylesheet" />
-    <script src="${baseUri}/jquery-3.6.0.slim${debug?"":".min"}.js"></script>
     <script src="${baseUri}/code.js"></script>
     </head><body>`;
 

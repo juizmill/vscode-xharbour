@@ -49,6 +49,8 @@ var lineFoldingOnly;
 var currStyleConfig;
 /** @type {{customKeywords: Array<{word:string,scope:string}>, callSuffixes: Array<string>}} */
 var aliasConfig = { customKeywords: [], callSuffixes: [] };
+/** @type {boolean} */
+var checkUndefinedFunctionsEnabled = false;
 
 var keywords = provider.keywords
 
@@ -170,6 +172,14 @@ connection.onDidChangeConfiguration(params => {
     connection.languages.semanticTokens.refresh().catch(() => {});
     if(workspaceDepth!=oldDepth)
         parseWorkspace();
+    var newCheckUndefinedFunctions = !!params.settings.harbour.checkUndefinedFunctions;
+    var checkUndefinedFunctionsChanged = newCheckUndefinedFunctions != checkUndefinedFunctionsEnabled;
+    checkUndefinedFunctionsEnabled = newCheckUndefinedFunctions;
+    if (checkUndefinedFunctionsChanged || workspaceDepth != oldDepth) {
+        documents.all().forEach(doc => {
+            publishUndefinedFunctionDiagnostics(getDocumentProvider(doc), doc.uri);
+        });
+    }
 })
 
 function parseWorkspace() {
@@ -950,6 +960,77 @@ function getStdHelp(word, nC) {
 var documents = new server.TextDocuments(server_textdocument.TextDocument);
 documents.listen(connection);
 
+/** Is `nameCmp` (already lowercased) a known function/procedure -- either defined
+ * in `pp` itself, anywhere in the indexed workspace, or part of the standard
+ * xHarbour/Harbour RTL?
+ * `pp` is checked directly (not just via the global `files` index) because a
+ * document's provider may not be registered in `files` yet -- e.g. right
+ * after the language server (re)starts and a config change re-runs this
+ * check before `documents.onDidChangeContent` has had a chance to register
+ * the document.
+ * @param {string} nameCmp
+ * @param {provider.Provider} [pp]
+ * @returns {boolean}
+ */
+function isKnownFunction(nameCmp, pp) {
+    var callableKinds = { "function": true, "procedure": true, "function*": true, "procedure*": true, "C-FUNC": true, "method": true };
+    function hasIt(prov) {
+        for (var fn in prov.funcList) {
+            var info = prov.funcList[fn];
+            if (info.nameCmp == nameCmp && callableKinds[info.kind])
+                return true;
+        }
+        return false;
+    }
+    if (pp && hasIt(pp)) return true;
+    for (var file in files) {
+        if (files[file] === pp) continue; // already checked above
+        if (hasIt(files[file])) return true;
+    }
+    for (var i = 0; i < docs.length; i++) {
+        if (docs[i].name && docs[i].name.toLowerCase() == nameCmp)
+            return true;
+    }
+    for (var i = 1; i < missing.length; i++) {
+        if (missing[i][0] && missing[i][0].toLowerCase() == nameCmp)
+            return true;
+    }
+    return false;
+}
+
+/** Publishes (or clears) "possibly undefined function" hints for one document.
+ * Best-effort: only flags bare `name(` calls (never `obj:Method(`), and only
+ * when harbour.checkUndefinedFunctions is enabled AND harbour.workspaceDepth
+ * is > 0 -- with depth 0 the language server only ever sees the files that
+ * happen to be open, so a name "not found" would almost always just mean
+ * "defined in a workspace file we never indexed", not "doesn't exist".
+ * @param {provider.Provider} pp
+ * @param {string} uri
+ */
+function publishUndefinedFunctionDiagnostics(pp, uri) {
+    if (!checkUndefinedFunctionsEnabled || !(workspaceDepth > 0)) {
+        connection.sendDiagnostics({ uri: uri, diagnostics: [] });
+        return;
+    }
+    var diagnostics = [];
+    for (var cmpName in pp.references) {
+        var refs = pp.references[cmpName];
+        if (!Array.isArray(refs)) continue;
+        if (isKnownFunction(cmpName, pp)) continue;
+        for (var i = 0; i < refs.length; i++) {
+            var ref = refs[i];
+            if (ref.type != "function") continue;
+            diagnostics.push({
+                severity: server.DiagnosticSeverity.Information,
+                range: server.Range.create(ref.line, ref.col, ref.line, ref.col + ref.howWrite.length),
+                message: `Function '${ref.howWrite}' not found in the workspace or in the standard xHarbour/Harbour RTL`,
+                source: "harbour"
+            });
+        }
+    }
+    connection.sendDiagnostics({ uri: uri, diagnostics: diagnostics });
+}
+
 documents.onDidChangeContent((e) => {
     var uri = Uri.parse(e.document.uri);
     if (uri.scheme != "file") return;
@@ -965,6 +1046,8 @@ documents.onDidChangeContent((e) => {
         if(uri in files) doGroups = files[uri].doGroups;
         var pp = parseDocument(e.document, (p) => { p.cMode = cMode; p.doGroups = doGroups; })
         UpdateFile(pp);
+        if (ext == ".prg")
+            publishUndefinedFunctionDiagnostics(pp, e.document.uri);
     }
 })
 
