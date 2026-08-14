@@ -1,0 +1,31 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "harbour-dbg",
+			"request": "attach",
+			"name": "Scegli un processo e collegati",
+			"process": "${command:pickProcess}",
+			"sourcePaths": ["${workspaceFolder}"]
+		},
+		{
+			"type": "harbour-dbg",
+			"request": "launch",
+			"name": "Launch currentFile",
+			"program": "${workspaceRoot}/${fileBasenameNoExtension}",
+			"sourcePaths": ["${workspaceRoot}"],
+			"workingDir": "${workspaceRoot}/",
+			"stopOnEntry": true,
+			//"preLaunchTask": "build",
+			"terminalType": "integrated"
+		},
+		{
+			"type": "harbour-dbg",
+			"request": "attach",
+			"name": "Attach currentFile",
+			"program": "${workspaceRoot}/${fileBasenameNoExtension}",
+			"sourcePaths": ["${workspaceRoot}"],
+			"debugServer": 4711
+		}
+	]
+}

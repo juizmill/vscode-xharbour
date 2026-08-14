@@ -1,0 +1,22 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "cSpell.words": [
+        "aperricone",
+        "harbourdoc",
+        "hbmk",
+        "BEGINDUMP",
+        "ENDDUMP",
+        "ONELINER",
+        "cstream",
+        "endcase",
+        "endclass",
+        "endtext",
+        "fiel",
+        "hbdocs",
+        "memv",
+        "memvar",
+        "preproc"
+    ],
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true
+}
