@@ -1,63 +1,79 @@
-# Prologo
-Il deubbger si mette in ascolto sulla porta 6110, quindi lancia il programma, al primo client che si collega smette di ascoltare e gestisce questo come il programma da debuggare.
-a questo punto cominciano a scambiarsi pacchetti, essi hanno forma asimettrica, *da cambiare*.
-Quelli dal -> debugger verso il programma hanno forma COMANDO:PARAM1:PARAM2:PARAM3...\r\n.
-Quelli dal <- programma verso il debugger hanno forma COMANDO\r\nPARAM1\r\nPARAM2\r\n.
+# Debugger protocol
 
-## GO ->
-Indica al programma di proseguire l'esecuzione
+The `harbour-dbg` debug adapter talks to the running program over a plain
+TCP socket. Messages sent **from the debugger to the program** look like
+`COMMAND:PARAM1:PARAM2:PARAM3...\r\n`. Messages sent **from the program back
+to the debugger** look like `COMMAND\r\nPARAM1\r\nPARAM2\r\n`.
 
-## NEXT ->
-Indica al programma di eseguire la prossima istruzione
+## GO →
+Tells the program to resume execution.
 
-## STEP ->
-Indica al programma di eseguire la prossima istruzione allo stesso livello
+## NEXT →
+Tells the program to execute the next statement (stepping over calls).
 
-## EXIT ->
-Indica al programma di uscire dal metoo corrente
+## STEP →
+Tells the program to execute the next statement at the same call level
+(stepping into calls).
 
-## PAUSE ->
-Indica al programma di interrompere l'esecuzione alla prima istruzione ***compilata con i simboli di debug***.
+## EXIT →
+Tells the program to exit the current method/function.
 
-## STOP <-
-Indica che il programma si è interrotto. è seguito da una descrizione testuale del perché si è fermato, ad esempio "Break" perché ha trovato un breakpoint, "Pause" perche é stato procesato il comando PAUSE,  ecc...
+## PAUSE →
+Tells the program to break at the next statement **compiled with debug
+symbols**.
 
-## ERROR <-
-Indica che il programma si è interrotto a seguito di un'errore
+## STOP ←
+The program has stopped. Followed by a short textual reason, e.g. `"Break"`
+(hit a breakpoint) or `"Pause"` (a `PAUSE` command was processed), etc.
 
-## INERROR ->
-Chiede se si è in errore, il programma restituisce T se si è in errore. ***Inutile***
+## ERROR ←
+The program has stopped because of an error.
 
-## BREAKPOINT ->
-Indica che sto per inviare un break point. la seconda riga ha l'elenco dei parametri separati da : due punti.
- * \+ per i breapoint da aggiungere, - per quelli da togliere
- * il nome del file
- * la riga
- * opzionalmente ? seguito da (separato da due punti) un comando in harbour da esegure dove i : sono sostituiti da ;. Il breakpoint scatta solo se la condizione è vera.
- * opzionalmente C seguito da (separato da due punti) un numero ad indicare dopo quante volte il breakpoint scatterà
- * opzionalmente L seguito da (separato da due punti) una stringa dove le parte tra parentesi graffe vengono eseguite (***da cambiare***)
+## INERROR →
+Asks whether the program is currently in an error state; the program
+replies `T`/`F`. ***Currently unused.***
 
-## LOG <-
-Richiede la stampa di una stringa di debug, che seguie il "LOG:"
+## BREAKPOINT →
+Announces a breakpoint to add or remove. The second line has its parameters
+separated by `:`:
+- `+`/`-` — add or remove.
+- the file name.
+- the line number.
+- optionally `?` followed by (again `:`-separated) a Harbour expression to
+  evaluate, with `:` replaced by `;` — the breakpoint only triggers if this
+  evaluates to true.
+- optionally `C` followed by a count — the breakpoint only triggers after
+  being hit that many times.
+- optionally `L` followed by a string where the parts between `{}` are
+  evaluated (***format subject to change***).
 
-## LOCALS, PUBLICS, PRIVATES, PRIVATE_CALLEE, STATICS ->
-Richede la lista delle variabili nello scopo indicato dal comando. la seconda riga ha l'elenco dei parametri separati da : due punti.
- * il livello dello stack
- * l'indice del primo elemento da tornare, partendo da 1
- * il numero di element da tornare, 0 per averli tutti.
-il programma risponderò con un messaggio che comincia con lo stesso comando, seguito da le informazioni separate da 2 punti:
- * la prima parte del comando per avere i figli di questa variabile, 3 lettere
- * il libello dello stack
- * l'id di questa variabile (numerico)
- * il nome dell'id di questa variabile 
- * il nome 
+## LOG ←
+Requests printing a debug string, which follows the `LOG:` prefix.
 
-## EXPRESSION ->
-Richiede l'esecuzione di un comando. la seconda riga ha l'elenco dei parametri separati da : due punti.
- * il livello nello stack
- * l'espressione dove i : sono stituiti da ;
-Per ognuno di questi comandi il debugger risponderà con un messaggio che comincia con **EXPRESSION** seguito da le informazioni separate da 2 punti:
- * il livello dello stack
- * il tipo del risultato, può valere U, N, C, L, A, H, O ecc..
- * il risultato da mostrare, nel caso di N,C,L oppure il numero di figli nel caso A,H,O
+## LOCALS, PUBLICS, PRIVATES, PRIVATE_CALLEE, STATICS →
+Requests the list of variables in the given scope. The second line has its
+parameters separated by `:`:
+- the stack level.
+- the index of the first item to return (1-based).
+- how many items to return, `0` for all of them.
 
+The program replies with one message per variable, each starting with the
+same command, followed by (`:`-separated):
+- the 3-letter prefix used to request this variable's children.
+- the stack level.
+- this variable's numeric id.
+- this variable's id name.
+- its name.
+
+## EXPRESSION →
+Requests evaluation of an expression. The second line has its parameters
+separated by `:`:
+- the stack level.
+- the expression, with `:` replaced by `;`.
+
+The program replies with a message starting with **EXPRESSION**, followed
+by (`:`-separated):
+- the stack level.
+- the result type — one of `U`, `N`, `C`, `L`, `A`, `H`, `O`, etc.
+- the result to display, for `N`/`C`/`L`; or the number of children, for
+  `A`/`H`/`O`.
