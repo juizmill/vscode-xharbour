@@ -47,10 +47,13 @@ var canLocationLink;
 var lineFoldingOnly;
 /** @type {object} */
 var currStyleConfig;
-/** @type {{customKeywords: Array<{word:string,scope:string}>, callSuffixes: Array<string>}} */
-var aliasConfig = { customKeywords: [], callSuffixes: [] };
+/** @type {{customKeywords: Array<{word:string,scope:string}>, callSuffixes: Array<string>, callSuffixesRaw: Array<string>}} */
+var aliasConfig = { customKeywords: [], callSuffixes: [], callSuffixesRaw: [] };
 /** @type {boolean} */
 var checkUndefinedFunctionsEnabled = false;
+/** "either" | "suffixOnly" | "bareOnly" -- see harbour.aliases.callSuffixMode
+ * @type {string} */
+var callSuffixMode = "either";
 
 var keywords = provider.keywords
 
@@ -168,16 +171,20 @@ connection.onDidChangeConfiguration(params => {
         }
     });
     aliasConfig.customKeywords = customKeywords;
-    aliasConfig.callSuffixes = (newAliases.callSuffixes || []).map(s => s.toLowerCase());
+    aliasConfig.callSuffixesRaw = (newAliases.callSuffixes || []).slice();
+    aliasConfig.callSuffixes = aliasConfig.callSuffixesRaw.map(s => s.toLowerCase());
     connection.languages.semanticTokens.refresh().catch(() => {});
     if(workspaceDepth!=oldDepth)
         parseWorkspace();
     var newCheckUndefinedFunctions = !!params.settings.harbour.checkUndefinedFunctions;
     var checkUndefinedFunctionsChanged = newCheckUndefinedFunctions != checkUndefinedFunctionsEnabled;
     checkUndefinedFunctionsEnabled = newCheckUndefinedFunctions;
-    if (checkUndefinedFunctionsChanged || workspaceDepth != oldDepth) {
+    var oldCallSuffixMode = callSuffixMode;
+    callSuffixMode = newAliases.callSuffixMode || "either";
+    var callSuffixModeChanged = callSuffixMode != oldCallSuffixMode;
+    if (checkUndefinedFunctionsChanged || workspaceDepth != oldDepth || callSuffixModeChanged) {
         documents.all().forEach(doc => {
-            publishUndefinedFunctionDiagnostics(getDocumentProvider(doc), doc.uri);
+            publishHarbourDiagnostics(getDocumentProvider(doc), doc);
         });
     }
 })
@@ -960,9 +967,11 @@ function getStdHelp(word, nC) {
 var documents = new server.TextDocuments(server_textdocument.TextDocument);
 documents.listen(connection);
 
-/** Is `nameCmp` (already lowercased) a known function/procedure -- either defined
- * in `pp` itself, anywhere in the indexed workspace, or part of the standard
- * xHarbour/Harbour RTL?
+var callableKinds = { "function": true, "procedure": true, "function*": true, "procedure*": true, "C-FUNC": true, "method": true };
+
+/** Is `nameCmp` (already lowercased) a known function/procedure defined in
+ * `pp` itself or anywhere in the indexed workspace (RTL not included -- see
+ * `isKnownFunction` for that).
  * `pp` is checked directly (not just via the global `files` index) because a
  * document's provider may not be registered in `files` yet -- e.g. right
  * after the language server (re)starts and a config change re-runs this
@@ -972,8 +981,7 @@ documents.listen(connection);
  * @param {provider.Provider} [pp]
  * @returns {boolean}
  */
-function isKnownFunction(nameCmp, pp) {
-    var callableKinds = { "function": true, "procedure": true, "function*": true, "procedure*": true, "C-FUNC": true, "method": true };
+function isKnownWorkspaceFunction(nameCmp, pp) {
     function hasIt(prov) {
         for (var fn in prov.funcList) {
             var info = prov.funcList[fn];
@@ -987,6 +995,18 @@ function isKnownFunction(nameCmp, pp) {
         if (files[file] === pp) continue; // already checked above
         if (hasIt(files[file])) return true;
     }
+    return false;
+}
+
+/** Is `nameCmp` (already lowercased) a known function/procedure -- either
+ * defined in `pp` itself, anywhere in the indexed workspace, or part of the
+ * standard xHarbour/Harbour RTL?
+ * @param {string} nameCmp
+ * @param {provider.Provider} [pp]
+ * @returns {boolean}
+ */
+function isKnownFunction(nameCmp, pp) {
+    if (isKnownWorkspaceFunction(nameCmp, pp)) return true;
     for (var i = 0; i < docs.length; i++) {
         if (docs[i].name && docs[i].name.toLowerCase() == nameCmp)
             return true;
@@ -998,20 +1018,18 @@ function isKnownFunction(nameCmp, pp) {
     return false;
 }
 
-/** Publishes (or clears) "possibly undefined function" hints for one document.
- * Best-effort: only flags bare `name(` calls (never `obj:Method(`), and only
- * when harbour.checkUndefinedFunctions is enabled AND harbour.workspaceDepth
- * is > 0 -- with depth 0 the language server only ever sees the files that
+/** Builds "possibly undefined function" hints for one document. Best-effort:
+ * only flags bare `name(` calls (never `obj:Method(`), and only when
+ * harbour.checkUndefinedFunctions is enabled AND harbour.workspaceDepth is
+ * > 0 -- with depth 0 the language server only ever sees the files that
  * happen to be open, so a name "not found" would almost always just mean
  * "defined in a workspace file we never indexed", not "doesn't exist".
  * @param {provider.Provider} pp
- * @param {string} uri
+ * @returns {Array<object>}
  */
-function publishUndefinedFunctionDiagnostics(pp, uri) {
-    if (!checkUndefinedFunctionsEnabled || !(workspaceDepth > 0)) {
-        connection.sendDiagnostics({ uri: uri, diagnostics: [] });
-        return;
-    }
+function buildUndefinedFunctionDiagnostics(pp) {
+    if (!checkUndefinedFunctionsEnabled || !(workspaceDepth > 0))
+        return [];
     var diagnostics = [];
     for (var cmpName in pp.references) {
         var refs = pp.references[cmpName];
@@ -1028,7 +1046,113 @@ function publishUndefinedFunctionDiagnostics(pp, uri) {
             });
         }
     }
-    connection.sendDiagnostics({ uri: uri, diagnostics: diagnostics });
+    return diagnostics;
+}
+
+/** `pp.references` includes a function/procedure's own declaration line as
+ * a "function"-typed reference (see provider.js's `prevWord.startsWith("func")`
+ * handling), not just its call sites. Callers that only care about actual
+ * calls (like callSuffixMode) need to filter those out.
+ * @param {provider.Provider} pp
+ * @param {string} cmpName
+ * @param {{line:number}} ref
+ * @returns {boolean}
+ */
+function isDefinitionSite(pp, cmpName, ref) {
+    for (var fn in pp.funcList) {
+        var info = pp.funcList[fn];
+        if (info.nameCmp == cmpName && info.foundLike == "definition" && info.startLine == ref.line)
+            return true;
+    }
+    return false;
+}
+
+/** Scans backward from a "method" reference's position (e.g. the "Exec" in
+ * `Saudacao:Exec(`) to find the receiver identifier right before the ':'.
+ * `pp.references` only records the method name itself, not its receiver, so
+ * this reads the raw line text to recover it.
+ * @param {import("vscode-languageserver-textdocument").TextDocument} doc
+ * @param {{line:number, col:number}} ref
+ * @returns {{name:string, start:number, end:number}|null}
+ */
+function findReceiverBeforeColon(doc, ref) {
+    var lineText = doc.getText(server.Range.create(ref.line, 0, ref.line, 1e8));
+    var idx = ref.col - 1;
+    while (idx >= 0 && /\s/.test(lineText[idx])) idx--;
+    if (idx < 0 || lineText[idx] != ':') return null;
+    idx--;
+    while (idx >= 0 && /\s/.test(lineText[idx])) idx--;
+    var identEnd = idx + 1;
+    while (idx >= 0 && /[A-Za-z0-9_]/.test(lineText[idx])) idx--;
+    var identStart = idx + 1;
+    if (identStart >= identEnd) return null;
+    return { name: lineText.substring(identStart, identEnd), start: identStart, end: identEnd };
+}
+
+/** Builds harbour.aliases.callSuffixMode diagnostics for one document: with
+ * "suffixOnly", every bare call to a workspace-known function must use one
+ * of harbour.aliases.callSuffixes instead; with "bareOnly", the opposite.
+ * RTL functions are never flagged -- there's no reasonable expectation that
+ * e.g. `Len:Exec()` should work.
+ * @param {provider.Provider} pp
+ * @param {import("vscode-languageserver-textdocument").TextDocument} doc
+ * @returns {Array<object>}
+ */
+function buildCallSuffixDiagnostics(pp, doc) {
+    if (callSuffixMode == "either" || aliasConfig.callSuffixes.length == 0)
+        return [];
+    var diagnostics = [];
+    if (callSuffixMode == "suffixOnly") {
+        var suggestedSuffix = aliasConfig.callSuffixesRaw[0];
+        for (var cmpName in pp.references) {
+            var refs = pp.references[cmpName];
+            if (!Array.isArray(refs)) continue;
+            if (!isKnownWorkspaceFunction(cmpName, pp)) continue;
+            for (var i = 0; i < refs.length; i++) {
+                var ref = refs[i];
+                if (ref.type != "function") continue;
+                if (isDefinitionSite(pp, cmpName, ref)) continue;
+                diagnostics.push({
+                    severity: server.DiagnosticSeverity.Error,
+                    range: server.Range.create(ref.line, ref.col, ref.line, ref.col + ref.howWrite.length),
+                    message: `Function '${ref.howWrite}' must be called as ${ref.howWrite}:${suggestedSuffix}(...) (harbour.aliases.callSuffixMode = "suffixOnly")`,
+                    source: "harbour"
+                });
+            }
+        }
+    } else if (callSuffixMode == "bareOnly") {
+        for (var cmpName in pp.references) {
+            if (aliasConfig.callSuffixes.indexOf(cmpName) < 0) continue; // cmpName is the suffix word itself here (e.g. "exec")
+            var refs = pp.references[cmpName];
+            if (!Array.isArray(refs)) continue;
+            for (var i = 0; i < refs.length; i++) {
+                var ref = refs[i];
+                if (ref.type != "method") continue;
+                var receiver = findReceiverBeforeColon(doc, ref);
+                if (!receiver) continue;
+                if (!isKnownWorkspaceFunction(receiver.name.toLowerCase(), pp)) continue;
+                diagnostics.push({
+                    severity: server.DiagnosticSeverity.Error,
+                    range: server.Range.create(ref.line, receiver.start, ref.line, ref.col + ref.howWrite.length),
+                    message: `Function '${receiver.name}' must be called as ${receiver.name}(...) without the :${ref.howWrite} suffix (harbour.aliases.callSuffixMode = "bareOnly")`,
+                    source: "harbour"
+                });
+            }
+        }
+    }
+    return diagnostics;
+}
+
+/** Publishes (or clears) all harbour-tools diagnostics for one document --
+ * undefined-function hints and call-suffix-mode errors combined into a
+ * single connection.sendDiagnostics call, since LSP diagnostics are a full
+ * replace per uri, not additive.
+ * @param {provider.Provider} pp
+ * @param {import("vscode-languageserver-textdocument").TextDocument} doc
+ */
+function publishHarbourDiagnostics(pp, doc) {
+    var diagnostics = buildUndefinedFunctionDiagnostics(pp).concat(buildCallSuffixDiagnostics(pp, doc));
+    connection.sendDiagnostics({ uri: doc.uri, diagnostics: diagnostics });
 }
 
 documents.onDidChangeContent((e) => {
@@ -1047,7 +1171,7 @@ documents.onDidChangeContent((e) => {
         var pp = parseDocument(e.document, (p) => { p.cMode = cMode; p.doGroups = doGroups; })
         UpdateFile(pp);
         if (ext == ".prg")
-            publishUndefinedFunctionDiagnostics(pp, e.document.uri);
+            publishHarbourDiagnostics(pp, e.document);
     }
 })
 

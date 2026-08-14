@@ -216,6 +216,12 @@
                     },
                     "default": []
                 },
+                "harbour.aliases.callSuffixMode": {
+                    "type": "string",
+                    "description": "%harbour.aliases.callSuffixMode%",
+                    "enum": ["either", "suffixOnly", "bareOnly"],
+                    "default": "either"
+                },
                 "harbour.aliases.commandRules": {
                     "type": "array",
                     "description": "%harbour.aliases.commandRules%",

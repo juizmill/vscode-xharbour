@@ -13,6 +13,7 @@
     "harbour.aliases.callSuffixes": [
         "Exec"
     ],
+    "harbour.aliases.callSuffixMode": "suffixOnly",
     "harbour.aliases.commandRules": [
         {
             "match": "DEFAULT <v> := <x>",

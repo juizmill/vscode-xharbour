@@ -26,11 +26,11 @@ FUNCTION Main()
 
     dd = "asdf"
 
-    ? Saudacao( cNome )
+    Saudacao( cNome )
 
     // With harbour.aliases.callSuffixes = ["Exec"], typing inside
     // Saudacao:Exec( ) should show the same signature help as Saudacao( ).
-    ? Saudacao:Exec( cNome )
+    Saudacao:Exec( cNome )
 
     // Isso tem que dar erro porque não existe
     clientedeErro()
