@@ -55,11 +55,6 @@
             }
         },
         {
-            "label": "buildX",
-            "command": "myBuildX.bat",
-            "args": [ "${fileBasenameNoExtension}"]
-        },
-        {
             "label": "createLibrary",
             "type": "HBMK2",
             "input": "dbg_lib.prg",
@@ -73,10 +68,6 @@
                 "setupBatch": "c:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars32.bat"
             },
             "extraArgs": ["-w3", "-es2", "-ocode_dbg","-gc3", "-hblib","-inc","-winuni"]
-        },
-        {
-            "label": "createLibraryX",
-            "command": "build_libX.bat"
         }
     ]
 }
