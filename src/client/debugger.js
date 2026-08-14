@@ -8,7 +8,7 @@ const localize = require("./myLocalize.js").localize;
 const process = require("process")
 const trueCase = require("true-case-path");
 const platform = require("os").platform();
-var winMonitor = undefined;
+let winMonitor = undefined;
 if(platform=="win32") {
     winMonitor = require("@yagisumi/win-output-debug-string").monitor;
 }
@@ -66,9 +66,9 @@ class harbourDebugSession extends debugadapter.DebugSession {
      * @param buff{string} the imported data
      */
     processInput(buff) {
-        var lines = buff.split("\r\n");
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
+        const lines = buff.split("\r\n");
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
             //if(!line.startsWith("LOG:")) this.sendEvent(new debugadapter.OutputEvent(">>"+line+"\r\n","stdout"))
             if (line.length == 0) continue;
             if (this.processLine) {
@@ -89,7 +89,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
             }
             if (line.startsWith("ERROR") && !line.startsWith("ERROR_VAR")) {
                 //console.log("ERROR")
-                var stopEvt = new debugadapter.StoppedEvent("error", 1, line.substring(6));
+                const stopEvt = new debugadapter.StoppedEvent("error", 1, line.substring(6));
                 this.sendEvent(stopEvt);
                 continue;
             }
@@ -166,8 +166,8 @@ class harbourDebugSession extends debugadapter.DebugSession {
      * @param {debugprotocol.DebugProtocol.LaunchRequestArguments} args 
      */
     launchRequest(response, args) {
-        var port = args.port ? args.port : 6110;
-        var tc = this;
+        const port = args.port ? args.port : 6110;
+        const tc = this;
         this.justStart = true;
         this.sourcePaths = []; //[path.dirname(args.program)];
         if ("workspaceRoot" in args) {
@@ -244,14 +244,14 @@ class harbourDebugSession extends debugadapter.DebugSession {
      * @param {debugprotocol.DebugProtocol.AttachRequestArguments} args 
      */
     attachRequest(response, args) {
-        var port = args.port ? args.port : 6110;
+        const port = args.port ? args.port : 6110;
         if (args.process <= 0 && (args.program || "").length == 0) {
             response.success = false;
             response.message = "invalid parameter";
             this.sendResponse(response);
             return;
         }
-        var tc = this;
+        const tc = this;
         this.justStart = true;
         this.sourcePaths = []; //[path.dirname(args.program)];
         if ("workspaceRoot" in args) {
@@ -279,7 +279,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     setProcess(pid) {
-        var tc = this
+        const tc = this
         if(!pid) {
             return
         }
@@ -324,7 +324,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
      * @param {debugprotocol.DebugProtocol.LaunchRequestArguments|debugprotocol.DebugProtocol.AttachRequestArguments} args 
      */
     evaluateClient(socket, server, args) {
-        var tc = this;
+        const tc = this;
 
         socket.on("data", data => {
             try {
@@ -333,13 +333,13 @@ class harbourDebugSession extends debugadapter.DebugSession {
                     return;
                 }
                 // the client sended exe name and process ID
-                var lines = data.toString().split("\r\n");
+                const lines = data.toString().split("\r\n");
                 if (lines.length < 2) {//todo: check if they arrive in 2 tranches.
                     socket.write("NO\r\n")
                     socket.end();
                     return;
                 }
-                var processId = parseInt(lines[1]);
+                const processId = parseInt(lines[1]);
                 if(tc.processId) {
                     if(tc.processId!=processId) {
                         socket.write("NO\r\n")
@@ -348,8 +348,8 @@ class harbourDebugSession extends debugadapter.DebugSession {
                     }
                 } else {
                     if (args.program && args.program.length > 0) {
-                        var exeTarget = path.basename(args.program, path.extname(args.program)).toLowerCase();
-                        var clPath = path.basename(lines[0], path.extname(lines[0])).toLowerCase();
+                        const exeTarget = path.basename(args.program, path.extname(args.program)).toLowerCase();
+                        const clPath = path.basename(lines[0], path.extname(lines[0])).toLowerCase();
                         if (clPath != exeTarget) {
                             socket.write("NO\r\n")
                             socket.end();
@@ -418,15 +418,15 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     sendStack(line) {
-        var nStack = parseInt(line.substring(6));
-        var frames = [];
+        const nStack = parseInt(line.substring(6));
+        const frames = [];
         frames.length = nStack;
-        var j = 0;
+        let j = 0;
         this.processLine = function (line) {
-            var infos = line.split(":");
+            const infos = line.split(":");
             for (let i = 0; i < infos.length; i++) infos[i] = infos[i].replace(";", ":")
-            var completePath = infos[0]
-            var found = false;
+            let completePath = infos[0]
+            let found = false;
             if (infos[0].length > 0) {
                 if (path.isAbsolute(infos[0]) && fs.existsSync(infos[0])) {
                     completePath = infos[0];
@@ -457,8 +457,8 @@ class harbourDebugSession extends debugadapter.DebugSession {
             j++;
             if (j == nStack) {
                 while (this.stack.length > 0) {
-                    var args = this.stackArgs.shift();
-                    var resp = this.stack.shift();
+                    const args = this.stackArgs.shift();
+                    const resp = this.stack.shift();
                     args.startFrame = args.startFrame || 0;
                     args.levels = args.levels || frames.length;
                     args.levels += args.startFrame;
@@ -482,10 +482,10 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     sendScope(inError) {
-        var commands = [];
+        let commands = [];
         if (inError) commands.push("ERROR_VAR")
         commands = commands.concat(["LOCALS", "PUBLICS", "PRIVATES", "PRIVATE_CALLEE", "STATICS", "WORKAREAS"]);
-        var n = this.variables.findIndex((v) => v.command==commands[0]);
+        let n = this.variables.findIndex((v) => v.command==commands[0]);
         if (n < 0) {
             n = this.variables.length;
             // TODO: put these 3 members together on 'AOS'
@@ -493,7 +493,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
                 this.variables.push(new HBVar(cmd));
             })
         }
-        var scopes = [];
+        let scopes = [];
         if (inError) scopes.push(new debugadapter.Scope("Error", ++n))
         scopes = scopes.concat([
             new debugadapter.Scope("Local", ++n),
@@ -503,7 +503,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
             new debugadapter.Scope("Statics", ++n),
             new debugadapter.Scope("Workareas", ++n)
         ])
-        var response = this.scopeResponse;
+        const response = this.scopeResponse;
         response.body = { scopes: scopes };
         this.sendResponse(response)
     }
@@ -514,10 +514,10 @@ class harbourDebugSession extends debugadapter.DebugSession {
     sendAreaHeaders(response, cmd) {
         // AREA:Alias:Area:fCount:recno:reccount:scope:
         //   0    1    2     3      4     5       6
-        var infos = this.areasInfos[parseInt(cmd.substring(4))];
-        var vars = [];
-        var baseEval = infos[1] + "->"
-        var v, recNo = parseInt(infos[4]), recCount = parseInt(infos[5]);
+        const infos = this.areasInfos[parseInt(cmd.substring(4))];
+        const vars = [];
+        const baseEval = infos[1] + "->"
+        let v, recNo = parseInt(infos[4]), recCount = parseInt(infos[5]);
         v = new debugadapter.Variable("recNo", infos[4]);
         if (recNo > recCount) v.value = "eof"
         if (recNo <= 0) v.value = "bof"
@@ -530,7 +530,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
         v.evaluateName = baseEval + "(OrdName(IndexOrd()))"
         v.type = "C"
         vars.push(v);
-        var columns = new debugadapter.Variable("Fields", "")
+        const columns = new debugadapter.Variable("Fields", "")
         columns.indexedVariables = parseInt(infos[3]);
         columns.variablesReference = this.getVarReference(cmd + ":FIELDS", baseEval);
         vars.push(columns);
@@ -540,9 +540,9 @@ class harbourDebugSession extends debugadapter.DebugSession {
 
     variablesRequest(response, args) {
         if (args.variablesReference <= this.variables.length) {
-            var hbStart = args.start ? args.start + 1 : 1;
-            var hbCount = args.count ? args.count : 0;
-            var cmd = this.variables[args.variablesReference - 1].command;
+            const hbStart = args.start ? args.start + 1 : 1;
+            const hbCount = args.count ? args.count : 0;
+            const cmd = this.variables[args.variablesReference - 1].command;
             if (cmd.startsWith("AREA") && cmd.indexOf(":") < 0) {
                 this.sendAreaHeaders(response, cmd)
                 return;
@@ -554,15 +554,15 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     getVarReference(line, evalTxt) {
-        var r = this.variables.findIndex((v) => v.command==line);
+        const r = this.variables.findIndex((v) => v.command==line);
         if (r >= 0) return r + 1;
-        var infos = line.split(":");
+        const infos = line.split(":");
         if (infos.length > 4) { //the value can contains : , we need to rejoin it.
             infos[2] = infos.splice(2).join(":").slice(0, -1);
             infos.length = 3;
             line = infos.join(":") + ":"
         }
-        var hbVar = new HBVar(line)
+        const hbVar = new HBVar(line)
         hbVar.evaluation = evalTxt;
         this.variables.push(hbVar)
         //this.sendEvent(new debugadapter.OutputEvent("added variable command:'"+line+"'\r\n","stdout"))
@@ -606,10 +606,10 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     sendVariables(id, line) {
-        var vars = [];
+        const vars = [];
         this.processLine = function (line) {
             if (line.startsWith("END")) {
-                var resp = this.variables[id].response
+                const resp = this.variables[id].response
                 resp.body = {
                     variables: vars
                 };
@@ -617,12 +617,12 @@ class harbourDebugSession extends debugadapter.DebugSession {
                 this.processLine = undefined;
                 return;
             }
-            var infos = line.split(":");
+            const infos = line.split(":");
             if (infos[0] == "AREA") {
                 // workareas
                 // AREA:Alias:Area:fCount:recno:reccount:scope:
                 //   0    1    2     3       4     5       6
-                var value = "AREA " + infos[2];
+                const value = "AREA " + infos[2];
                 var v = new debugadapter.Variable(infos[1], value);
                 v.indexedVariables = 4; //recno-recCount-Scope-Fields
                 this.areasInfos[parseInt(infos[2])] = infos;
@@ -670,14 +670,14 @@ class harbourDebugSession extends debugadapter.DebugSession {
 
     /// breakpoints
     setBreakPointsRequest(response, args) {
-        var message = "";
+        let message = "";
         // prepare a response
         response.body = { "breakpoints": [] };
         response.body.breakpoints = [];
         response.body.breakpoints.length = args.breakpoints.length;
         // check if the source is already configurated for breakpoints
-        var src = args.source.name.toLowerCase();
-        var dest
+        const src = args.source.name.toLowerCase();
+        let dest
         if (!(src in this.breakpoints)) {
             this.breakpoints[src] = {};
         }
@@ -691,9 +691,9 @@ class harbourDebugSession extends debugadapter.DebugSession {
         // check current breakpoints
         dest.response = response;
         for (var i = 0; i < args.breakpoints.length; i++) {
-            var breakpoint = args.breakpoints[i];
+            const breakpoint = args.breakpoints[i];
             response.body.breakpoints[i] = new debugadapter.Breakpoint(false, breakpoint.line);
-            var thisBreakpoint = "BREAKPOINT\r\n"
+            let thisBreakpoint = "BREAKPOINT\r\n"
             thisBreakpoint += `+:${src}:${breakpoint.line}`
             if ('condition' in breakpoint && breakpoint.condition.length > 0) {
                 thisBreakpoint += `:?:${breakpoint.condition.replace(/:/g, ";")}`
@@ -714,7 +714,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
             }
         }
         // require delete old breakpoints
-        var n1 = 0;
+        const n1 = 0;
         for (var i in dest) {
             if (dest.hasOwnProperty(i) && i != "response") {
                 if (dest[i].substring(0, 1) == "-") {
@@ -732,8 +732,8 @@ class harbourDebugSession extends debugadapter.DebugSession {
 
     processBreak(line) {
         //this.sendEvent(new debugadapter.OutputEvent("received: "+line+"\r\n","console"))
-        var aInfos = line.split(":");
-        var dest
+        const aInfos = line.split(":");
+        let dest
         if (!(aInfos[1] in this.breakpoints)) {
             //error
             return
@@ -741,7 +741,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
         aInfos[2] = parseInt(aInfos[2]);
         aInfos[3] = parseInt(aInfos[3]);
         dest = this.breakpoints[aInfos[1]]
-        var idBreak = dest.response.body.breakpoints.findIndex(b => b.line == aInfos[2]);
+        const idBreak = dest.response.body.breakpoints.findIndex(b => b.line == aInfos[2]);
         if (idBreak == -1) {
             if (aInfos[2] in dest) {
                 delete dest[aInfos[2]];
@@ -765,8 +765,8 @@ class harbourDebugSession extends debugadapter.DebugSession {
     }
 
     checkBreakPoint(src) {
-        var dest = this.breakpoints[src];
-        for (var i in dest) {
+        const dest = this.breakpoints[src];
+        for (const i in dest) {
             if (dest.hasOwnProperty(i) && i != "response") {
                 if (dest[i] != 1) {
                     return;
@@ -779,7 +779,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
 
     /// Exception / error
     setExceptionBreakPointsRequest(response, args) {
-        var errorType = args.filters.length;
+        let errorType = args.filters.length;
         // 0 - no stop on error
         // 1 - stop only out-of-sequence
         // 2 - stop all
@@ -849,11 +849,11 @@ class harbourDebugSession extends debugadapter.DebugSession {
      */
     processExpression(line) {
         // EXPRESSION:{frame}:{type}:{result}
-        var infos = line.split(":");
+        const infos = line.split(":");
         if (infos.length > 4) { //the value can contains : , we need to rejoin it.
             infos[3] = infos.splice(3).join(":");
         }
-        var resp = this.evaluateResponses.shift();
+        const resp = this.evaluateResponses.shift();
         var line = "EXP:" + infos[1] + ":" + resp.body.result.replace(/:/g, ";") + ":";
         resp.body.name = resp.body.result
         if (infos[2] == "E") {
@@ -879,7 +879,7 @@ class harbourDebugSession extends debugadapter.DebugSession {
             completitonText = completitonText[0];
         }
         completitonText = completitonText.substring(0, args.column - 1);
-        let lastWord = completitonText.match(/[\w\:]+$/i)
+        const lastWord = completitonText.match(/[\w\:]+$/i)
         if (lastWord) completitonText = lastWord[0];
         this.command(`COMPLETITION\r\n${args.frameId + 1 || this.currentStack}:${completitonText}\r\n`)
     }
@@ -896,9 +896,9 @@ class harbourDebugSession extends debugadapter.DebugSession {
             }
             if (!this.completionsResponse.body) this.completionsResponse.body = {};
             if (!this.completionsResponse.body.targets) this.completionsResponse.body.targets = [];
-            var type = line.substr(0, line.indexOf(":"));
+            const type = line.substr(0, line.indexOf(":"));
             line = line.substr(line.indexOf(":") + 1);
-            var thisCompletion = new debugadapter.CompletionItem(line, 0);
+            const thisCompletion = new debugadapter.CompletionItem(line, 0);
             thisCompletion.type = type == "F" ? 'function' :
                 type == "M" ? 'field' :
                     type == "D" ? 'variable' : 'value';

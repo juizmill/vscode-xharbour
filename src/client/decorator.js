@@ -2,9 +2,9 @@ const vscode = require('vscode');
 
 // reuse the bracket-match style
 
-var decoration;
+let decoration;
 /** @type{client.LanguageClient} */
-var client;
+let client;
 function activate(context,_client)
 {
 	client=_client;
@@ -19,10 +19,10 @@ function activate(context,_client)
 
 function showGroups(evt)
 {
-	var section = vscode.workspace.getConfiguration('harbour');
+	const section = vscode.workspace.getConfiguration('harbour');
 	if(!section.decorator) return;
 
-	var editor = evt.textEditor
+	const editor = evt.textEditor
 	if(!editor) return;
 	if(!editor.document) return;
 	if(editor.document.languageId!="harbour") return;
@@ -31,9 +31,9 @@ function showGroups(evt)
 		evt.textEditor.setDecorations(decoration, []);
 		return;
 	}
-	var sel = evt.selections[0];
+	const sel = evt.selections[0];
 	client.sendRequest("harbour/groupAtPosition",{textDocument:{uri:editor.document.uri.toString()}, sel:sel}).then(ranges=>{
-		var places = [];
+		const places = [];
 		for (let k = 0; k < ranges.length; k++) {
 			const rr = ranges[k];
 			places.push({ range: new vscode.Range(rr.line,rr.startCol,rr.line,rr.endCol) });

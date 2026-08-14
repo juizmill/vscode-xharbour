@@ -1,15 +1,15 @@
-var path = require('path');
-var provider = require('./provider.js');
+const path = require('path');
+const provider = require('./provider.js');
 
-var p = new provider.Provider();
+const p = new provider.Provider();
 p.doGroups = true;
-var src = path.join(__dirname, '..', '..', 'test', 'minimal.prg');
+let src = path.join(__dirname, '..', '..', 'test', 'minimal.prg');
 src = path.join(__dirname, '..', '..', 'test', 'class_c.prg');
 //src="C:\\Perry\\beta\\c_artmod.prg"
 //src = "c:\\fwh\\include\\fivewin.ch"
 //src="C:\\Harbour32\\tests\\hbpp\\hbpptest.prg"
 console.log(new Date())
-var s = Number(Date.now())
+const s = Number(Date.now())
 p.parseFile(src).then(()=> {
     console.log(new Date())
     console.log(Number(Date.now())-s)
@@ -29,19 +29,19 @@ p.parseFile(src).then(()=> {
         if(oneDifferent) console.log("**************************")
     }
     process.exit();*/
-    for (var fn in p.funcList) {
+    for (const fn in p.funcList) {
         if (p.funcList.hasOwnProperty(fn)) {
-            var info = p.funcList[fn];
-            var msg = `${info.kind}: ${info.name} (${info.foundLike})`;
+            const info = p.funcList[fn];
+            let msg = `${info.kind}: ${info.name} (${info.foundLike})`;
             if(info.parent) msg+= ` of ${info.parent.name}`
             msg+= ` in ${info.document}(${info.startLine}:${info.startCol})-(${info.endLine}:${info.endCol})`
             if(info.comment) msg+= ` (${info.comment})`
             console.log(msg)
         }
     }
-    for(var db in p.databases) if (p.databases.hasOwnProperty(db)) {
+    for(const db in p.databases) if (p.databases.hasOwnProperty(db)) {
         console.log(`database ${p.databases[db].name}`);
-        for(var f in p.databases[db].fields) if (p.databases[db].fields.hasOwnProperty(f)) {
+        for(const f in p.databases[db].fields) if (p.databases[db].fields.hasOwnProperty(f)) {
             console.log(`   field ${p.databases[db].fields[f]}`);
     } }
     for(var i=0;i<p.groups.length;i++) {

@@ -19,9 +19,9 @@ function showEditor(context) {
         localize('harbour.formatter.title'),
         vscode.ViewColumn.Active, {}
     );
-    var package = JSON.parse(fs.readFileSync(path.join(context.extensionPath,"package.json"), 'utf8'))
+    let package = JSON.parse(fs.readFileSync(path.join(context.extensionPath,"package.json"), 'utf8'))
     package = package.contributes.configuration.properties;
-    var section = vscode.workspace.getConfiguration('harbour').formatter;
+    const section = vscode.workspace.getConfiguration('harbour').formatter;
     // And set its HTML content
     const localResources = vscode.Uri.file(path.join(context.extensionPath,"formatter-settings"));
     const codiconsUri = vscode.Uri.joinPath(context.extensionUri, 'dist', 'codicons');
@@ -31,7 +31,7 @@ function showEditor(context) {
     }
     const baseUri = panel.webview.asWebviewUri(localResources);
     const cspSource = panel.webview.cspSource;
-    var html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+    let html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none';
         font-src ${cspSource};
         style-src ${cspSource};
@@ -43,13 +43,13 @@ function showEditor(context) {
     <script src="${baseUri}/code.js"></script>
     </head><body>`;
 
-    for(let subZone in section) {
-        let k0 = `harbour.formatter.${subZone}`;
+    for(const subZone in section) {
+        const k0 = `harbour.formatter.${subZone}`;
         html += `<h1>${localize(k0)}</h1><div>`
-        for(let zone in section[subZone]) {
-            let cnf = section[subZone][zone];
-            let k = k0+`.${zone}`;
-            let cfg = package[k];
+        for(const zone in section[subZone]) {
+            const cnf = section[subZone][zone];
+            const k = k0+`.${zone}`;
+            const cfg = package[k];
             html += `<label>`
             switch (cfg.type) {
                 case "boolean":
@@ -103,14 +103,14 @@ function onEditorMessage(m) {
 }
 
 function updateConfig(readedValue) {
-    var currValue = vscode.workspace.getConfiguration('harbour');
-    var section = readedValue.formatter;
-    for(let subZone in section) {
-        let k0 = `formatter.${subZone}`;
-        for(let zone in section[subZone]) {
-            let k = k0+`.${zone}`;
-            var ins = currValue.inspect(k);
-            var rv = section[subZone][zone];
+    const currValue = vscode.workspace.getConfiguration('harbour');
+    const section = readedValue.formatter;
+    for(const subZone in section) {
+        const k0 = `formatter.${subZone}`;
+        for(const zone in section[subZone]) {
+            const k = k0+`.${zone}`;
+            const ins = currValue.inspect(k);
+            const rv = section[subZone][zone];
             if(rv==ins.defaultValue)
                 currValue.update(k,undefined);
             else

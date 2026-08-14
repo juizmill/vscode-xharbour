@@ -29,7 +29,7 @@ function Provider(light) {
         return this.removedComments[this.removedComments.length - 1].value;
     })
     this.__defineSetter__("lastComment", (v) => {
-        var dest = this.removedComments[this.removedComments.length - 1];
+        const dest = this.removedComments[this.removedComments.length - 1];
         if (dest.line < 0) dest.line = this.lineNr;
         //if(v.startsWith("\r\n")) v=v.substr(2);
         return dest.value = v;
@@ -143,7 +143,7 @@ Provider.prototype.resetComments = function () {
 
 Provider.prototype.newComment = function () {
     if (this.removedComments.length > 0) {
-        var lc = this.removedComments[this.removedComments.length - 1];
+        const lc = this.removedComments[this.removedComments.length - 1];
         if (lc.line == -1) return;
     }
     this.removedComments.push({
@@ -206,19 +206,19 @@ function Info(name, kind, foundLike, parent, document, startLine, startCol, endL
 Provider.prototype.addInfo = function (name, kind, like, parent, search) {
     if (search !== true) search = false;
     if (search) {
-        var lines = this.currLine.split("\r\n");
-        var rr = new RegExp('\\b' + name.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '\\b', "i")
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            var m = rr.exec(line)
+        const lines = this.currLine.split("\r\n");
+        const rr = new RegExp('\\b' + name.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '\\b', "i")
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const m = rr.exec(line)
             if (m) {
-                var thisComment = "";
-                var nextComma = line.indexOf(",", m.index);
+                let thisComment = "";
+                let nextComma = line.indexOf(",", m.index);
                 if (nextComma < 0) nextComma = line.indexOf(")", m.index);
                 if (nextComma < 0) nextComma = line.length + 10;
-                var prevComma = line.lastIndexOf(",", m.index);
+                const prevComma = line.lastIndexOf(",", m.index);
                 //if(prevComma<0) prevComma=0;
-                for (var ic = 0; ic < this.removedComments.length; ic++) {
+                for (let ic = 0; ic < this.removedComments.length; ic++) {
                     if (this.removedComments[ic].line == this.startLine + i && ( //same line
                         (this.removedComments[ic].pos < nextComma && //inside this elements commas
                             this.removedComments[ic].pos > prevComma) ||
@@ -233,7 +233,7 @@ Provider.prototype.addInfo = function (name, kind, like, parent, search) {
             }
         }
     }
-    var comment = this.lastComment;
+    let comment = this.lastComment;
     if (this.removedComments.length > 0) for (let i = 0; i < this.removedComments.length; i++) {
         const comm = this.removedComments[i];
         if (comm.line < this.startLine)
@@ -279,7 +279,7 @@ Group.prototype.addRange = function (line, startCol, endCol, text) {
 }
 
 Provider.prototype.linePP = function (line) {
-    var i=0;
+    let i=0;
     if (this.comment) {
         var endComment = line.indexOf("*/");
         if (endComment == -1) {
@@ -314,8 +314,8 @@ Provider.prototype.linePP = function (line) {
     }
 
     var prevJustStart, justStart = !this.cont;
-    var prevC = " ", c = " ", prevCNoSpace="";
-    var lineStart = 0;
+    let prevC = " ", c = " ", prevCNoSpace="";
+    let lineStart = 0;
     for (; i < line.length; i++) {
         prevC = c;
         prevCNoSpace = (c == " " || c == '\t') ? prevCNoSpace : c;
@@ -374,7 +374,7 @@ Provider.prototype.linePP = function (line) {
             break;
         }
         if (c == '"' || c=="'" || (c == "[" && /[^a-zA-Z0-9_\[\]]/.test(prevCNoSpace) && !/^\s*#/.test(line))) {
-            var endString = line.indexOf(c=="["? "]" : c, i+1);
+            let endString = line.indexOf(c=="["? "]" : c, i+1);
             if (c=='"' && (prevC == "e" || this.cMode)) {
                 while(endString>0 && line[endString-1]=="\\") {
                     endString = line.indexOf('"', endString+1);
@@ -402,7 +402,7 @@ Provider.prototype.parseDeclareList = function (list, kind, parent) {
     var i = -1;
     while (true) {
         i++;
-        var filter = undefined;
+        let filter = undefined;
         switch (i) {
             case 0: filter = /\([^\(\)]*\)/g; break;    // () couple
             case 1: filter = /;\s*\r?\n/g; break;    //  New line
@@ -425,27 +425,27 @@ Provider.prototype.parseDeclareList = function (list, kind, parent) {
     //return list.split(",");
     //if(list.length>1) this.lastComment = ""
     for (var i = 0; i < list.length; i++) {
-        var m = list[i].trim().split(/\s+/g)[0];
+        const m = list[i].trim().split(/\s+/g)[0];
         if (m.length > 0 && m.match(/[a-z0-9_]+/i))
             this.addInfo(m, kind, "definition", parent, true);
     }
 }
 
 function CommandSplitDefinition(definePart) {
-    var commandResult = [];
+    const commandResult = [];
     // SplitDefinePart
-    var pos = 0;
+    let pos = 0;
     while (pos < definePart.length) {
         while (pos < definePart.length && [" ", "\t", "\r", "\n"].indexOf(definePart.charAt(pos)) >= 0)
             pos++;
-        var nextChar = definePart.charAt(pos);
+        const nextChar = definePart.charAt(pos);
         var end;
         if (nextChar == "[") {
             end = definePart.indexOf("]", pos);
 			if (end < 0) return undefined; // incomplete
-            var open = definePart.indexOf("[", pos + 1);
+            const open = definePart.indexOf("[", pos + 1);
             if (open < end && open > pos) {
-                var nPar = 2;
+                let nPar = 2;
                 end = open + 1;
                 while (nPar != 0 && end < definePart.length) {
                     switch (definePart.charAt(end)) {
@@ -476,11 +476,11 @@ function CommandSplitDefinition(definePart) {
 }
 
 function CommandPartToRegex(text) {
-	var firstVar = /\s*<([^>]+)>\s*/.exec(text);
+	const firstVar = /\s*<([^>]+)>\s*/.exec(text);
 	// it is only variable, then no regex.
 	if (firstVar && firstVar[0] == text)
 		return undefined;
-	var pattern;
+	let pattern;
     // https://stackoverflow.com/a/3561711/854279
 	// escape all control characters
 	pattern = text.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -492,19 +492,19 @@ function CommandPartToRegex(text) {
 }
 
 function CommandPartToSnippet(text, fixed, resultPart) {
-	var snippet = text, repeatable = !fixed
-	var variableRegEx = /<!?([^!>]+)!?>/
-        var idx = 1;
-	var match;
+	let snippet = text, repeatable = !fixed
+	const variableRegEx = /<!?([^!>]+)!?>/
+        let idx = 1;
+	let match;
 	while (match = variableRegEx.exec(snippet)) {
-		var currVar = match[1];
-            var colonPos = currVar.indexOf(":");
-		var snippetPart = "${" + idx;
+		let currVar = match[1];
+            const colonPos = currVar.indexOf(":");
+		let snippetPart = "${" + idx;
             if (colonPos < 0) {
 			currVar = currVar.trim().replace(/,\s*\.\.\./, "")
 			snippetPart += ":" + currVar
             } else {
-                var names = currVar.substr(colonPos + 1).split(",");
+                const names = currVar.substr(colonPos + 1).split(",");
                 for (let i = 0; i < names.length; i++) {
 				snippetPart += `|${names[i].trim()}`
                 }
@@ -513,7 +513,7 @@ function CommandPartToSnippet(text, fixed, resultPart) {
 		if (repeatable) {
 			var resMatch;
 			currVar = currVar.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                var varRegEx = new RegExp("(\\[[^\\]]*)?<.?\\b" + currVar + "\\b.?>", "ig");
+                const varRegEx = new RegExp("(\\[[^\\]]*)?<.?\\b" + currVar + "\\b.?>", "ig");
 			while (repeatable && (resMatch = varRegEx.exec(resultPart))) {
 				repeatable = repeatable && Boolean(resMatch[1]);
                 }
@@ -529,15 +529,15 @@ Provider.prototype.parseCommand = function (translate) {
 	if (!commandParsingEnabled)
 		return;
 	// find the define part and the result part
-	var pos = this.currLine.match(/^\s*#\w?(?:command|translate)\s+/i);
+	let pos = this.currLine.match(/^\s*#\w?(?:command|translate)\s+/i);
 	if (!pos) return;
 	pos = pos.index + pos[0].length;
-	var endDefine = this.currLine.indexOf("=>");
+	const endDefine = this.currLine.indexOf("=>");
 	if (endDefine < 0) return; // incomplete code
-	var definePart = this.currLine.substring(pos, endDefine).replace(/;\s+/g, "");
-	var resultPart = this.currLine.substring(endDefine + 2).replace(/;\s+/g, "");
+	const definePart = this.currLine.substring(pos, endDefine).replace(/;\s+/g, "");
+	const resultPart = this.currLine.substring(endDefine + 2).replace(/;\s+/g, "");
 	// split the define part
-	var commandResult = CommandSplitDefinition(definePart);
+	const commandResult = CommandSplitDefinition(definePart);
 	// create a name from first fixed part
 	var i = 0;
 	while (!commandResult[i].fixed) i++;
@@ -583,7 +583,7 @@ Provider.prototype.parseHarbour = function (words) {
         this.cMode = true;
         return;
     }
-    var words1 = "";
+    let words1 = "";
     if (words.length > 1) {
         words1 = words[1];
         words[1] = words[1].toLowerCase();
@@ -599,7 +599,7 @@ Provider.prototype.parseHarbour = function (words) {
         } else if (words[0] == '#define') {
             var r = defineRegEx.exec(this.currLinePreProc);
             if (r) {
-                var define = this.addInfo(r[2], 'define', "definition", undefined, true);
+                const define = this.addInfo(r[2], 'define', "definition", undefined, true);
                 define.body = r[4] ? r[4].trim() : "";
                 if (r[3] && r[3].length)
                     this.parseDeclareList(r[3], "param", define);
@@ -638,7 +638,7 @@ Provider.prototype.parseHarbour = function (words) {
                     if (words[0] == "method" || words[0] == "classmethod" || (words[0] == "class" && words[1]=="method")) {
                         var r = methodRegEx.exec(this.currLine);
                         if (r) {
-                            var fLike = "definition"
+                            let fLike = "definition"
                             if (this.currentClass && !this.currentClass.endLine) fLike = "declaration";
                             if (r[4] && r[4].length) {
                                 r[4] = r[4].toLowerCase();
@@ -712,19 +712,19 @@ Provider.prototype.parseC = function () {
         return;
     }
     if (this.currLine.indexOf("HB_FUNC") >= 0) {
-        var r = hb_funcRegEx.exec(this.currLine);
+        const r = hb_funcRegEx.exec(this.currLine);
         if (r) {
             this.addInfo(r[1], 'C-FUNC', "definition");
         }
     }
-    var open = this.currLine.indexOf("{"), close = this.currLine.indexOf("}");
+    let open = this.currLine.indexOf("{"), close = this.currLine.indexOf("}");
     while (open >= 0 || close >= 0) {
         if (open >= 0 && (open < close || close < 0)) {
             this.cCodeFolder.push([this.lineNr, open]);
             open = this.currLine.indexOf("{", open + 1);
         } else
         /*if(close>=0 && (close<open || open<0)) */ {
-            var idx = this.cCodeFolder.length - 1;
+            let idx = this.cCodeFolder.length - 1;
             while (idx >= 0 && this.cCodeFolder[idx].length > 2) idx--;
             if (idx >= 0) this.cCodeFolder[idx].push(this.lineNr, close);
             close = this.currLine.indexOf("}", close + 1)
@@ -735,7 +735,7 @@ Provider.prototype.parseC = function () {
 Provider.prototype.AddMultilineComment = function (startLine, endLine) {
     this.multilineComments.push([startLine, endLine]);
     /** @type{string|undefined} */
-    var mComment;
+    let mComment;
     for (let i = 0; i < this.removedComments.length; i++) {
         const comm = this.removedComments[i];
         if (comm.line == startLine) {
@@ -745,8 +745,8 @@ Provider.prototype.AddMultilineComment = function (startLine, endLine) {
     }
     if (!mComment) return;
     if (mComment.indexOf("$DOC$") < 0) return;
-    var lines = mComment.split("\r\n");
-    var docInfo, lastSpecifyLine;
+    const lines = mComment.split("\r\n");
+    let docInfo, lastSpecifyLine;
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line.length == 0) continue;
@@ -787,9 +787,9 @@ Provider.prototype.AddMultilineComment = function (startLine, endLine) {
                     if (docInfo["label"])
                         docInfo["label"] += " " + line;
                     else {
-                        var p = line.indexOf("(");
+                        const p = line.indexOf("(");
                         if (p < 0) break;
-                        var name = line.substring(0, p)
+                        const name = line.substring(0, p)
                         if (name.indexOf(" ") > 0) {
                             docInfo = undefined;
                             break;
@@ -836,8 +836,8 @@ Provider.prototype.AddMultilineComment = function (startLine, endLine) {
  */
 Provider.prototype.parse = function (line) {
     this.lineNr++;
-    var wasCont = this.cont;
-    var linePP = this.linePP(line);
+    const wasCont = this.cont;
+    const linePP = this.linePP(line);
     if(wasCont) {
         this.clPPArray.push(line);
         this.clArray.push(linePP);
@@ -862,18 +862,18 @@ Provider.prototype.parse = function (line) {
         this.parseC();
         if (this.doGroups) this.updateGroups();
     } else {
-        var lines = [this.currLine];
+        const lines = [this.currLine];
         if (! /^\s*#/.test(this.currLine)) {// if does not start with #, see #44
             // split line in its component for example
             // if lCondition ; a+=b ; endif
             this.currLine.split(/;(?!\s+[\r\n])/)
         }
-        var pre = ""
+        let pre = ""
         var code = false;
-        for (var i = 0; i < lines.length; i++) {
+        for (let i = 0; i < lines.length; i++) {
             this.currLine = pre + lines[i];
             //console.debug(this.lineNr+"-"+this.currLine);
-            var words = this.currLine.replace(/\s+/g, " ").trim().split(" ");
+            const words = this.currLine.replace(/\s+/g, " ").trim().split(" ");
             if (words.length == 0) continue;
             code = true;
             words[0] = words[0].toLowerCase();
@@ -898,8 +898,8 @@ Provider.prototype.parseString = function (txt, docName, cMode) {
     this.currentDocument = docName;
     if (cMode != undefined)
         this.cMode = cMode;
-    var lines = txt.split(/\r?\n/);
-    for (var i = 0; i < lines.length; i++) {
+    const lines = txt.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
         this.parse(lines[i])
     }
     this.endParse();
@@ -911,9 +911,9 @@ Provider.prototype.endParse = function () {
     if (this.firstLineComment > 0 && this.firstLineComment < this.lineNr - 1)
         this.AddMultilineComment(this.firstLineComment, this.lineNr - 1);
     for (let i = 0; i < this.harbourDocs.length; i++) {
-        var doc = this.harbourDocs[i];
+        const doc = this.harbourDocs[i];
         if (!doc.name) continue;
-        var lCmp = doc.name.toLowerCase()
+        const lCmp = doc.name.toLowerCase()
         for (let j = 0; j < this.funcList.length; j++) {
             const info = this.funcList[j];
             if (info.nameCmp == lCmp) {
@@ -933,7 +933,7 @@ Provider.prototype.endParse = function () {
  * @returns {Promise<Provider>} this
  */
 Provider.prototype.parseFile = function (file, docName, cMode, encoding) {
-    var providerThisContext = this;
+    const providerThisContext = this;
     this.Clear();
     if (cMode != undefined)
         this.cMode = cMode;
@@ -941,7 +941,7 @@ Provider.prototype.parseFile = function (file, docName, cMode, encoding) {
     this.currentDocument = docName;
     //console.log(">>> Start parseFile: "+file)
     return new Promise((resolve, reject) => {
-        var reader = readline.createInterface({ input: fs.createReadStream(file, encoding) });
+        const reader = readline.createInterface({ input: fs.createReadStream(file, encoding) });
         reader.on("line", d => providerThisContext.parse(d));
         reader.on("close", () => {
             //console.log("<<<  End  parseFile: "+file)
@@ -952,33 +952,33 @@ Provider.prototype.parseFile = function (file, docName, cMode, encoding) {
 }
 
 Provider.prototype.findDBReferences = function (line) {
-    var charRegEx= /[a-z0-9_\(\)]/
-    var wordRegEx = /\b([a-z_][a-z0-9_]*)\s*([^a-z0-9_]*)/gi
+    const charRegEx= /[a-z0-9_\(\)]/
+    const wordRegEx = /\b([a-z_][a-z0-9_]*)\s*([^a-z0-9_]*)/gi
     var match, refs=[], dbName;
     if(/^\s*#/.test(this.currLine)) {
         // don't parse pre proc
         if(this.currLine.indexOf("=>")<0)
             return;
-        var arrow = line.indexOf("=>")
+        const arrow = line.indexOf("=>")
         if(arrow>=0) {
             line = " ".repeat(arrow+2) + line.substr(arrow+2)
         }
     }
-    var prevWord, cmpName = ""
+    let prevWord, cmpName = ""
     while (match = wordRegEx.exec(line)) {
         prevWord = cmpName
-        var prevC = match.index>0? line[match.index-1] : ""
+        const prevC = match.index>0? line[match.index-1] : ""
         if(match[2][0] == "." && prevC==".") // logical keyword
             continue;
         if(match[2][0] == ">" && prevC=="<") // command keyword
             continue;
         if(prevC=="#") continue; //preproc line
-        var type = prevC==":" ? "data" : "variable"
+        let type = prevC==":" ? "data" : "variable"
         cmpName = match[1].toLowerCase();
         if(keywords.indexOf(cmpName)>=0) continue;
         if(match[2][0] == "(") type = prevC==":" ? "method" : "function"
         else if(dbName) {
-            var dbCmd = dbName.toLowerCase();
+            const dbCmd = dbName.toLowerCase();
             if(dbCmd!="field") {
                 if (!(this.databases[dbCmd]))
                     this.databases[dbCmd] = { name: dbName, fields: {} };
@@ -994,13 +994,13 @@ Provider.prototype.findDBReferences = function (line) {
         if(prevWord=="access" || prevWord=="assign" || prevWord=="data") type = "data"
 
         if(match[2].endsWith("->")) {
-            var pos = match.index + match[0].length - 3;
-            var pdb = pos;
+            const pos = match.index + match[0].length - 3;
+            let pdb = pos;
             var dbName = "";
-            var nBracket = 0;
+            let nBracket = 0;
             while ((line[pdb] == ' ' || line[pdb] == '\t') && pdb>0) pdb--;
             while (nBracket > 0 || charRegEx.test(line[pdb])) {
-                var c = line[pdb];
+                const c = line[pdb];
                 pdb--;
                 if(pdb==-1) break;
                 if (c == ')') nBracket++;
@@ -1027,7 +1027,7 @@ Provider.prototype.findDBReferences = function (line) {
 
 // every group is an array (TODO class?)
 // 0 is name, 1 is start keyword, (2...n-2) middle keyword, (n-1) last keyword
-var group_keywords = [
+const group_keywords = [
     ["if", "if", /else(?:if)?\b/, /end(?:\b|\s*if\b)/],
     ["for", /for(?:\s+each)?\b/, "loop", "exit", "next"],
     ["case", /(switch|do\s+case)\b/, "case", "otherwise", "default", "exit", /end\s*(?:switch|case)?\b/],
@@ -1037,7 +1037,7 @@ var group_keywords = [
     ["dump", /#pragma\s+begindump\b/, /#pragma\s+enddump/],
 ];
 //it can be mixed with other groups
-var preproc_keywords = [
+const preproc_keywords = [
     ["#if", /#if(?:n?def)?\b/, /#else(?:if)?\b/, /#end\s*(?:if)?\b/]
 ];
 
@@ -1062,9 +1062,9 @@ removeStrings(group_keywords);
  */
 function GroupManagement(dest, destStack, keywords, checkString, pos, lineNr) {
     /** @type {Array<RegExp>} temp variable to store the list of keywords */
-    var currKeywords;
+    let currKeywords;
     /** @type {Group} temp variable to store a group */
-    var currGroup;
+    let currGroup;
     // looking for new group start
     for (var i = 0; i < keywords.length; i++) {
         var m; // if match the first keyword, a new group begins
@@ -1077,7 +1077,7 @@ function GroupManagement(dest, destStack, keywords, checkString, pos, lineNr) {
         }
     }
     // looking for pending group, starting from the last opened
-    for (var j = destStack.length - 1; j >= 0; j--) {
+    for (let j = destStack.length - 1; j >= 0; j--) {
         currGroup = destStack[j];
         // find the current examined group keyword list
         currKeywords = keywords.find(v => v[0] == currGroup.type);
@@ -1097,10 +1097,10 @@ function GroupManagement(dest, destStack, keywords, checkString, pos, lineNr) {
 }
 
 Provider.prototype.updateGroups = function () {
-    var checkString = this.currLine.toLowerCase();
-    var pos = checkString.length - checkString.trimLeft().length;
+    let checkString = this.currLine.toLowerCase();
+    const pos = checkString.length - checkString.trimLeft().length;
     checkString = checkString.substr(pos);
-    var ln = this.startLine;
+    const ln = this.startLine;
     if (!this.cMode) GroupManagement(this.groups, this.groupStack, group_keywords, checkString, pos, ln);
     GroupManagement(this.preprocGroups, this.preprocGroupStack, preproc_keywords, checkString, pos, ln);
 }

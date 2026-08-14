@@ -10,7 +10,7 @@ const taskProvider = require('./taskProvider.js');
 class HarbourDBGProvider {
     provideDebugConfigurations(folder,token) {
         return new getAllWorkspaceFiles(token).then((values)=>{
-            var retValue = [{
+            const retValue = [{
                 "type": "harbour-dbg",
                 "request": "launch",
                 "name": "Launch currentFile",
@@ -20,12 +20,12 @@ class HarbourDBGProvider {
                 return;
             }
             for(let j=0;j<values.length;j++) {
-                let ff = values[j];
+                const ff = values[j];
                 for(let i=0;i<ff.length;++i) {
                     if(!ff[i].isFile()) continue;
-                    var ext = path.extname(ff[i].name).toLowerCase();
+                    const ext = path.extname(ff[i].name).toLowerCase();
                     if(ext==".hbp") {
-                        var debugInfo = {
+                        const debugInfo = {
                             "type": "harbour-dbg",
                             "request": "launch",
                             "name": "Launch currentFile",

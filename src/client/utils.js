@@ -10,14 +10,14 @@ const path = require("path");
  */
 function getAllWorkspaceFiles(token) {
     /** @type{Array<Promise>} */
-    var promises = [];
+    const promises = [];
     for(let d=0;d<vscode.workspace.workspaceFolders.length;d++) {
-        let thisDir = vscode.workspace.workspaceFolders[d];
+        const thisDir = vscode.workspace.workspaceFolders[d];
         /** @type {vscode.Uri} */
         var uri = vscode.Uri.parse(thisDir.uri)
         if (uri.scheme != "file") continue;
         //var r = promisify();
-        var r = new Promise((res,reject)=>{
+        const r = new Promise((res,reject)=>{
             if(token.isCancellationRequested) {
                 reject(token);
                 return;
@@ -51,14 +51,14 @@ function getAllWorkspaceFiles(token) {
  * @return {Array<string>}
  */
 function getAliasCommandArgs(fileCwd) {
-    var section = vscode.workspace.getConfiguration('harbour');
-    var rules = (section.aliases && section.aliases.commandRules) || [];
-    var lines = rules
+    const section = vscode.workspace.getConfiguration('harbour');
+    const rules = (section.aliases && section.aliases.commandRules) || [];
+    const lines = rules
         .filter(r => r && r.match && r.replace)
         .map(r => "#command " + r.match + " => " + r.replace);
     if (lines.length == 0)
         return [];
-    var chPath = path.join(fileCwd, ".xharbour-tools-command-rules.ch");
+    const chPath = path.join(fileCwd, ".xharbour-tools-command-rules.ch");
     fs.writeFileSync(chPath, lines.join("\n") + "\n");
     return ["-u+" + chPath];
 }

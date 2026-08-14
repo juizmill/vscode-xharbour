@@ -19,19 +19,19 @@ function activate(context) {
 	});
 	validation.activate(context);
 
-	var serverModule = context.asAbsolutePath(path.join('dist','hb_server.js'));
-	var debugOptions = { execArgv: ["--nolazy", "--inspect-brk=21780"] };
-	var serverOptions = {
+	const serverModule = context.asAbsolutePath(path.join('dist','hb_server.js'));
+	const debugOptions = { execArgv: ["--nolazy", "--inspect-brk=21780"] };
+	const serverOptions = {
 		run : { module: serverModule, transport: client.TransportKind.ipc },
 		debug: { module: serverModule, transport: client.TransportKind.ipc , options: debugOptions }
 	}
-	var clientOptions = {
+	const clientOptions = {
 		documentSelector: ['harbour'],
 		synchronize: {
 			configurationSection: ['harbour','search','editor']
 		}
 	}
-	var cl = new client.LanguageClient('HarbourServer', 'Harbour Server', serverOptions, clientOptions);
+	const cl = new client.LanguageClient('HarbourServer', 'Harbour Server', serverOptions, clientOptions);
 	cl.registerProposedFeatures()
 	context.subscriptions.push(cl.start());
 	vscode.commands.registerCommand('harbour.getDbgCode', () => { getDbgCode(context); })
@@ -53,23 +53,23 @@ function activate(context) {
 
 function DebugList(args) {
 	return new Promise((resolve,reject) => {
-		var picks = vscode.window.createQuickPick();
+		const picks = vscode.window.createQuickPick();
 		picks.placeholder = "select the process to attach with"
 		picks.busy=true;
 		picks.items=[];
-		var port = args.port? args.port :6110;
-		var server = net.createServer(socket => {
+		const port = args.port? args.port :6110;
+		const server = net.createServer(socket => {
 			socket.on("data", data=> {
 				try {
 					while(true) {
-						var lines = data.toString().split("\r\n");
+						const lines = data.toString().split("\r\n");
 						if(lines.length<2)  {//todo: check if they arrive in 2 tranches.
 							break;
 						}
-						var clPath = path.basename(lines[0],path.extname(lines[0])).toLowerCase();
+						const clPath = path.basename(lines[0],path.extname(lines[0])).toLowerCase();
 						var processId = parseInt(lines[1]);
 						if(args.program && args.program.length>0) {
-							var exeTarget = path.basename(args.program,path.extname(args.program)).toLowerCase();
+							const exeTarget = path.basename(args.program,path.extname(args.program)).toLowerCase();
 							if(clPath!=exeTarget) break;
 						}
 						if(!picks.items.find((v)=>v.process==processId))

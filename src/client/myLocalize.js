@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require('path');
 const localize = require("vscode-nls").loadMessageBundle();
 
-var messages,messagesFall;
+let messages,messagesFall;
 function Init()
 {
     if(process.env.VSCODE_NLS_CONFIG)
@@ -26,7 +26,7 @@ function reInit(config)
 }
 
 function indexTrim(str, ch) {
-    var start = 0,
+    let start = 0,
         end = str.length;
 
     while(start < end && str[start] === ch)
@@ -40,7 +40,7 @@ function indexTrim(str, ch) {
 
 function myLocalize()
 {
-    var arg = Array.prototype.slice.call(arguments);
+    const arg = Array.prototype.slice.call(arguments);
     /** @type {String} */
     let key = indexTrim(arg[0],'%');
     if(key in messages) {

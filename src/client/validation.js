@@ -5,7 +5,7 @@ const localize = require("./myLocalize.js").localize;
 const readline = require("readline");
 const getAliasCommandArgs = require("./utils.js").getAliasCommandArgs;
 
-var diagnosticCollection;
+let diagnosticCollection;
 
 function activate(context)
 {
@@ -24,8 +24,8 @@ function deactivate()
 	 diagnosticCollection.dispose();
 }
 
-var valRegEx = /^\r?(?:([^\(]*)\((\d+)\)\s+)?(Warning|Error)\s+([^\r\n]*)/
-var lineContRegEx = /;(\s*(\/\/|&&|\/\*))?/
+const valRegEx = /^\r?(?:([^\(]*)\((\d+)\)\s+)?(Warning|Error)\s+([^\r\n]*)/
+const lineContRegEx = /;(\s*(\/\/|&&|\/\*))?/
 /**
  * Whether the text right after a matched identifier is ":<suffix>(", where
  * <suffix> is one of harbour.aliases.callSuffixes -- i.e. the identifier is
@@ -38,21 +38,21 @@ var lineContRegEx = /;(\s*(\/\/|&&|\/\*))?/
 function isCallSuffixUsage(lineText, afterIndex, callSuffixesLower)
 {
 	if(callSuffixesLower.length == 0) return false;
-	var m = /^\s*:\s*([A-Za-z_]\w*)\s*\(/.exec(lineText.substring(afterIndex));
+	const m = /^\s*:\s*([A-Za-z_]\w*)\s*\(/.exec(lineText.substring(afterIndex));
 	return m ? callSuffixesLower.indexOf(m[1].toLowerCase()) >= 0 : false;
 }
 function validate(textDocument)
 {
 	if(textDocument.languageId !== 'harbour' )
 		return;
-	var section = vscode.workspace.getConfiguration('harbour');
+	const section = vscode.workspace.getConfiguration('harbour');
 	if(!section.validating)
 		return;
-	var callSuffixesLower = ((section.aliases && section.aliases.callSuffixes) || []).map(function(s) {return s.toLowerCase();});
-	var args = ["-s", "-q0", "-m", "-n0", "-w"+section.warningLevel, textDocument.fileName ];
-	var file_cwd = path.dirname(textDocument.fileName);
-	for (var i = 0; i < section.extraIncludePaths.length; i++) {
-		var pathVal = section.extraIncludePaths[i];
+	const callSuffixesLower = ((section.aliases && section.aliases.callSuffixes) || []).map(function(s) {return s.toLowerCase();});
+	let args = ["-s", "-q0", "-m", "-n0", "-w"+section.warningLevel, textDocument.fileName ];
+	const file_cwd = path.dirname(textDocument.fileName);
+	for (let i = 0; i < section.extraIncludePaths.length; i++) {
+		let pathVal = section.extraIncludePaths[i];
 		if(pathVal.indexOf("${workspaceFolder}")>=0) {
 			pathVal=pathVal.replace("${workspaceFolder}",file_cwd)
 		}
@@ -60,20 +60,20 @@ function validate(textDocument)
 	}
 	args = args.concat(section.extraOptions.split(" ").filter(function(el) {return el.length != 0 || el=="-ge1"}));
 	args = args.concat(getAliasCommandArgs(file_cwd));
-	var diagnostics = {};
+	const diagnostics = {};
 	diagnostics[textDocument.fileName] = [];
-	var doneSubjects = {};
+	const doneSubjects = {};
 	function parseLine(subLine)
 	{
-		var r = valRegEx.exec(subLine);
+		const r = valRegEx.exec(subLine);
 		if(r)
 		{
 			if(!r[1]) r[1]=textDocument.fileName;
-			var lineNr = r[2]? parseInt(r[2])-1 : 0;
-			var subject = r[4].match(/'([^']+)'/g);
+			let lineNr = r[2]? parseInt(r[2])-1 : 0;
+			const subject = r[4].match(/'([^']+)'/g);
 			if(subject && subject.length>1 && subject[1].indexOf("(")>=0)
 			{
-				var nSub = subject[1].match(/\(([0-9]+)\)/);
+				const nSub = subject[1].match(/\(([0-9]+)\)/);
 				if(nSub)
 				{
 					lineNr = parseInt(nSub[1])-1;
@@ -84,18 +84,18 @@ function validate(textDocument)
 				if(!(lineNr in doneSubjects)) doneSubjects[lineNr]=[];
 				doneSubjects[lineNr].push(subject[0]);
 			}
-			var line = textDocument.lineAt(lineNr)
+			const line = textDocument.lineAt(lineNr)
 			if(!(r[1] in diagnostics))
 			{
 				diagnostics[r[1]] = [];
 			}
-			var putAll = true;
+			let putAll = true;
 			if(subject)
 			{
-				var m;
+				let m;
 				subject[0] = subject[0].substring(1,subject[0].length-1)
-				var rr = new RegExp('\\b'+subject[0].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")+'\\b',"ig")
-				var testLine = line;
+				const rr = new RegExp('\\b'+subject[0].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")+'\\b',"ig")
+				let testLine = line;
 				do {
 					while(m=rr.exec(testLine.text))
 					{
@@ -104,7 +104,7 @@ function validate(textDocument)
 							isCallSuffixUsage(testLine.text, m.index+subject[0].length, callSuffixesLower)) {
 							continue;
 						}
-						var diag = new vscode.Diagnostic(new vscode.Range(lineNr,m.index,lineNr,m.index+subject[0].length), r[4],
+						const diag = new vscode.Diagnostic(new vscode.Range(lineNr,m.index,lineNr,m.index+subject[0].length), r[4],
 							r[3]=="Warning"? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error)
 						if(r[4].indexOf("not used")>0) {
 							diag.tags = [vscode.DiagnosticTag.Unnecessary];
@@ -119,20 +119,20 @@ function validate(textDocument)
 				diagnostics[r[1]].push(new vscode.Diagnostic(line.range, r[4], r[3]=="Warning"? 1 : 0))
 		}
 	}
-	var process = cp.spawn(section.compilerExecutable,args, { cwd: file_cwd });
+	const process = cp.spawn(section.compilerExecutable,args, { cwd: file_cwd });
 	process.on("error", e=>
 	{
 		vscode.window.showWarningMessage(localize("harbour.validation.NoExe",section.compilerExecutable));
 	});
-	var reader = readline.createInterface({ input: process.stderr})
+	const reader = readline.createInterface({ input: process.stderr})
 	reader.on("line",d=>parseLine(d));
 	//process.stderr.on('data', (v) => parseData(v,true));
 	//process.stdout.on('data', (v) => parseData(v,false));
 	process.on("exit",function(code)
 	{
-		for (var file in diagnostics) {
+		for (const file in diagnostics) {
 			if (diagnostics.hasOwnProperty(file)) {
-				var infos = diagnostics[file];
+				const infos = diagnostics[file];
 				diagnosticCollection.set(vscode.Uri.file(file), infos);
 			}
 		}

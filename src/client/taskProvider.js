@@ -19,13 +19,13 @@ function resolvePredefinedVariables(v) {
             } while(v.indexOf(what)>=0);
         }
     }
-    var textDocument = undefined;
-    var parsed = undefined;
+    let textDocument = undefined;
+    let parsed = undefined;
     if(vscode && vscode.window && vscode.window.activeTextEditor && vscode.window.activeTextEditor.document) {
         textDocument =vscode.window.activeTextEditor.document;
         parsed = path.parse(textDocument.uri.fsPath);
     }
-    var workspace0 = undefined, relativeParsed = undefined, relativePath = undefined;
+    let workspace0 = undefined, relativeParsed = undefined, relativePath = undefined;
     if(textDocument) {
         workspace0 = vscode.workspace.getWorkspaceFolder(textDocument.uri);
     }
@@ -59,24 +59,24 @@ class HRBTask {
     }
 
     GetArgs(fileName) {
-        var section = vscode.workspace.getConfiguration('harbour');
-        var args = ["-w"+section.warningLevel, fileName ];
-        for (var i = 0; i < section.extraIncludePaths.length; i++) {
-            var pathVal = resolvePredefinedVariables(section.extraIncludePaths[i]);
+        const section = vscode.workspace.getConfiguration('harbour');
+        const args = ["-w"+section.warningLevel, fileName ];
+        for (let i = 0; i < section.extraIncludePaths.length; i++) {
+            const pathVal = resolvePredefinedVariables(section.extraIncludePaths[i]);
             args.push("-I"+pathVal);
         }
         return args.concat(section.extraOptions.split(" ").filter(function(el) {return el.length != 0})).concat(getAliasCommandArgs(path.dirname(fileName)));
     }
 
     provideTasks(token) {
-        var textDocument = undefined;
+        let textDocument = undefined;
         if(vscode && vscode.window && vscode.window.activeTextEditor && vscode.window.activeTextEditor.document)
             textDocument =vscode.window.activeTextEditor.document;
-        var retValue = [];
+        const retValue = [];
     	if(textDocument && textDocument.languageId == 'harbour' ) {
-            var section = vscode.workspace.getConfiguration('harbour');
-            var args = this.GetArgs(textDocument.fileName);
-            var file_cwd = path.dirname(textDocument.fileName);
+            const section = vscode.workspace.getConfiguration('harbour');
+            const args = this.GetArgs(textDocument.fileName);
+            const file_cwd = path.dirname(textDocument.fileName);
             retValue.push(new vscode.Task({
                     "type": "Harbour",
                     "input": "${file}",
@@ -103,16 +103,16 @@ class HRBTask {
      * @param {vscode.CancellationToken} token
      */
     resolveTask(task, token) {
-        var input=resolvePredefinedVariables(task.definition.input);
-        var ext = path.extname(input);
+        const input=resolvePredefinedVariables(task.definition.input);
+        const ext = path.extname(input);
         if(ext!=".prg")
             return undefined;
-        var retTask = new vscode.Task(task.definition, vscode.TaskScope.Workspace,"build "+input ,"Harbour");
+        const retTask = new vscode.Task(task.definition, vscode.TaskScope.Workspace,"build "+input ,"Harbour");
 
-        var args = this.GetArgs(input);
+        let args = this.GetArgs(input);
         if(task.definition.output=="C code") {
             if("c-type" in task.definition) {
-                var id = ["compact","normal",
+                const id = ["compact","normal",
                     "verbose","real C Code"].indexOf(task.definition["c-type"]);
                 if(id>=0) {
                     args = args.concat(["-gc"+id]);
@@ -120,8 +120,8 @@ class HRBTask {
             } else args = args.concat(["-gc"]);
         } else
             args = args.concat(["-gh"]);
-        var file_cwd = path.dirname(vscode.window.activeTextEditor.document.fileName);
-        var section = vscode.workspace.getConfiguration('harbour');
+        const file_cwd = path.dirname(vscode.window.activeTextEditor.document.fileName);
+        const section = vscode.workspace.getConfiguration('harbour');
         retTask.execution = new vscode.ShellExecution(section.compilerExecutable,args.concat(["-gc"]),{
             cwd: file_cwd
         });
@@ -133,7 +133,7 @@ class HRBTask {
     }
 }
 
-var myTerminals = {};
+const myTerminals = {};
 /**
  *
  * @param {vscode.Task} task
@@ -146,12 +146,12 @@ function getTerminalFn(task) {
         if(!myTerminals[task.name])
             myTerminals[task.name]=new HBMK2Terminal(task);
         // check if the batch changed
-        var taskBatch = getBatch(task);
+        const taskBatch = getBatch(task);
         if((myTerminals[task.name].batch || taskBatch) && taskBatch!=myTerminals[task.name].batch) {
             myTerminals[task.name]=new HBMK2Terminal(task);
         }
         //
-        var ret=myTerminals[task.name];
+        const ret=myTerminals[task.name];
         ret.append(task);
         return ret;
     }
@@ -161,9 +161,9 @@ function ToAbsolute(fileName) {
     if(path.isAbsolute(fileName))
         return fileName;
     for (let i = 0; i < vscode.workspace.workspaceFolders.length; i++) {
-        let thisDir = vscode.workspace.workspaceFolders[i];
+        const thisDir = vscode.workspace.workspaceFolders[i];
         /** @type {vscode.Uri} */
-        let uri = vscode.Uri.parse(thisDir.uri)
+        const uri = vscode.Uri.parse(thisDir.uri)
         if (uri.scheme != "file") continue;
         const p = path.join(uri.fsPath,fileName);
         if(fs.existsSync(p)) {
@@ -175,15 +175,15 @@ function ToAbsolute(fileName) {
 }
 
 function getBatch(task) {
-    var batch = task.definition.setupBatch;
-    var platform = process.platform;
+    let batch = task.definition.setupBatch;
+    let platform = process.platform;
     if(platform=='win32') platform="windows";
     if(platform=='darwin') platform="osx";
     //TODO: other platforms
     if(platform in task.definition) {
-        var platformSpecific = task.definition[platform];
+        const platformSpecific = task.definition[platform];
         if(platformSpecific.env) {
-            var extraEnv = platformSpecific.env;
+            const extraEnv = platformSpecific.env;
             for (const p in extraEnv) {
                 if (extraEnv.hasOwnProperty(p)) {
                     this.env[p] = extraEnv[p];
@@ -213,14 +213,14 @@ class HBMK2Terminal {
         this.settingUp = false;
         this.env=process.env;
         if(task.definition.options && task.definition.options.env) {
-            var extraEnv = task.definition.options.env;
+            const extraEnv = task.definition.options.env;
             for (const p in extraEnv) {
                 if (extraEnv.hasOwnProperty(p)) {
                     this.env[p] = extraEnv[p];
                 }
             }
         }
-        var batch = getBatch(task);
+        let batch = getBatch(task);
         this.batch=batch;
         if(batch) {
             batch=ToAbsolute(batch);
@@ -229,7 +229,7 @@ class HBMK2Terminal {
                 return;
             }
             this.settingUp = true;
-            var cmd="setup"; //TODO: make unique
+            let cmd="setup"; //TODO: make unique
             if(os.platform()=='win32') {
                 cmd+=".bat";
                 fs.writeFileSync(cmd,
@@ -239,13 +239,13 @@ class HBMK2Terminal {
                 fs.writeFileSync(cmd,
                     `sh  \"${batch}\"\r\printenv\r\n`)
             }
-            var tc = this;
-            var env1 = {};
+            const tc = this;
+            const env1 = {};
             function onData(data) {
                 /** @type{String[]} */
-                var str = data.toString().split(/[\r\n]{1,2}/);
+                const str = data.toString().split(/[\r\n]{1,2}/);
                 for(let i=0;i<str.length-1;++i) {
-                    var m = str[i].match(/([^=]+)=(.*)$/);
+                    const m = str[i].match(/([^=]+)=(.*)$/);
                     // I am not sure about the toUpperCase...
                     // on windows is necessary, on linux/mac I don't know
                     // I am not sure if all this is necessary on linux/mac
@@ -255,7 +255,7 @@ class HBMK2Terminal {
                         tc.write(str[i]+"\r\n");
                 }
             }
-            var p1 = cp.spawn( cmd,{env:process.env})
+            const p1 = cp.spawn( cmd,{env:process.env})
             p1.stdout.on('data', onData);
             p1.on("exit", () => {
                 fs.unlink(cmd, ()=>{});
@@ -296,11 +296,11 @@ class HBMK2Terminal {
         }
         if(this.tasks.length==0)
             this.closeEvt(0);
-        var task = this.tasks.splice(0,1)[0];
-        var inputFile = ToAbsolute(resolvePredefinedVariables(task.definition.input)) || task.definition.input;
-        var section = vscode.workspace.getConfiguration('harbour');
+        const task = this.tasks.splice(0,1)[0];
+        const inputFile = ToAbsolute(resolvePredefinedVariables(task.definition.input)) || task.definition.input;
+        const section = vscode.workspace.getConfiguration('harbour');
 
-        var args = [inputFile, "-w"+section.warningLevel];
+        let args = [inputFile, "-w"+section.warningLevel];
         if(task.definition.debugSymbols) {
             args.push("-b");
             args.push(path.resolve(__dirname, path.join('..','extra','dbg_lib.prg')));
@@ -309,12 +309,12 @@ class HBMK2Terminal {
         if(Array.isArray(task.definition.extraArgs)) args=args.concat(task.definition.extraArgs);
         if(task.definition.platform) args.push("-plat="+task.definition.platform);
         if(task.definition.compiler) args.push("-comp="+task.definition.compiler);
-        var file_cwd = path.dirname(inputFile);
+        const file_cwd = path.dirname(inputFile);
         args = args.concat(getAliasCommandArgs(file_cwd));
-        var hbmk2Path = path.join(path.dirname(section.compilerExecutable), "hbmk2")
+        const hbmk2Path = path.join(path.dirname(section.compilerExecutable), "hbmk2")
         this.write(localize("harbour.task.HBMK2.start")+"\r\n")
         this.p = cp.spawn(hbmk2Path,args,{cwd:file_cwd,env:this.env});
-        var tc = this;
+        const tc = this;
         this.p.stderr.on('data', data =>
             tc.write(data.toString())
         );
@@ -337,7 +337,7 @@ class HBMK2Terminal {
  */
 class HBMK2Task {
     getValidTask(name,input, definition, problemMatches) {
-        var retTask = new vscode.Task({
+        const retTask = new vscode.Task({
             "type": "HBMK2",
             "input": input
             //"c-type": "compact"
@@ -356,20 +356,20 @@ class HBMK2Task {
     provideTasks(token) {
         if(!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length==0)
             return [];
-        var HBMK2This = this;
+        const HBMK2This = this;
         return new Promise((resolve,reject)=> {
-            var retValue=[];
-            var textDocument = undefined;
+            const retValue=[];
+            let textDocument = undefined;
             if(vscode && vscode.window && vscode.window.activeTextEditor && vscode.window.activeTextEditor.document)
                 textDocument =vscode.window.activeTextEditor.document;
             if(textDocument && textDocument.languageId == 'harbour' ) {
-                var task = new vscode.Task({
+                const task = new vscode.Task({
                     "type": "HBMK2",
                     "input": "${file}"
                 }, vscode.TaskScope.Workspace, localize("harbour.task.HBMK2.provideName2") ,"HBMK2");
                 task.execution = new vscode.CustomExecution(getTerminalFn(task));
                 task.problemMatchers = ["$harbour","$msCompile"];
-                var task2 = new vscode.Task({
+                const task2 = new vscode.Task({
                     "type": "HBMK2",
                     "input": "${file}",
                     "debugSymbols": true,
@@ -385,12 +385,12 @@ class HBMK2Task {
                     return;
                 }
                 for(let j=0;j<values.length;j++) {
-                    let ff = values[j];
+                    const ff = values[j];
                     for(let i=0;i<ff.length;++i) {
                         if(!ff[i].isFile()) continue;
-                        var ext = path.extname(ff[i].name).toLowerCase();
+                        const ext = path.extname(ff[i].name).toLowerCase();
                         if(ext==".hbp") {
-                            var task = new vscode.Task({
+                            const task = new vscode.Task({
                                     "type": "HBMK2",
                                     "input": ff[i].name
                                 }, vscode.TaskScope.Workspace,
@@ -412,7 +412,7 @@ class HBMK2Task {
      * @param {vscode.CancellationToken} token
      */
     resolveTask(task) {
-        var retTask = new vscode.Task(task.definition, vscode.TaskScope.Workspace,
+        const retTask = new vscode.Task(task.definition, vscode.TaskScope.Workspace,
                 "build "+task.definition.input ,"HBMK2");
         retTask.execution = new vscode.CustomExecution(getTerminalFn(retTask));
         if(!Array.isArray(task.problemMatchers) || task.problemMatchers.length==0 )

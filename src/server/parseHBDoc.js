@@ -1,10 +1,10 @@
-var fs = require("fs");
-var readline = require("readline");
-var path = require("path")
+const fs = require("fs");
+const readline = require("readline");
+const path = require("path")
 
-var nTodo = 0;
-var docs = [];
-var stdMethods = [];
+let nTodo = 0;
+const docs = [];
+const stdMethods = [];
 
 //walkPath(/home/perry/harbour-src)
 walkPath("c:\\harbour")
@@ -13,9 +13,9 @@ function walkPath(dir) {
 	fs.readdir(dir, function (err, ff) {
 		if (ff == undefined)
 			return;
-		for (var i = 0; i < ff.length; i++) {
-			let completePath = path.join(dir, ff[i]);
-			let info = fs.statSync(completePath);
+		for (let i = 0; i < ff.length; i++) {
+			const completePath = path.join(dir, ff[i]);
+			const info = fs.statSync(completePath);
 			const lowerFileName = ff[i].toLocaleLowerCase();
 			if(lowerFileName.endsWith(".txt")) {
 				new parseFile(completePath);
@@ -36,12 +36,12 @@ function walkPath(dir) {
 function parseHBX(completePath)
 {
 	nTodo++;
-	let fileName = path.parse(completePath).name
-	var ck = /DYNAMIC\s+([_a-z0-9]+)/i;
-	var reader = readline.createInterface({input:fs.createReadStream(completePath,"utf8")});
+	const fileName = path.parse(completePath).name
+	const ck = /DYNAMIC\s+([_a-z0-9]+)/i;
+	const reader = readline.createInterface({input:fs.createReadStream(completePath,"utf8")});
 	reader.on("line",l =>
 	{
-		var m = l.match(ck);
+		const m = l.match(ck);
 		if(m && m[1])
 		{
 			stdMethods.push([m[1],fileName]);
@@ -78,8 +78,8 @@ function createDoc()
 	console.debug(`parsed ${docs.length} procedures (over ${stdMethods.length} standard)`)
 	docs.sort( (a,b) => a.name.localeCompare(b.name));
 	stdMethods.sort( (a,b) => a[0].localeCompare(b[0]));
-	var unDoc = [], extra = [];
-	var is = 0, id =0;
+	const unDoc = [], extra = [];
+	let is = 0, id =0;
 	while(is<stdMethods.length && id<docs.length)
 	{
 		switch(stdMethods[is][0].localeCompare(docs[id].name))
@@ -89,8 +89,8 @@ function createDoc()
 			case 1: extra.push(docs[id].label); id++; break; // I don't write it anywhere, but extra contains documentated proc absent in hbx
 		}
 	}
-	var msg = "[\r\n"
-	for(var i=0;i<unDoc.length;i++)
+	let msg = "[\r\n"
+	for(let i=0;i<unDoc.length;i++)
 		msg += `["${unDoc[i][0]}","${unDoc[i][1]}"],\r\n`;
 	msg=msg.slice(0,msg.length-3)
 	msg += "\r\n]";
@@ -153,13 +153,13 @@ parseFile.prototype.parseLine = function(line)
 					this.doc["label"] += " " + line;
 				else
 				{
-					var p = line.indexOf("(");
+					const p = line.indexOf("(");
 					if(p<0)
 					{
 						this.doc = undefined;
 						break;
 					}
-					var name = line.substring(0,p)
+					const name = line.substring(0,p)
 					if(name.indexOf(" ")>0)
 					{
 						this.doc = undefined;
