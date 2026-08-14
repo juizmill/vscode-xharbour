@@ -294,8 +294,8 @@ npx webpack --mode production          # builds dist/extension.js,
                                         # dist/debugger.js, dist/hb_server.js
 npx vsce package --no-dependencies \
   --allow-missing-repository \
-  --baseContentUrl "<url>" --baseImagesUrl "<url>"   # -> xharbour-tools.vsix
-code --install-extension xharbour-tools.vsix
+  --baseContentUrl "<url>" --baseImagesUrl "<url>"   # -> vscode-xharbour.vsix
+code --install-extension vscode-xharbour.vsix
 ```
 
 `npm run prelanch` (`webpack --mode development`) is the pre-launch task

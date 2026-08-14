@@ -1,5 +1,5 @@
 {
-    "name": "xharbour-tools",
+    "name": "vscode-xharbour",
     "displayName": "xHarbour Tools",
     "description": "xHarbour/Harbour language support for Visual Studio Code (fork of harbourCodeExtension by Antonino Perricone, with configurable syntax aliases)",
     "version": "0.0.1",
