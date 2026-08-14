@@ -292,9 +292,7 @@ npm install                            # single node_modules for both the
                                         # server (src/client, src/server)
 npx webpack --mode production          # builds dist/extension.js,
                                         # dist/debugger.js, dist/hb_server.js
-npx vsce package --no-dependencies \
-  --allow-missing-repository \
-  --baseContentUrl "<url>" --baseImagesUrl "<url>"   # -> vscode-xharbour.vsix
+npx vsce package --no-dependencies     # -> vscode-xharbour.vsix
 code --install-extension vscode-xharbour.vsix
 ```
 
