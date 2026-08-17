@@ -170,6 +170,10 @@ connection.onDidChangeConfiguration(params => {
             existingWords.push(m[1].toLowerCase());
         }
     });
+    if(newAliases.customDefault !== false && existingWords.indexOf("default") < 0) {
+        customKeywords.push({word: "Default", scope: "keyword"});
+        existingWords.push("default");
+    }
     aliasConfig.customKeywords = customKeywords;
     aliasConfig.callSuffixesRaw = (newAliases.callSuffixes || []).slice();
     aliasConfig.callSuffixes = aliasConfig.callSuffixesRaw.map(s => s.toLowerCase());

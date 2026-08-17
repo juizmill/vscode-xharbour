@@ -36,11 +36,27 @@ function getAllWorkspaceFiles(token) {
 }
 
 /**
+ * Built-in "DEFAULT <v> := <x> [, <v2> := <x2> ...]" command, always on
+ * unless harbour.aliases.customDefault is set to false. Two rules: the base
+ * case (a single "<v> := <x>" with nothing left) expands to Default(v, x);
+ * the recursive case (one pair followed by ", " and more) peels off the
+ * first pair and re-emits "DEFAULT <rest>", which the preprocessor rescans
+ * against these same two rules -- so cascades of any length work (tested up
+ * to 60 chained pairs against the real xHarbour compiler), not just a fixed
+ * number of optional clauses.
+ * @type {string}
+ */
+const DEFAULT_COMMAND_RULES =
+    "#command DEFAULT <v1> := <x1> => Default( <v1>, <x1> )\n" +
+    "#command DEFAULT <v1> := <x1> , <*rest*> => Default( <v1>, <x1> ) ;; DEFAULT <rest>";
+
+/**
  * Materializes harbour.aliases.commandRules (settings.json) into a generated
  * .ch file with one #command per rule, so the user doesn't have to paste
- * "#command <match> => <replace>" at the top of every .prg. Returns the
- * extra compiler args needed to pick it up (-u+<file>), or [] if there are
- * no rules configured.
+ * "#command <match> => <replace>" at the top of every .prg. Also always
+ * includes the built-in DEFAULT command (see DEFAULT_COMMAND_RULES) unless
+ * harbour.aliases.customDefault is false. Returns the extra compiler args
+ * needed to pick it up (-u+<file>), or [] if there is nothing to generate.
  *
  * The file is written inside fileCwd (the directory of the file being
  * compiled) rather than the OS temp dir: harbour.compilerExecutable can be a
@@ -56,6 +72,9 @@ function getAliasCommandArgs(fileCwd) {
     const lines = rules
         .filter(r => r && r.match && r.replace)
         .map(r => "#command " + r.match + " => " + r.replace);
+    const customDefault = !section.aliases || section.aliases.customDefault !== false;
+    if (customDefault)
+        lines.unshift(DEFAULT_COMMAND_RULES);
     if (lines.length == 0)
         return [];
     const chPath = path.join(fileCwd, ".vscode-xharbour-lang-command-rules.ch");

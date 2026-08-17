@@ -254,6 +254,11 @@
                         ]
                     },
                     "default": []
+                },
+                "harbour.aliases.customDefault": {
+                    "type": "boolean",
+                    "description": "%harbour.aliases.customDefault%",
+                    "default": true
                 }
             }
         },

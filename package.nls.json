@@ -7,6 +7,7 @@
     "harbour.aliases.commandRules": "Custom #command rules (e.g. your own DEFAULT/translate macros) applied automatically to every file, without having to paste a #command line at the top of each .prg. Each rule is compiled into a generated .ch file that is passed to the compiler with -u+. The first word of 'match' is also colored as a keyword automatically.",
     "harbour.aliases.commandRules.match": "The pattern to match, using standard xHarbour #command syntax (e.g. \"DEFAULT <v> := <x>\")",
     "harbour.aliases.commandRules.replace": "What the matched pattern expands to (e.g. \"Default( <v>, <x> )\")",
+    "harbour.aliases.customDefault": "Built-in support for the DEFAULT command (e.g. \"Default cNome := \\\"mundo\\\"\"), including cascading multiple assignments in one statement with \",;\" line continuation (e.g. \"Default cNome := x, cSobrenome := y\"), with no #command/commandRules setup needed. Also colors DEFAULT like a keyword. On by default; set to false to turn it off (e.g. if your own harbour.aliases.commandRules defines a conflicting DEFAULT command).",
     "harbour.validating": "Every time a file is opened or saved the executable is called to validate the code(Lint)",
     "harbour.compilerExecutable": "complete path of the harbour executable",
     "harbour.extraOptions": "other options to pass to harbour compiler",

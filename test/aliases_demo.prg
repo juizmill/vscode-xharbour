@@ -1,25 +1,32 @@
 // Demo file for the new fork features:
-// - harbour.aliases.commandRules   (defines the DEFAULT command from settings.json,
+// - built-in DEFAULT command (harbour.aliases.customDefault, on by default,
+//                              no settings/commandRules entry needed)
+// - harbour.aliases.commandRules   (your own #command rules from settings.json,
 //                                    no need to paste a #command line in every .prg)
 // - harbour.aliases.callSuffixes   ("Exec" suffix aliases to the receiver)
 // - hover showing the comment above a function
 // - validate on save (uncomment the line with a typo to see a diagnostic)
 //
-// harbour.aliases.commandRules (see test/.vscode/settings.json) generates a
-// .ch with "#command DEFAULT <v> := <x> => Default( <v>, <x> )" and passes
-// it to the compiler via -u+ automatically, on every validate/build. That's
-// what makes "Default cNome := x" actually compile as "Default(cNome, x)"
-// below -- and it also colors "Default" like a keyword in the editor, so
-// harbour.aliases.customKeywords doesn't need a separate entry for it.
+// The extension always generates a .ch with the DEFAULT command (so "Default
+// cNome := x" compiles as "Default(cNome, x)" below, cascades of any length
+// via ",;" included) and passes it to the compiler via -u+
+// automatically, on every validate/build. Set harbour.aliases.customDefault
+// to false to turn this off. It also colors "Default" like a keyword in the
+// editor, so harbour.aliases.customKeywords doesn't need a separate entry
+// for it.
 
 FUNCTION Main()
     LOCAL cNome      := ""
-    LOCAL cSobreNome := ""
+    LOCAL cSobreNome := "" ,;
+        ba := "" ,;
+        Ca := ""
 
     Default cNome := "mundo"
     default(cSobreNome, "bar")
 
-    default cZZ := "abc"
+    default cZZ := "abc" ,;
+        ff := "dd"
+
 
     // Isso tem que dar erro porque não tem Local definido
     ZugZug := "asdf"
