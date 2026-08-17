@@ -27,6 +27,16 @@
   }
  },
  {
+  "label": "__DbCONTINUE()   -> NIL",
+  "documentation": "Resume a pending LOCATE",
+  "arguments": [],
+  "name": "__DbCONTINUE",
+  "return": {
+   "name": "",
+   "help": "__DbCONTINUE()  Always return nil"
+  }
+ },
+ {
   "label": "__dbCopyStruct( <cFileName>, [<aFieldList>] )",
   "documentation": "Create a new database based on current database structure",
   "arguments": [
@@ -202,6 +212,16 @@
   "return": {
    "name": "",
    "help": "__dbStructFilter() return a new multidimensional array where each element is in the same structure as the original <aStruct>, but the array is built according to the list of fields in <aFieldList>. If <aFieldList> is empty, __dbStructFilter() return reference to the original <aStruct> array."
+  }
+ },
+ {
+  "label": "__DbZap()  -> NIL",
+  "documentation": "Remove all records from the current database file",
+  "arguments": [],
+  "name": "__DbZap",
+  "return": {
+   "name": "",
+   "help": "__DbZap()   will always return nil"
   }
  },
  {
@@ -432,6 +452,16 @@
   "return": {
    "name": "",
    "help": "The symbolic values are defined in hbmemvar.ch <table-noheader> HB_MV_NOT_FOUND      variable is not declared (not found in symbol table) HB_MV_UNKNOWN        if variable doesn't exist (but found in symbol table) HB_MV_ERROR          if information cannot be obtained (memory error or argument error) HB_MV_PUBLIC         for public variables HB_MV_PRIVATE_GLOBAL for private variables declared outside of current function/procedure HB_MV_PRIVATE_LOCAL  for private variables declared in current function/procedure </table>"
+  }
+ },
+ {
+  "label": "__MVSYMBOLINFO()  --> <aValue>",
+  "documentation": "This function returns an array of array of MEMVAR's {\"SymbolName\", xSymbolValue}",
+  "arguments": [],
+  "name": "__MVSYMBOLINFO",
+  "return": {
+   "name": "",
+   "help": "a 2 dimentional array of { \"SymbolName\", xSymbolValue}"
   }
  },
  {
@@ -761,6 +791,21 @@
   "documentation": "Terminates an application.",
   "arguments": [],
   "name": "__Quit"
+ },
+ {
+  "label": "__RDDSETDEFAULT([<cNewDefaultRDD>]) --> cPreviousDefaultRDD ",
+  "documentation": "Set or return the default RDD for the application",
+  "arguments": [
+   {
+    "label": "<cNewDefaultRDD>",
+    "documentation": "is a character string, the name of the RDD that is to be made the new default RDD in the application."
+   }
+  ],
+  "name": "__RDDSETDEFAULT",
+  "return": {
+   "name": "",
+   "help": "__RDDSETDEFAULT() returns a character string, cPreviousDefaultRDD, the name of the previous default driver.  The default driver is the driver that HARBOUR uses if you do not explicitly specify an RDD with the VIA clause of the USE command."
+  }
  },
  {
   "label": "__Run( <cCommand> )",
@@ -2695,6 +2740,25 @@
   }
  },
  {
+  "label": "CHARPACK(<cString>, [<nMethod>]) --> cPackedString",
+  "documentation": "Compresses (packs) a string",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "is a character string to be packed."
+   },
+   {
+    "label": "<nMethod>",
+    "documentation": "is a number designating which pack algorithm to use. The default value is 0."
+   }
+  ],
+  "name": "CHARPACK",
+  "return": {
+   "name": "",
+   "help": "The compressed character string."
+  }
+ },
+ {
   "label": "CharPix() --> nHeight",
   "documentation": "Gets the number of scan lines per character.",
   "arguments": [],
@@ -2860,6 +2924,28 @@
   }
  },
  {
+  "label": "CHARSPREAD(<cString>,<nLength>, [<cChar|nChar>]) --> cString",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "Designates a character string that is expanded with spaces or <cChar>|<nChar> characters to <nLength> length."
+   },
+   {
+    "label": "<nLength>",
+    "documentation": "Designates the length of the return string."
+   },
+   {
+    "label": "<cChar|nChar>",
+    "documentation": "Designates the fill character and token delimiter.  It can be a numeric value or a character.  If it is a numeric value, it must be between 0 and 255.  The default value is a space CHR(32)."
+   }
+  ],
+  "name": "CHARSPREAD",
+  "return": {
+   "name": "",
+   "help": "Returns the expanded string."
+  }
+ },
+ {
   "label": "CharSub( <[@]cString1>, <cString2>) --> cSubString",
   "documentation": "Subtracts corresponding ASCII value of two strings",
   "arguments": [
@@ -2891,6 +2977,21 @@
   "return": {
    "name": "<cSwappedString>",
    "help": "a string where neighbour characters are swapped"
+  }
+ },
+ {
+  "label": "CHARUNPACK(<cPackedString>) --> cUnpackedString",
+  "documentation": "Uncompresses (unpacks) a string",
+  "arguments": [
+   {
+    "label": "<cPackedString>",
+    "documentation": "is a character string to be unpacked."
+   }
+  ],
+  "name": "CHARUNPACK",
+  "return": {
+   "name": "",
+   "help": "The uncompressed character string."
   }
  },
  {
@@ -2963,6 +3064,89 @@
   }
  },
  {
+  "label": "CLEARBIT( <nLONG|cHexLONG>, <nBitPos1>[,...<nBitPos32>] ) -> <nNewValue>",
+  "arguments": [],
+  "name": "CLEARBIT"
+ },
+ {
+  "label": "CLEAREOL([<nRow>], [<nColumn>], [<cAttr|nAttr>], [<cCharacter|nCharacter>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<nRow>",
+    "documentation": "Designates the line to be erased.  The default is the cursor line."
+   },
+   {
+    "label": "<nColumn >",
+    "documentation": "Designates the column where the erasure is to begin. The default is the cursor column."
+   },
+   {
+    "label": "<cAttrn|nAttr>",
+    "documentation": "Designates the attribute used to clear.  The default is CLEARA."
+   },
+   {
+    "label": "<cCharacter|nCharacter>",
+    "documentation": "Designates the character used to clear. The default is CLEARB."
+   }
+  ],
+  "name": "CLEAREOL",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
+  "label": "CLEARSLOW(<nDelay>, [<nTopline>], [<nLeftcolumn>], [<nBottomline>], [<nRightcolumn>], [<cCharacter|nCharacter>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<nDelay>",
+    "documentation": "Designates the time delay in milliseconds for the individual steps in the delete procedure.  The value is in the range of 1 to 65535."
+   },
+   {
+    "label": "<nTopline>",
+    "documentation": "Designates the line for the top-left corner of the area. The default value is the topmost line."
+   },
+   {
+    "label": "<nLeftcolumn>",
+    "documentation": "Designates the column for the top-left corner of the area.  The default value is the leftmost column."
+   },
+   {
+    "label": "<nBottomline>",
+    "documentation": "Designates the line for the bottom-right corner of the area.  The default value is the bottommost line."
+   },
+   {
+    "label": "<nRightcolumn>",
+    "documentation": "Designates the column for the bottom-right corner of the area.  The default value is the rightmost column."
+   },
+   {
+    "label": "<cCharacter|nCharacter>",
+    "documentation": "Designates the character to use to clear the screen.  The character can be numeric in the range of 0 to 255 or a character string.  The default is the character set using SETCLEARB()."
+   }
+  ],
+  "name": "CLEARSLOW",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
+  "label": "CLEOL([<nRow>], [<nColumn>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<nRow>",
+    "documentation": "Designates the line to clear.  The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the column from which to clear.  The default is the cursor column."
+   }
+  ],
+  "name": "CLEOL",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
   "label": "CLIPINIT() --> NIL",
   "documentation": "Initialize various Harbour sub-systems",
   "arguments": [],
@@ -2970,6 +3154,32 @@
   "return": {
    "name": "",
    "help": "CLIPINIT() always return NIL."
+  }
+ },
+ {
+  "label": "CLWIN([<nTopLine>], [<nLeftCol>], [<nBottomLine>], [<nRightColumn>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<nTopLine>",
+    "documentation": "Designates the topmost line where clearing should begin. The default is the cursor line."
+   },
+   {
+    "label": "<nLeftCol>",
+    "documentation": "Designates the leftmost column where erasure should begin.  The default is the cursor column."
+   },
+   {
+    "label": "<nBottomLine>",
+    "documentation": "Designates the bottommost line to clear.  The default is the last screen line or window line."
+   },
+   {
+    "label": "<nRightColumn>",
+    "documentation": "Designates the rightmost column to clear.  The default is the right screen border or window border."
+   }
+  ],
+  "name": "CLWIN",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
   }
  },
  {
@@ -3154,6 +3364,60 @@
   }
  },
  {
+  "label": "CSETSAFETY([<lNewSwitch>]) --> <lOldSwitch>",
+  "arguments": [
+   {
+    "label": "<lNewSwitch>",
+    "documentation": "Designates whether existing files should not be overwritten during CA-Clipper Tools file operations. Designates .F. for yes; .T. for no."
+   }
+  ],
+  "name": "CSETSAFETY",
+  "return": {
+   "name": "",
+   "help": "Returns the current setting for the CA-Clipper Tools safety mode switch; or if <lNewSwitch> is passed, the previous setting."
+  }
+ },
+ {
+  "label": "CTCEXIT () -> nil",
+  "documentation": "Uninitializes the CT3 library, C part",
+  "arguments": [],
+  "name": "CTCEXIT",
+  "return": {
+   "name": "",
+   "help": "nil"
+  }
+ },
+ {
+  "label": "CTCINIT () -> lInitialized",
+  "documentation": "Initializes the CT3 library, C part",
+  "arguments": [],
+  "name": "CTCINIT",
+  "return": {
+   "name": "",
+   "help": "lInitialized     .T. if the function has been correctly initialized"
+  }
+ },
+ {
+  "label": "CTEXIT () -> nil",
+  "documentation": "Uninitializes the CT3 library",
+  "arguments": [],
+  "name": "CTEXIT",
+  "return": {
+   "name": "",
+   "help": "nil"
+  }
+ },
+ {
+  "label": "CTINIT () -> lInitialized",
+  "documentation": "Initializes the CT3 library",
+  "arguments": [],
+  "name": "CTINIT",
+  "return": {
+   "name": "",
+   "help": "lInitialized     .T. if the function has been correctly initialized"
+  }
+ },
+ {
   "label": "CToBit( <cBitString>, <cBitPattern> ) -> <nWord>",
   "documentation": "",
   "arguments": [],
@@ -3263,6 +3527,122 @@
   }
  },
  {
+  "label": "DAYSINMONTH (<nMonth>, <lLeapYear>) -> nDaysInMonth",
+  "documentation": "Returns the number of days in month",
+  "arguments": [],
+  "name": "DAYSINMONTH"
+ },
+ {
+  "label": "DAYSTOMONTH (<nMonth>, <lLeapYear>) -> nDaysToMonth",
+  "documentation": "Total number of days from first of Jan to beginning of nMonth.",
+  "arguments": [],
+  "name": "DAYSTOMONTH"
+ },
+ {
+  "label": "DbAppend(<lLock>]) --> NIL",
+  "documentation": "Appends a new record to a database file.",
+  "arguments": [
+   {
+    "label": "<lLock>",
+    "documentation": "Toggle to release record locks"
+   }
+  ],
+  "name": "DbAppend",
+  "return": {
+   "name": "",
+   "help": "DbAppend() always returns NIL"
+  }
+ },
+ {
+  "label": "DbClearFilTer() -> NIL",
+  "documentation": "Clears the current filter condiction in a work area",
+  "arguments": [],
+  "name": "DbClearFilTer",
+  "return": {
+   "name": "",
+   "help": "DbClearFilTer() always returns NIL"
+  }
+ },
+ {
+  "label": "DbCloseAll() -> NIL",
+  "documentation": "Close all open files in all work areas.",
+  "arguments": [],
+  "name": "DbCloseAll",
+  "return": {
+   "name": "",
+   "help": "DBCLOSEALL() always return NIL"
+  }
+ },
+ {
+  "label": "DbCloseArea() -> NIL",
+  "documentation": "Close a database file in a work area.",
+  "arguments": [],
+  "name": "DbCloseArea",
+  "return": {
+   "name": "",
+   "help": "DbCloseArea() always returns NIL."
+  }
+ },
+ {
+  "label": "DBCOMMIT() --> NIL",
+  "documentation": "Updates all index and database buffers for a given workarea",
+  "arguments": [],
+  "name": "DBCOMMIT",
+  "return": {
+   "name": "",
+   "help": "DBCOMMIT() always returns NIL."
+  }
+ },
+ {
+  "label": "DBCREATE(<cDatabase>, <aStruct>,[<cDriver>],[<lOpen>], [<cAlias>]) --> NIL",
+  "documentation": "Creates an empty database from a array.",
+  "arguments": [
+   {
+    "label": "<cDatabase>",
+    "documentation": "Name of database to be create"
+   },
+   {
+    "label": "<aStruct>",
+    "documentation": "Name of a multidimensional array that contains the a database structure"
+   },
+   {
+    "label": "<cDriver>",
+    "documentation": "Name of the RDD"
+   },
+   {
+    "label": "<lOpenNew>",
+    "documentation": "3-way toggle to Open the file in New or Current workarea:"
+   },
+   {
+    "label": "<table>",
+    "documentation": " NIL     The file is not opened. True    It is opened in a New area. False   It is opened in the current area."
+   },
+   {
+    "label": "</table>",
+    "documentation": ""
+   },
+   {
+    "label": "<cAlias>",
+    "documentation": "Name of database Alias"
+   }
+  ],
+  "name": "DBCREATE",
+  "return": {
+   "name": "",
+   "help": "DBCREATE() always returns NIL."
+  }
+ },
+ {
+  "label": "DBDELETE() --> NIL",
+  "documentation": "Marks records for deletion in a database.",
+  "arguments": [],
+  "name": "DBDELETE",
+  "return": {
+   "name": "",
+   "help": "DBDELETE() always returns NIL."
+  }
+ },
+ {
   "label": "dbEdit( [<nTop>], [<nLeft>], [<nBottom>], [<nRight>], [<acColumns>], [<xUserFunc>], [<xColumnSayPictures>], [<xColumnHeaders>], [<xHeadingSeparators>], [<xColumnSeparators>], [<xFootingSeparators>], [<xColumnFootings>] ) --> lOk",
   "documentation": "Browse records in a table",
   "arguments": [
@@ -3322,6 +3702,233 @@
   }
  },
  {
+  "label": "DBEVAL( <bBlock>, [<bFor>], [<bWhile>], [<nNext>], [<nRecord>], [<lRest>] ) --> NIL",
+  "documentation": "Performs a code block operation on the current Database",
+  "arguments": [
+   {
+    "label": "<bBlock>",
+    "documentation": "Operation that is to be performed"
+   },
+   {
+    "label": "<bFor>",
+    "documentation": "Code block for the For condition"
+   },
+   {
+    "label": "<bWhile>",
+    "documentation": "Code block for the WHILE condition"
+   },
+   {
+    "label": "<nNext>",
+    "documentation": "Number of NEXT records  to process"
+   },
+   {
+    "label": "<nRecord>",
+    "documentation": "Record number to work on exactly"
+   },
+   {
+    "label": "<lRest>",
+    "documentation": "Toggle to rewind record pointer"
+   }
+  ],
+  "name": "DBEVAL",
+  "return": {
+   "name": "",
+   "help": "DBEVAL() always returns NIL"
+  }
+ },
+ {
+  "label": "Dbf() --> <cWorkArea>",
+  "documentation": "Alias name of a work area",
+  "arguments": [],
+  "name": "Dbf",
+  "return": {
+   "name": "<cWorkArea>",
+   "help": "Name of alias"
+  }
+ },
+ {
+  "label": "DBFILTER() --> cFilter",
+  "documentation": "Return the filter expression in a work area",
+  "arguments": [],
+  "name": "DBFILTER",
+  "return": {
+   "name": "",
+   "help": "DBFILTER() returns the filter expression."
+  }
+ },
+ {
+  "label": "DBGOBOTTOM() --> NIL",
+  "documentation": "Moves the record pointer to the bottom of the database.",
+  "arguments": [],
+  "name": "DBGOBOTTOM",
+  "return": {
+   "name": "",
+   "help": "DBGOBOTTOM() always returns NIL."
+  }
+ },
+ {
+  "label": "DBGOTO(<xRecordNumber>) --> NIL",
+  "documentation": "Position the record pointer to a specific location.",
+  "arguments": [
+   {
+    "label": "<xRecordNumber>",
+    "documentation": "Record number or unique identity"
+   }
+  ],
+  "name": "DBGOTO",
+  "return": {
+   "name": "",
+   "help": "DBGOTO() always returns NIL."
+  }
+ },
+ {
+  "label": "DBGOTOP() --> NIL",
+  "documentation": "Moves the record pointer to the bottom of the database.",
+  "arguments": [],
+  "name": "DBGOTOP",
+  "return": {
+   "name": "",
+   "help": "DBGOTOP() always returns NIL."
+  }
+ },
+ {
+  "label": "DBRECALL() --> NIL",
+  "documentation": "Recalls a record previousy marked for deletion.",
+  "arguments": [],
+  "name": "DBRECALL",
+  "return": {
+   "name": "",
+   "help": "DBRECALL() always returns NIL."
+  }
+ },
+ {
+  "label": "DBRLOCK([<xIdentity>]) --> lSuccess",
+  "documentation": "This function locks the record basedon identify",
+  "arguments": [
+   {
+    "label": "<xIdentity>",
+    "documentation": "Record indetifier"
+   }
+  ],
+  "name": "DBRLOCK",
+  "return": {
+   "name": "",
+   "help": "DBRLOCK() returns a logical true (.T.) if lock was successful"
+  }
+ },
+ {
+  "label": "DBRLOCKLIST() --> aRecordLocks",
+  "documentation": "This function return a list of records in the database work area",
+  "arguments": [],
+  "name": "DBRLOCKLIST",
+  "return": {
+   "name": "<aRecordList>",
+   "help": "is an array of lock records"
+  }
+ },
+ {
+  "label": "DBRUNLOCK([<xIdentity>]) --> NIL",
+  "documentation": "Unlocks a record base on its indentifier",
+  "arguments": [
+   {
+    "label": "<xIdentity>",
+    "documentation": "Record indentifier,tipicaly a record number"
+   }
+  ],
+  "name": "DBRUNLOCK",
+  "return": {
+   "name": "",
+   "help": "DBRUNLOCK() always returns NIL."
+  }
+ },
+ {
+  "label": "DBSEEK(<expKey>, [<lSoftSeek>],[<lFindLast>]) --> lFound",
+  "documentation": "Searches for a value based on an active index.",
+  "arguments": [
+   {
+    "label": "<expKey>",
+    "documentation": "Any expression"
+   },
+   {
+    "label": "<lSoftSeek>",
+    "documentation": "Toggle SOFTSEEK condition"
+   },
+   {
+    "label": "<lFindLast>",
+    "documentation": "is an optional logical value that set the current record position to the last record if successful"
+   }
+  ],
+  "name": "DBSEEK",
+  "return": {
+   "name": "",
+   "help": "DBSEEK() returns logical true (.T.) if found, otherwise false"
+  }
+ },
+ {
+  "label": "DBSELECTAREA(<xArea>) --> NIL",
+  "documentation": "Change to another work area",
+  "arguments": [
+   {
+    "label": "<xArea>",
+    "documentation": "Alias or work area"
+   }
+  ],
+  "name": "DBSELECTAREA",
+  "return": {
+   "name": "",
+   "help": "DBSELECTAREA() always returns NIL."
+  }
+ },
+ {
+  "label": "DBSETDRIVER([<cDriver>]) --> cCurrentDriver",
+  "documentation": "Establishes the name of replaceable daabas driver for a selected work area",
+  "arguments": [
+   {
+    "label": "<cDriver>",
+    "documentation": "Optional database driver name"
+   }
+  ],
+  "name": "DBSETDRIVER",
+  "return": {
+   "name": "",
+   "help": "DBSETDRIVER() returns the name of active driver"
+  }
+ },
+ {
+  "label": "DBSETFILTER(<bCondition>, [<cCondition>]) --> NIL",
+  "documentation": "Establishes a filter condition for a work area.",
+  "arguments": [
+   {
+    "label": "<bCondition>",
+    "documentation": "Code block expression for filtered evaluation."
+   },
+   {
+    "label": "<cCondition>",
+    "documentation": "Optional character expression of code block."
+   }
+  ],
+  "name": "DBSETFILTER",
+  "return": {
+   "name": "",
+   "help": "DBSETFILTER() always returns NIL."
+  }
+ },
+ {
+  "label": "DBSKIP([<nRecords>]) --> NIL",
+  "documentation": "Moves the record pointer in the selected work area.",
+  "arguments": [
+   {
+    "label": "<nRecords>",
+    "documentation": "Numbers of records to move record pointer."
+   }
+  ],
+  "name": "DBSKIP",
+  "return": {
+   "name": "",
+   "help": "DBSKIP() always returns NIL."
+  }
+ },
+ {
   "label": "dbSkipper( <nRecs> ) --> nSkipped",
   "documentation": "Helper function to skip a database",
   "arguments": [
@@ -3334,6 +3941,71 @@
   "return": {
    "name": "",
    "help": "dbSkipper() return the number of actual record skipped."
+  }
+ },
+ {
+  "label": "DBSTRUCT() --> aStruct",
+  "documentation": "Creates a multidimensional array of a database structure.",
+  "arguments": [],
+  "name": "DBSTRUCT",
+  "return": {
+   "name": "",
+   "help": "DBSTRUCT() returns an array pointer to database structure"
+  }
+ },
+ {
+  "label": "DBUNLOCK() --> NIL",
+  "documentation": "Unlock a record or release a file lock",
+  "arguments": [],
+  "name": "DBUNLOCK",
+  "return": {
+   "name": "",
+   "help": "DBUNLOCK() always returns NIL."
+  }
+ },
+ {
+  "label": "DBUNLOCKALL() --> NIL",
+  "documentation": "Unlocks all records and releases all file locks in all work areas.",
+  "arguments": [],
+  "name": "DBUNLOCKALL",
+  "return": {
+   "name": "",
+   "help": "DBUNLOCKALL() always returns NIL."
+  }
+ },
+ {
+  "label": "DBUSEAREA( [<lNewArea>], [<cDriver>], <cName>, [<xcAlias>], [<lShared>], [<lReadonly>]) --> NIL",
+  "documentation": "Opens a work area and uses a database file.",
+  "arguments": [
+   {
+    "label": "<lNewArea>",
+    "documentation": "A optional logical expression for the new work area"
+   },
+   {
+    "label": "<cDriver>",
+    "documentation": "Database driver name"
+   },
+   {
+    "label": "<cName>",
+    "documentation": "File Name"
+   },
+   {
+    "label": "<xcAlias>",
+    "documentation": "Alias name"
+   },
+   {
+    "label": "<lShared>",
+    "documentation": "Shared/exclusive status flag"
+   },
+   {
+    "label": "<lReadonly>",
+    "documentation": "Read-write status flag."
+   }
+  ],
+  "name": "DBUSEAREA",
+  "return": {
+   "name": "",
+   "help": "DBUSEAREA() always returns NIL."
   }
  },
  {
@@ -3382,6 +4054,29 @@
   }
  },
  {
+  "label": "Default( @<uVar>, <uDefault> ) ---> NIL",
+  "documentation": "Assign a default value to a NIL argument.",
+  "arguments": [
+   {
+    "label": "<uVar>",
+    "documentation": "The variable to which the default value will be assigned."
+   },
+   {
+    "label": "<uVar>",
+    "documentation": "must be passed by reference to the Default() function."
+   },
+   {
+    "label": "<uDefault>",
+    "documentation": "The default value to assign."
+   }
+  ],
+  "name": "Default",
+  "return": {
+   "name": "",
+   "help": "NIL"
+  }
+ },
+ {
   "label": "Deleted() --> lDeleted",
   "documentation": "Tests the record's deletion flag.",
   "arguments": [],
@@ -3389,6 +4084,21 @@
   "return": {
    "name": "",
    "help": "Deleted() return a logical true (.T.) or false (.F.)."
+  }
+ },
+ {
+  "label": "DELETEFILE(<cFileName>) --> nErrorCode",
+  "documentation": "Delete an error-tolerant file.",
+  "arguments": [
+   {
+    "label": "<cFileName>",
+    "documentation": "Designates which file name to delete."
+   }
+  ],
+  "name": "DELETEFILE",
+  "return": {
+   "name": "",
+   "help": "DELETEFILE() returns a code that signifies its completion status: Code    Symb. constants     Definition 0      NO_DISK_ERR         No error occurs -2      ER_FILE_NOT_FOUND   File not found -3      ER_PATH_NOT_FOUND   Path not found -5      ER_ACCESS_DENIED    Access denied (e.g., file is read-only)"
   }
  },
  {
@@ -3404,6 +4114,44 @@
   "return": {
    "name": "",
    "help": "Inverted value of the same type as passed."
+  }
+ },
+ {
+  "label": "DestroyMutex( MUTEX ) --> NIL",
+  "documentation": "Destroy an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   }
+  ],
+  "name": "DestroyMutex",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
+  }
+ },
+ {
+  "label": "DEVOUT(<exp>, [<cColorString>], [<nRow>, <nCol>] ) --> NIL",
+  "documentation": "Write a value to the current device",
+  "arguments": [
+   {
+    "label": "<exp>",
+    "documentation": "is the value to display."
+   },
+   {
+    "label": "<cColorString>",
+    "documentation": "is an optional argument that defines the display color of <exp>.  If the current DEVICE setting is SCREEN, the output is displayed in the specified color. If not specified, <exp> is displayed as the standard color of the current system color as defined by SETCOLOR().  <cColorString> is a character expression containing the standard color setting.  If you want to specify a literal color setting, enclose it in quote marks."
+   },
+   {
+    "label": "<nRow>",
+    "documentation": "and <nCol> are optional parameters that specify in what position to write the text, if not specified, the interbal Values for Row and Column are used."
+   }
+  ],
+  "name": "DEVOUT",
+  "return": {
+   "name": "",
+   "help": "This function always return NIL"
   }
  },
  {
@@ -3426,6 +4174,21 @@
   "name": "DevOutPict"
  },
  {
+  "label": "DEVPOS(<nRow>, <nCol>) --> NIL",
+  "documentation": "Move the cursor or printhead to a new position depending on the current device",
+  "arguments": [
+   {
+    "label": "<nRow>",
+    "documentation": "and <nCol> are the new row and column positions of the cursor or printhead."
+   }
+  ],
+  "name": "DEVPOS",
+  "return": {
+   "name": "",
+   "help": "DEVPOS() always returns NIL."
+  }
+ },
+ {
   "label": "DirChange( <cDirectory> ) --> nError",
   "documentation": "Changes the directory",
   "arguments": [
@@ -3438,6 +4201,36 @@
   "return": {
    "name": "<nError>",
    "help": "0 if directory was successfully changed, otherwise the number of the last error."
+  }
+ },
+ {
+  "label": "DIRMAKE(<cDirectory>) --> nErrorCode",
+  "documentation": "Create a new directory",
+  "arguments": [
+   {
+    "label": "<cDirectory>",
+    "documentation": "Designates the new directory name to create."
+   }
+  ],
+  "name": "DIRMAKE",
+  "return": {
+   "name": "",
+   "help": "DIRMAKE() returns a 0 when it has successfully created the directory; otherwise, an error code is passed.  The codes are defined as follows: Code    Symb. constants     Definition 0      NO_DISK_ERR         No error occurred -2      ER_FILE_NOT_FOUND   File not found -3      ER_PATH_NOT_FOUND   Path not found -5      ER_ACCESS_DENIED    Access denied (e.g., in network)"
+  }
+ },
+ {
+  "label": "DIRNAME([<cDrive>]) --> cDirectory",
+  "documentation": "Determines the name of the current directory",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive for which the current directory is determined (a colon is unnecessary).  The default is the current drive."
+   }
+  ],
+  "name": "DIRNAME",
+  "return": {
+   "name": "",
+   "help": "DIRNAME() returns the current directory name on the <cDrive>."
   }
  },
  {
@@ -3456,6 +4249,102 @@
   }
  },
  {
+  "label": "DISKFORMAT( [<cDrive>], [<nCapacity>], [<cUDF>], [<cBootText>],[<nRepetitions>], [<cLabel>], [<lBoot>], [<lQuickFormat>]  ) --> nDOSErrorCode",
+  "documentation": "Format a floppy disk drive in command prompt mode. Call the DOS Format command.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the disk drive to format.  Only a floppy drive is permitted (A or B).  You may optionally specify a colon (:). The disk default is A."
+   },
+   {
+    "label": "<nCapacity>",
+    "documentation": "This optional argument, designates the appropriate disk capacity for the disk you are about to format.  Possible values are: 160, 180, 320, 360, and 1200 for 5.25\"; 720 and 1440 for 3.5\" disks. The default is 0, the maximum drive capacity."
+   },
+   {
+    "label": "<cUDF>",
+    "documentation": "Designates the name of a user-defined function call before each format step (track or head change). The default is no UDF called. This parameter is still without effect because not yet implemented."
+   },
+   {
+    "label": "<cBootText>",
+    "documentation": "This optional parameter designates text, with a maximum of 255 characters, to display if the formatted disk is booted.  The default is described in the \"Notes\" section on the following page. This parameter is still without effect because not yet implemented."
+   },
+   {
+    "label": "<nRepetitions>",
+    "documentation": "Designates the number of repeat attempts you should make, to format a track before the function aborts.  The default is one repetition. This parameter is still without effect because not yet implemented."
+   },
+   {
+    "label": "<cLabel>",
+    "documentation": "Designates the string label name to disk. Maximum len is 11 characters."
+   },
+   {
+    "label": "<lBoot>",
+    "documentation": "This optional parameter designates if the disk if bootable. if true the operational system is write to disk. Allowed only for Windows 95/98/ME. For WindowsNT/2000/XP this argument is ignored."
+   },
+   {
+    "label": "<lQuickFormat>",
+    "documentation": "This optional parameter designates the quickly format capabilities of operational system. Not recomended."
+   }
+  ],
+  "name": "DISKFORMAT",
+  "return": {
+   "name": "",
+   "help": "This FUNCTION return a DOSERROR() code. 0 if successfull."
+  }
+ },
+ {
+  "label": "DISKFREE([<cDrive>]) --> nFreeByte",
+  "documentation": "Determine the space available on a floppy or hard disk.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates for which drive (A, B, C, etc.) the open capacity is determined.  The default value is the current drive."
+   }
+  ],
+  "name": "DISKFREE",
+  "return": {
+   "name": "",
+   "help": "DISKFREE() RETURNs the available memory capacity of the selected drive."
+  }
+ },
+ {
+  "label": "DISKREADY([<cDrive>], [<lDOS/BIOS>]) --> lDiskReady",
+  "documentation": "Tests to see if a disk drive is ready.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive designator (A, B, C, etc.) of the drive to test.  The default is the current disk drive."
+   },
+   {
+    "label": "<lDOS/BIOS>",
+    "documentation": "This logical parameter allows you to designate whether you want the FUNCTION tested through the BIOS (.F.) or DOS (.T.).  The default is discussed in the Description below."
+   }
+  ],
+  "name": "DISKREADY",
+  "return": {
+   "name": "",
+   "help": "DISKREADY() RETURNs .T. when the drive being tested is ready to use."
+  }
+ },
+ {
+  "label": "DISKREADYW([<cDriveId>]), [<lDOS/BIOS>]) --> lDiskReady",
+  "documentation": "Queries whether you can write to a drive.",
+  "arguments": [
+   {
+    "label": "<cDriveId>",
+    "documentation": "Designates which drive designator (A, B, C, etc.) to query.  The default value is the current disk drive."
+   },
+   {
+    "label": "<lDOS/BIOS>",
+    "documentation": "This logical parameter allows you to specify whether you want to query the FUNCTION through the BIOS (.F.) or DOS (.T.).  The default is described in the Description below."
+   }
+  ],
+  "name": "DISKREADYW",
+  "return": {
+   "name": "",
+   "help": "DISKREADYW() RETURNs .T. when you query a drive that is operational and can be written to."
+  }
+ },
+ {
   "label": "DiskSpace( [<nDrive>] ) --> nDiskBytes",
   "documentation": "Get the amount of space available on a disk",
   "arguments": [
@@ -3468,6 +4357,36 @@
   "return": {
    "name": "<nDiskBytes>",
    "help": "The number of bytes on the requested disk that match the requested type."
+  }
+ },
+ {
+  "label": "DISKTOTAL([<cDrive>]) --> nTotalSpace",
+  "documentation": "Determines the total capacity of a floppy or hard disk.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive for which memory capacity is determined.  The default is the current drive."
+   }
+  ],
+  "name": "DISKTOTAL",
+  "return": {
+   "name": "",
+   "help": "DISKTOTAL() RETURNs a value that corresponds to the total capacity of the data carrier in the selected drive.  The default is the current disk drive."
+  }
+ },
+ {
+  "label": "DISKUSED([<cDrive>]) --> nFreeByte",
+  "documentation": "Determines the used space on a floppy or hard disk.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates for which drive (A, B, C, etc.) the used capacity is determined.  The default value is the current drive."
+   }
+  ],
+  "name": "DISKUSED",
+  "return": {
+   "name": "",
+   "help": "DISKUSED() RETURNs the used memory capacity of the selected drive."
   }
  },
  {
@@ -3529,6 +4448,21 @@
   "return": {
    "name": "<nDay>",
    "help": "The day number"
+  }
+ },
+ {
+  "label": "DRIVETYPE([<cDrive>]) --> nDriveType",
+  "documentation": "Determines the drive type.",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive (A, B, C, etc.) for which the type is determined.  The default is the current drive."
+   }
+  ],
+  "name": "DRIVETYPE",
+  "return": {
+   "name": "",
+   "help": "DRIVETYPE() returns a numeric value for the drive type.  The following codes apply: Code  Definition 0     RAM Disk 1     Floppy Disk (disk change cannot be established by system) 2     Floppy Disk (disk change can be established by system) 3     Hard Disk 4     CD-Rom Drive  - xHarbour extension 5     Network Drive - xHarbour extension 9     Unknow Drive  - xHarbour extension"
   }
  },
  {
@@ -3720,6 +4654,28 @@
   "return": {
    "name": "<nValue>",
    "help": "The anti-logarithm of <nNumber>"
+  }
+ },
+ {
+  "label": "EXPAND(<cString>,[<nNumber>],[<cChar|nChar>]) --> cString",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "Designates the string that is processed."
+   },
+   {
+    "label": "<nNumber>",
+    "documentation": "Designates the number of the <cChar|nChar> characters that are inserted between each character in the <cString>. The default value is one character."
+   },
+   {
+    "label": "<cChar|nChar>",
+    "documentation": "Designates the character that is inserted between each character in <cString>. The default value is a space, CHR(32)."
+   }
+  ],
+  "name": "EXPAND",
+  "return": {
+   "name": "",
+   "help": "The processed <cString> is returned."
   }
  },
  {
@@ -3950,6 +4906,129 @@
   }
  },
  {
+  "label": "FILEDELETE(<cFileMask>, [<nFileAttr>]) --> lDeleted",
+  "documentation": "Deletes file(s) by name and attribute",
+  "arguments": [
+   {
+    "label": "<cFileMask>",
+    "documentation": "Designates the file or files to delete."
+   },
+   {
+    "label": "<nFileAttr>",
+    "documentation": "Designates one of the following file attributes.  The default value is 32. Value     Symb. constants   Definition 0         FA_NORMAL 1         FA_READONLY       Read-only 2         FA_HIDDEN         HIDDEN (Concealed files) 4         FA_SYSTEM         SYSTEM (System files) 8         FA_VOLUME         VOLUME (Name of floppy/hard disk) 32        FA_ARCHIVE        ARCHIVE (Changed since last backup)"
+   }
+  ],
+  "name": "FILEDELETE",
+  "return": {
+   "name": "",
+   "help": "FILEDELETE() RETURNs .T. when at least one or more files are deleted; otherwise, .F. is RETURNed."
+  }
+ },
+ {
+  "label": "FILEMOVE(<cSourceFile>, <cTargetFile>) --> nErrorCode",
+  "documentation": "Move files to another directory.",
+  "arguments": [
+   {
+    "label": "<cSourceFile>",
+    "documentation": "Designates the name and the path of the source file."
+   },
+   {
+    "label": "<cTargetFile>",
+    "documentation": "Designates the name and the path of the target file."
+   }
+  ],
+  "name": "FILEMOVE",
+  "return": {
+   "name": "",
+   "help": "FILEMOVE() returns a value of 0 when the file can be moved; otherwise, an error code is returned.  The codes are defined below: Code    Symb. constants        Definition 0       NO_DISK_ERR            No errors -2      ER_FILE_NOT_FOUND      File not found -3      ER_PATH_NOT_FOUND      Access path not found -5      ER_ACCESS_DENIED       Access denied (e.g., network) -17     ER_DIFFERENT_DEVICE    Target file not on same drive"
+  }
+ },
+ {
+  "label": "FILESCREEN(<cFileName>, [<nOffset>]) --> nByte",
+  "arguments": [
+   {
+    "label": "<cFileName>",
+    "documentation": "Designates the name and path of the screen file."
+   },
+   {
+    "label": "<nOffset>",
+    "documentation": "Designates from which part of the file offset the screen is to be read.  The default is the beginning of file."
+   }
+  ],
+  "name": "FILESCREEN",
+  "return": {
+   "name": "",
+   "help": "Returns the number of bytes read."
+  }
+ },
+ {
+  "label": "FILESMAX() --> nFiles",
+  "documentation": "Gets maximum number of file handles",
+  "arguments": [],
+  "name": "FILESMAX",
+  "return": {
+   "name": "",
+   "help": "Returns the maximum number of file handles that can be open by application."
+  }
+ },
+ {
+  "label": "FILESTR(<cFile>, [<nLength>], [<nOffset>], [<lCtrl_Z>]) --> cCharacterstring",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "Designates the file from which a string is read."
+   },
+   {
+    "label": "<nLength>",
+    "documentation": "Designates how many characters you want to read from a file (up to a maximum of 65520 bytes).  The default is read all characters."
+   },
+   {
+    "label": "<nOffset>",
+    "documentation": "Designates an offset within the file from which the"
+   },
+   {
+    "label": "<nLength>",
+    "documentation": "characters or the rest of the file, are read.  The default is from the first character (0)."
+   },
+   {
+    "label": "<lCtrl_Z>",
+    "documentation": "If this parameter is designated as .T., only data up to the first Ctrl_Z is read in.  The default is read all data (.F.)."
+   }
+  ],
+  "name": "FILESTR",
+  "return": {
+   "name": "",
+   "help": "Returns the string read in from the designated file."
+  }
+ },
+ {
+  "label": "FILEVALID(<cFileName>, <nMaxName>, <nMaxExt>, <lWithoutExt>) --> lValid",
+  "documentation": "Tests whether a string has a valid file name",
+  "arguments": [
+   {
+    "label": "<cFileName>",
+    "documentation": "Designates the file name you want to test for validity."
+   },
+   {
+    "label": "<nMaxName>",
+    "documentation": "Designates the max file name len. The default is 8."
+   },
+   {
+    "label": "<nMaxExt>",
+    "documentation": "Designates the max file extension len. The default is 3."
+   },
+   {
+    "label": "<lWithoutExt>",
+    "documentation": "Allow file name without extension. The default is .T. Note: if <nMaxExt> is zero then <lWithoutExt> will be set to .T."
+   }
+  ],
+  "name": "FILEVALID",
+  "return": {
+   "name": "",
+   "help": "FILEVALID() RETURNs .T. when the designated name is valid."
+  }
+ },
+ {
   "label": "FLock() --> lSuccess",
   "documentation": "Locks a file",
   "arguments": [],
@@ -3972,6 +5051,21 @@
   "return": {
    "name": "<nDownRoundedNumber>",
    "help": "the rounded number"
+  }
+ },
+ {
+  "label": "FLOPPYTYPE([<cDrive>]) --> nFloppyType",
+  "documentation": "Determines the exact type of floppy drive",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive (A, B, C, etc.) for which you want a type determined.  The default is the current disk drive."
+   }
+  ],
+  "name": "FLOPPYTYPE",
+  "return": {
+   "name": "",
+   "help": "The FUNCTION RETURNs the exact type of the designated disk drive, coded as follows: 0      No floppy drive 1      360-kB drive 2      1.2-MB drive 3      720-kB drive 4      1.44-MB drive"
   }
  },
  {
@@ -8032,6 +9126,21 @@
   }
  },
  {
+  "label": "gdImageDestroy( <pImage> ) --> NIL",
+  "documentation": "Free memory used from an image.",
+  "arguments": [
+   {
+    "label": "<pImage>",
+    "documentation": "- Image pointer"
+   }
+  ],
+  "name": "gdImageDestroy",
+  "return": {
+   "name": "",
+   "help": "NIL"
+  }
+ },
+ {
   "label": "gdImageFill( <pImage>, <x>, <y>, <nColor> ) --> NIL",
   "documentation": "floods a portion of the image with the specified color.",
   "arguments": [
@@ -8188,6 +9297,141 @@
   "return": {
    "name": "",
    "help": "NIL"
+  }
+ },
+ {
+  "label": "gdImageFromGD( <cFile> | <nHandle> | <pPointer> [, <nSize> ] ) --> <pImage>",
+  "documentation": "Load a GD image file.",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "- Image file name"
+   },
+   {
+    "label": "<nHandle>",
+    "documentation": "- File handle"
+   },
+   {
+    "label": "<pPointer>",
+    "documentation": "- Memory image pointer"
+   },
+   {
+    "label": "<nSize>",
+    "documentation": "- Image size"
+   }
+  ],
+  "name": "gdImageFromGD",
+  "return": {
+   "name": "<pImage>",
+   "help": "- Image pointer"
+  }
+ },
+ {
+  "label": "gdImageFromGif( <cFile> | <nHandle> | <pPointer> [, <nSize> ] ) --> <pImage>",
+  "documentation": "Load a Gif image file.",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "- Image file name"
+   },
+   {
+    "label": "<nHandle>",
+    "documentation": "- File handle"
+   },
+   {
+    "label": "<pPointer>",
+    "documentation": "- Memory image pointer"
+   },
+   {
+    "label": "<nSize>",
+    "documentation": "- Image size"
+   }
+  ],
+  "name": "gdImageFromGif",
+  "return": {
+   "name": "<pImage>",
+   "help": "- Image pointer"
+  }
+ },
+ {
+  "label": "gdImageFromJpeg( <cFile> | <nHandle> | <pPointer> [, <nSize> ] ) --> <pImage>",
+  "documentation": "Load a JPEG image file.",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "- Image file name"
+   },
+   {
+    "label": "<nHandle>",
+    "documentation": "- File handle"
+   },
+   {
+    "label": "<pPointer>",
+    "documentation": "- Memory image pointer"
+   },
+   {
+    "label": "<nSize>",
+    "documentation": "- Image size"
+   }
+  ],
+  "name": "gdImageFromJpeg",
+  "return": {
+   "name": "<pImage>",
+   "help": "- Image pointer"
+  }
+ },
+ {
+  "label": "gdImageFromPng( <cFile> | <nHandle> | <pPointer> [, <nSize> ] ) --> <pImage>",
+  "documentation": "Load a PNG image file.",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "- Image file name"
+   },
+   {
+    "label": "<nHandle>",
+    "documentation": "- File handle"
+   },
+   {
+    "label": "<pPointer>",
+    "documentation": "- Memory image pointer"
+   },
+   {
+    "label": "<nSize>",
+    "documentation": "- Image size"
+   }
+  ],
+  "name": "gdImageFromPng",
+  "return": {
+   "name": "<pImage>",
+   "help": "- Image pointer"
+  }
+ },
+ {
+  "label": "gdImageFromWBmp( <cFile> | <nHandle> | <pPointer> [, <nSize> ] ) --> <pImage>",
+  "documentation": "Load a WBmp image file.",
+  "arguments": [
+   {
+    "label": "<cFile>",
+    "documentation": "- Image file name"
+   },
+   {
+    "label": "<nHandle>",
+    "documentation": "- File handle"
+   },
+   {
+    "label": "<pPointer>",
+    "documentation": "- Memory image pointer"
+   },
+   {
+    "label": "<nSize>",
+    "documentation": "- Image size"
+   }
+  ],
+  "name": "gdImageFromWBmp",
+  "return": {
+   "name": "<pImage>",
+   "help": "- Image pointer"
   }
  },
  {
@@ -8591,6 +9835,45 @@
   }
  },
  {
+  "label": "gdSetAntiAliasedDontBlend( <pImage>, <nColor> ) --> NIL",
+  "documentation": "indicate the special color that the foreground should stand out more clearly against.",
+  "arguments": [
+   {
+    "label": "<pImage>",
+    "documentation": "- Image pointer"
+   },
+   {
+    "label": "<nColor>",
+    "documentation": "- Color index of filling color"
+   }
+  ],
+  "name": "gdSetAntiAliasedDontBlend",
+  "return": {
+   "name": "",
+   "help": "NIL"
+  }
+ },
+ {
+  "label": "GetCurrentThread()  --> THREAD",
+  "documentation": "Get the current thread Id",
+  "arguments": [],
+  "name": "GetCurrentThread",
+  "return": {
+   "name": "<THREAD>",
+   "help": "An Thread Id Value"
+  }
+ },
+ {
+  "label": "GETDEFAULTPRINTER() -> <cPrinter>",
+  "documentation": "Return the computer default printer name",
+  "arguments": [],
+  "name": "GETDEFAULTPRINTER",
+  "return": {
+   "name": "<cPrinter>",
+   "help": "The printer name"
+  }
+ },
+ {
   "label": "GetE( <cEnviroment> ) --> cReturn",
   "documentation": "Obtains a system environmental setting.",
   "arguments": [
@@ -8628,6 +9911,41 @@
   "return": {
    "name": "",
    "help": "nDigits        digit count between 1 and 16"
+  }
+ },
+ {
+  "label": "GetPrinters([ <lPorts> ]) -> <aPrint>",
+  "documentation": "Get an List of printers",
+  "arguments": [],
+  "name": "GetPrinters",
+  "return": {
+   "name": "<aPrint>",
+   "help": "A 1 dimension array of Printer names installed if the optional <lPorts> parameter is passed .T. a 2 dimension array {Printer name , Printer Port}"
+  }
+ },
+ {
+  "label": "GetRegistry( <nHkey>, <cKeyName>, <cEntryName> ) => < xValue >",
+  "documentation": "Used to get the value of a registry entry",
+  "arguments": [],
+  "name": "GetRegistry",
+  "return": {
+   "name": "< xValue >",
+   "help": "-> The value of the registry key or NIL if it does not exist"
+  }
+ },
+ {
+  "label": "GetThreadId( THREAD )  --> nThreadNumber",
+  "documentation": "Get the current thread id",
+  "arguments": [
+   {
+    "label": "<THREAD>",
+    "documentation": "An Thread Id Value"
+   }
+  ],
+  "name": "GetThreadId",
+  "return": {
+   "name": "<nThreadNumber>",
+   "help": "Id of this thread"
   }
  },
  {
@@ -9072,6 +10390,21 @@
   }
  },
  {
+  "label": "HB_ANSITOOEM(<cString>)  -> cDosString",
+  "documentation": "Convert a windows Character to a Dos based character",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "Windows ansi string to convert to DOS oem String"
+   }
+  ],
+  "name": "HB_ANSITOOEM",
+  "return": {
+   "name": "<cDosString>",
+   "help": "Dos based  string"
+  }
+ },
+ {
   "label": "hb_AScan( <aArray>, <xSearch>, [<nStart>], [<nCount>], [<lExact>] ) --> nPosition",
   "documentation": "Scan array elements for a specified condition",
   "arguments": [
@@ -9184,6 +10517,121 @@
   }
  },
  {
+  "label": "HB_BACKGROUNDACTIVE( <nHandle>, <lActive> ) --> lOldActive",
+  "documentation": "Set if a task is active or not.",
+  "arguments": [
+   {
+    "label": "<nHandle>",
+    "documentation": "is the identifier of the task returned by the HB_BACKGROUNDADD() function."
+   },
+   {
+    "label": "<lActive>",
+    "documentation": ".T. (default) if the task is active and will be executed."
+   }
+  ],
+  "name": "HB_BACKGROUNDACTIVE",
+  "return": {
+   "name": "<lOldActive>",
+   "help": "the last value defined"
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDADD( <bAction>|<aAction>, [nMillisecs], [lActive] ) --> nHandle",
+  "documentation": "Adds the background task.",
+  "arguments": [
+   {
+    "label": "<bAction>",
+    "documentation": "is a codeblock that will be executed in background. There are no arguments passed to this codeblock during evaluation."
+   },
+   {
+    "label": "<aAction>",
+    "documentation": "is an array that contains parameters as defined in HB_EXECFROMARRAY()"
+   },
+   {
+    "label": "<nMillisecs>",
+    "documentation": "is the number of milliseconds after which the task will be executed default 0 which means that the task will be executed at every time"
+   },
+   {
+    "label": "<lActive>",
+    "documentation": "defines if the task is active or not. Default .T."
+   }
+  ],
+  "name": "HB_BACKGROUNDADD",
+  "return": {
+   "name": "<nHandle>",
+   "help": "The handle (an integer value) that identifies the task. This handle can be used for deleting the task or to change other parameters."
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDDEL( <nHandle> ) --> xAction",
+  "documentation": "Removes the background task from the list of tasks.",
+  "arguments": [
+   {
+    "label": "<nHandle>",
+    "documentation": "is the identifier of the task returned by the HB_BACKGROUNDADD() function."
+   }
+  ],
+  "name": "HB_BACKGROUNDDEL",
+  "return": {
+   "name": "<xAction>",
+   "help": "NIL if invalid handle is passed or a codeblock or an array that was passed to HB_BACKGROUNDADD() function."
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDRESET()",
+  "documentation": "Reset internal coounter of background tasks.",
+  "arguments": [],
+  "name": "HB_BACKGROUNDRESET",
+  "return": {
+   "name": "",
+   "help": "Nothing."
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDRUN( [<nHandle>] )",
+  "documentation": "Forces run of background tasks but only if SET BACKGROUND is ON.",
+  "arguments": [
+   {
+    "label": "<nHandle>",
+    "documentation": "is the identifier of the task returned by the HB_BACKGROUNDADD() function."
+   }
+  ],
+  "name": "HB_BACKGROUNDRUN",
+  "return": {
+   "name": "",
+   "help": "Nothing."
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDRUNFORCED()",
+  "documentation": "Forces run of all background tasks also if SET BACKGROUND TASKS is OFF.",
+  "arguments": [],
+  "name": "HB_BACKGROUNDRUNFORCED",
+  "return": {
+   "name": "",
+   "help": "Nothing."
+  }
+ },
+ {
+  "label": "HB_BACKGROUNDTIME( <nHandle>, <nMillisecs> ) --> nOldMillisecs",
+  "documentation": "Set milliseconds after the task will be performed.",
+  "arguments": [
+   {
+    "label": "<nHandle>",
+    "documentation": "is the identifier of the task returned by the HB_BACKGROUNDADD() function."
+   },
+   {
+    "label": "<nMillisecs>",
+    "documentation": "time, in milliseconds, after that the task will be executed. If the value is 0 (default) the task will be executed at every cycle"
+   }
+  ],
+  "name": "HB_BACKGROUNDTIME",
+  "return": {
+   "name": "<nOldMillisecs>",
+   "help": "the last value defined"
+  }
+ },
+ {
   "label": "hb_cdpSelect( [<cNewLang>] ) --> cOldLang",
   "documentation": "Select the active code page by language ID",
   "arguments": [
@@ -9223,6 +10671,25 @@
   "return": {
    "name": "",
    "help": "The selected color string, or if anything goes wrong, an empty string."
+  }
+ },
+ {
+  "label": "HB_DBG_VMVARLGET( <nProcLevel>, <nLocal> )",
+  "documentation": "Retrive a local variable from a procedure level",
+  "arguments": [
+   {
+    "label": "<nProcLevel>",
+    "documentation": "Is the procedure level, same as used in ProcName() and ProcLine(), from which a local variable containts is going to be retrieved.   </par>"
+   },
+   {
+    "label": "<nLocal>",
+    "documentation": "Is the index of the local variable to retrieve.   </par>"
+   }
+  ],
+  "name": "HB_DBG_VMVARLGET",
+  "return": {
+   "name": "",
+   "help": "The containts of a specific local variable   </par>"
   }
  },
  {
@@ -9904,10 +11371,40 @@
   }
  },
  {
+  "label": "HB_IDLESLEEPMSEC( <nMilliSeconds> ) --> nMilliSecondsPrevious",
+  "documentation": "Allows tuning of the number of MilliSeconds to Sleep during idle state",
+  "arguments": [
+   {
+    "label": "<nMilliSeconds>",
+    "documentation": "is the number of milli-seconds to sleep during each hb_idlestate() call"
+   }
+  ],
+  "name": "HB_IDLESLEEPMSEC",
+  "return": {
+   "name": "<nMilliSecondsPrevious>",
+   "help": "the number of milli-seconds of sleep time currently set ( before being reset by this call if <nMilliSeconds> is passed )"
+  }
+ },
+ {
   "label": "hb_idleState()",
   "documentation": "Evaluates a single background task and calls the garbage collector.",
   "arguments": [],
   "name": "hb_idleState"
+ },
+ {
+  "label": "HB_IDLEWAITNOCPU( <bNewState> ) -->  bOldState",
+  "documentation": "Allows most efficient idle sleep state to be used by operating system",
+  "arguments": [
+   {
+    "label": "<bNewState>",
+    "documentation": "is .T. or .F.. If .T. then hb_releaseCPU() will use the OS efficient idle sleep state - but only if implemented on that platform"
+   }
+  ],
+  "name": "HB_IDLEWAITNOCPU",
+  "return": {
+   "name": "<bOldState>",
+   "help": "the state before being reset by this call"
+  }
  },
  {
   "label": "hb_inetAccept( <socket> ) --> <SOCKET>",
@@ -10629,6 +12126,16 @@
   }
  },
  {
+  "label": "HB_ISBYREF( @<Var> ) --> <lVarIsByRef>",
+  "documentation": "Inform if the variable is passed by reference.",
+  "arguments": [],
+  "name": "HB_ISBYREF",
+  "return": {
+   "name": "<lVarIsByRef>",
+   "help": "a logical value indicating if the variable is passed by reference to actual function or procedure."
+  }
+ },
+ {
   "label": "hb_keyPut( <nInkeyCode> )",
   "documentation": "Put an inkey code to the keyboard buffer.",
   "arguments": [
@@ -10864,6 +12371,31 @@
   }
  },
  {
+  "label": "HB_OEMTOANSI(<cString>)  -> cDosString",
+  "documentation": "Convert a DOS(OEM) Character to a WINDOWS (ANSI) based character",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "DOS (OEM)  string to convert to WINDOWS (ANSI) String"
+   }
+  ],
+  "name": "HB_OEMTOANSI",
+  "return": {
+   "name": "<cDosString>",
+   "help": "WINDOWS based  string"
+  }
+ },
+ {
+  "label": "HB_OSNewLine() --> cString",
+  "documentation": "Returns the newline character(s) to use with the current OS",
+  "arguments": [],
+  "name": "HB_OSNewLine",
+  "return": {
+   "name": "<cString>",
+   "help": "A character string containing the character or characters required to move the screen cursor or print head to the start of a new line. The string will hold either CHR(10) or CHR(13) + CHR(10)."
+  }
+ },
+ {
   "label": "hb_PIsByRef( nParam ) --> lParamIsByRef",
   "documentation": "Determine if a parameter is passed by reference.",
   "arguments": [
@@ -10914,6 +12446,17 @@
    "name": "",
    "help": "hb_RAt() return the location of beginning position of last occurrence a substring of a string."
   }
+ },
+ {
+  "label": "HB_SERVICE( lDetach )",
+  "documentation": "Service oriented program startup",
+  "arguments": [
+   {
+    "label": "<lDetach>",
+    "documentation": ""
+   }
+  ],
+  "name": "HB_SERVICE"
  },
  {
   "label": "hb_SetBuffer( [<nWriteBuffer>], [<nExtractBuffer>], [<nReadBuffer>] ) --> NIL",
@@ -11482,6 +13025,21 @@
   }
  },
  {
+  "label": "INVERTATTR( <cAttr|nAttr> ) -> <nInvertAttr>",
+  "documentation": "Inverts the foreground and background of an attribute",
+  "arguments": [
+   {
+    "label": "<nAttr|cAttr>",
+    "documentation": "Designates the attribute to invert."
+   }
+  ],
+  "name": "INVERTATTR",
+  "return": {
+   "name": "",
+   "help": "INVERTATTR() returns the numeric value of the inverted attribute."
+  }
+ },
+ {
   "label": "IsAffirm( <cChar> ) --> lTrueOrFalse",
   "documentation": "Checks if passed char is an affirmation char",
   "arguments": [
@@ -11527,6 +13085,11 @@
   }
  },
  {
+  "label": "ISBIT( <nLONG|cHexLONG>, <nBitPos> ) -> <lSet>",
+  "arguments": [],
+  "name": "ISBIT"
+ },
+ {
   "label": "IsDec( <cN> ) --> <cNr>",
   "documentation": "Check if the value is a Decimal  Number",
   "arguments": [
@@ -11554,6 +13117,21 @@
   "return": {
    "name": "<lDigit>",
    "help": "Logical true (.T.) or false (.F.)."
+  }
+ },
+ {
+  "label": "IsDir( <cDirectory> ) ---> lSuccess",
+  "documentation": "VerIFy IF a directory exist.",
+  "arguments": [
+   {
+    "label": "<cDirectory>",
+    "documentation": "The directory name to verIFy."
+   }
+  ],
+  "name": "IsDir",
+  "return": {
+   "name": "",
+   "help": "True IF <cDirectory> exist, otherwise false."
   }
  },
  {
@@ -11668,6 +13246,25 @@
   }
  },
  {
+  "label": "IsSameThread( TH1, TH2 ) --> lAreSame",
+  "documentation": "Verify if two thread are iqual",
+  "arguments": [
+   {
+    "label": "<TH1>",
+    "documentation": "An thread Handle"
+   },
+   {
+    "label": "<TH2>",
+    "documentation": "An thread Handle"
+   }
+  ],
+  "name": "IsSameThread",
+  "return": {
+   "name": "<lAreSame>",
+   "help": "True if both thread are same"
+  }
+ },
+ {
   "label": "IsUpper( <cString> ) --> lUpper",
   "documentation": "Checks if leftmost character is an uppercased letter.",
   "arguments": [
@@ -11683,6 +13280,36 @@
   }
  },
  {
+  "label": "IsValidThread( xThing ) --> lValid",
+  "documentation": "Verify if an thread is valid",
+  "arguments": [
+   {
+    "label": "<xThing>",
+    "documentation": "any expression"
+   }
+  ],
+  "name": "IsValidThread",
+  "return": {
+   "name": "<lValid>",
+   "help": "True if expression is valid otherwise false."
+  }
+ },
+ {
+  "label": "JoinThread( THREAD ) --> NIL",
+  "documentation": "Join an thread",
+  "arguments": [
+   {
+    "label": "<THREAD>",
+    "documentation": "An thread Handle"
+   }
+  ],
+  "name": "JoinThread",
+  "return": {
+   "name": "",
+   "help": "This function alwarys return nil"
+  }
+ },
+ {
   "label": "JustLeft( <[@]cString>, [<cChar>|<nChar>] ) -> cJustifiedString",
   "documentation": "Move characters from the beginning to the end of a string",
   "arguments": [],
@@ -11693,6 +13320,21 @@
   "documentation": "Move characters from the end to the beginning of a string",
   "arguments": [],
   "name": "JustRight"
+ },
+ {
+  "label": "KillThread( <THREAD> ) --> NIL",
+  "documentation": "Kill an thread",
+  "arguments": [
+   {
+    "label": "<THREAD>",
+    "documentation": "An Thread Id Value"
+   }
+  ],
+  "name": "KillThread",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
+  }
  },
  {
   "label": "KSetCaps( [<lNewSwitch>] ) -> lOldSwitch",
@@ -11799,6 +13441,28 @@
   }
  },
  {
+  "label": "LIKE(<cString1>,<cString2>) --> lEqual",
+  "arguments": [
+   {
+    "label": "<cString1>",
+    "documentation": "Designates the wildcard string for comparison.  All wildcards must be in this character string."
+   },
+   {
+    "label": "<cString2>",
+    "documentation": "Designates the string to compare to <cString1>."
+   },
+   {
+    "label": "<nNewFileAttr>",
+    "documentation": "- a file attribute for a new file"
+   }
+  ],
+  "name": "LIKE",
+  "return": {
+   "name": "",
+   "help": "LIKE() returns .T. when, after taking wildcards into account, both character strings are equal."
+  }
+ },
+ {
   "label": "Log( <nNumber> ) --> nLog",
   "documentation": "Returns the natural logarithm of a number.",
   "arguments": [
@@ -11841,6 +13505,20 @@
   "return": {
    "name": "<cLowerString>",
    "help": "Lowercased value of <cString>"
+  }
+ },
+ {
+  "label": "LTON([<lValue>]) --> nLogicalValue",
+  "arguments": [
+   {
+    "label": "<lValue>",
+    "documentation": "Designates the logical expression to convert.  The default value is .F.."
+   }
+  ],
+  "name": "LTON",
+  "return": {
+   "name": "",
+   "help": "If you designate a .T., LTON() returns a 1; with .F., it returns a 0."
   }
  },
  {
@@ -11925,6 +13603,20 @@
   "return": {
    "name": "<nPosition>",
    "help": "The maximum number of columns possible in current video mode"
+  }
+ },
+ {
+  "label": "MAXLINE(<cString>) --> nLength",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "Designates the string that is processed."
+   }
+  ],
+  "name": "MAXLINE",
+  "return": {
+   "name": "",
+   "help": "Returns the maximum line length necessary to display the"
   }
  },
  {
@@ -12108,6 +13800,61 @@
   }
  },
  {
+  "label": "MutexCreate() --> <Mutex>",
+  "documentation": "Creates an mutex",
+  "arguments": [],
+  "name": "MutexCreate",
+  "return": {
+   "name": "<Mutex>",
+   "help": "An Mutex handle"
+  }
+ },
+ {
+  "label": "MutexLock( MUTEX ) --> NIL",
+  "documentation": "Locks an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   }
+  ],
+  "name": "MutexLock",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
+  }
+ },
+ {
+  "label": "MutexTryLock( MUTEX ) --> lAchieved",
+  "documentation": "Try to locks an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   }
+  ],
+  "name": "MutexTryLock",
+  "return": {
+   "name": "<lAchieved>",
+   "help": "True if mutex is locked, otherwise false"
+  }
+ },
+ {
+  "label": "MutexUnlock( <MUTEX> ) -->Nil",
+  "documentation": "Unlocks an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   }
+  ],
+  "name": "MutexUnlock",
+  "return": {
+   "name": "",
+   "help": "NIL  This function always return nil"
+  }
+ },
+ {
   "label": "NationMsg( <nMsg> ) --> cMessage",
   "documentation": "Returns international strings messages.",
   "arguments": [
@@ -12120,6 +13867,36 @@
   "return": {
    "name": "<cMessage>",
    "help": "if <nMsg> is a valid message selector, returns the message. If <nMsg> is NIL, it returns \"Invalid Argument\", and if <nMsg> is any other type it returns an empty string."
+  }
+ },
+ {
+  "label": "NETCANCEL(<cLocalDevice>) --> lReleased",
+  "documentation": "Releases the redirection of a local device",
+  "arguments": [
+   {
+    "label": "<cLocalDevice>",
+    "documentation": "Designates the name for the local device, for which an existing redirection in the network is released."
+   }
+  ],
+  "name": "NETCANCEL",
+  "return": {
+   "name": "",
+   "help": "NETCANCEL() returns .T. when a redirection existed for the designated device and it was released."
+  }
+ },
+ {
+  "label": "NETDISK(<cDrive>) --> lServerDrive",
+  "documentation": "Determines whether a drive is local or resident on the server",
+  "arguments": [
+   {
+    "label": "<cDrive>",
+    "documentation": "Designates the drive that is tested in a range from A to Z."
+   }
+  ],
+  "name": "NETDISK",
+  "return": {
+   "name": "",
+   "help": "NETDISK() returns .T. when the specified drive is a network drive."
   }
  },
  {
@@ -12138,6 +13915,68 @@
   }
  },
  {
+  "label": "NETPRINTER() --> lServerPrinter",
+  "documentation": "Determines whether the current printer is a local or network printer.",
+  "arguments": [],
+  "name": "NETPRINTER",
+  "return": {
+   "name": "",
+   "help": "NETPRINTER() returns .T. when the printer installed using the xHarbour SET PRINTER TO <LPTn> command has been redirected onto a network server."
+  }
+ },
+ {
+  "label": "NETREDIR(<cLocalDevice>, <cServerDevice>, [<cPassword>], [<lShowError>] ) --> lRedirection",
+  "documentation": "Redirects a local device to a server device",
+  "arguments": [
+   {
+    "label": "<cLocalDevice>",
+    "documentation": "Designates the name of the local device (LPTn:, PRN:, or d:)."
+   },
+   {
+    "label": "<cServerDevice>",
+    "documentation": "Designates the complete path for the server (\\\\<Servername>\\<Devicename>)."
+   },
+   {
+    "label": "<cPassword>",
+    "documentation": "Can designate a password when it is required by the server."
+   },
+   {
+    "label": "<lShowError>",
+    "documentation": "If true shows an alert box if any error ocurrs. the default is false. This parameter is a xHarbour's extension."
+   }
+  ],
+  "name": "NETREDIR",
+  "return": {
+   "name": "",
+   "help": "NETREDIR() returns .T. when the specified local device has been redirected to the selected server device."
+  }
+ },
+ {
+  "label": "NETRMTNAME(<cLocalDevice>) --> cServerDevice",
+  "documentation": "Determines the name of a server device for a local device",
+  "arguments": [
+   {
+    "label": "<cLocalDevice>",
+    "documentation": "Designates the local devie name."
+   }
+  ],
+  "name": "NETRMTNAME",
+  "return": {
+   "name": "",
+   "help": "NETRMTNAME() returns the local device name for the designated location in the DOS redirection table (<cLocalDevice>), or a null string if no name is available."
+  }
+ },
+ {
+  "label": "NETWORK() --> lActiveNet",
+  "documentation": "Tests to see if a network is active",
+  "arguments": [],
+  "name": "NETWORK",
+  "return": {
+   "name": "",
+   "help": "NETWORK() returns .T. when a PC LAN/MS-NET or a Novell network is available."
+  }
+ },
+ {
   "label": "NextKey( [<nInputMask>] ) --> nKey",
   "documentation": "Get the next key code in the buffer without extracting it.",
   "arguments": [
@@ -12150,6 +13989,54 @@
   "return": {
    "name": "<nKey>",
    "help": "The value of the next key in the Harbour keyboard buffer."
+  }
+ },
+ {
+  "label": "NNETWORK() --> lNovellNetActive  Netware: 2.2 and 3.11",
+  "documentation": "Determines whether or not a Novell network is active",
+  "arguments": [],
+  "name": "NNETWORK",
+  "return": {
+   "name": "",
+   "help": "NNETWORK() returns .T. when you are working in a Novell network."
+  }
+ },
+ {
+  "label": "Notify( MUTEX [,anyParam] ) --> NIL",
+  "documentation": "Notify an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   },
+   {
+    "label": "<anyParam>",
+    "documentation": "Optional Value"
+   }
+  ],
+  "name": "Notify",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
+  }
+ },
+ {
+  "label": "NotifyAll( MUTEX [,anyParam] ) --> NIL",
+  "documentation": "Notify all mutexes",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   },
+   {
+    "label": "<anyParam>",
+    "documentation": "Optional Value"
+   }
+  ],
+  "name": "NotifyAll",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
   }
  },
  {
@@ -12190,16 +14077,259 @@
   }
  },
  {
+  "label": "NUMAND( <nWORD1|cHexWORD1>, <nWORD2|cHexWORD2>[, ..<nWORDn|cHexWORDn>) -> <nWordAND>",
+  "documentation": "Bitwise logical AND operation on 16-bit numbers",
+  "arguments": [],
+  "name": "NUMAND"
+ },
+ {
+  "label": "NUMANDX( <nSignificativeBits>, <nLONG1|cHexLONG1>, <nLONG2|cHexLONG2> [, ..<nLONGn|cHexLONGn>) -> <nLONGAND>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   }
+  ],
+  "name": "NUMANDX",
+  "return": {
+   "name": "",
+   "help": "NUMANDX() join all designated parameters with the logical \"AND\" and return the result."
+  }
+ },
+ {
   "label": "NumAt( <cStringToMatch>, <cString>, [<nIgnore>] ) --> nCount",
   "documentation": "Number of occurrences of a sequence in a string",
   "arguments": [],
   "name": "NumAt"
  },
  {
+  "label": "NUMCOUNT([<nIncrement|nStartValue>,[<lMode>]]) --> nNewCounterValue",
+  "arguments": [
+   {
+    "label": "<nIncrement|nStartValue>",
+    "documentation": "Designates the incremental value for the internal counter or a new starting value."
+   },
+   {
+    "label": "<lMode>",
+    "documentation": "Designates whether <nIncrement|nStartValue> is a new starting value (.T.) or an increment (.F.).  The default is increment (.F.). () Without parameters, the current counter value is returned."
+   }
+  ],
+  "name": "NUMCOUNT",
+  "return": {
+   "name": "",
+   "help": "When called without parameters, this function returns the current counter value; otherwise, it always returns the new counter value."
+  }
+ },
+ {
+  "label": "NUMDISKL() --> nDisks",
+  "documentation": "Gets the number of valid drive letters.",
+  "arguments": [],
+  "name": "NUMDISKL",
+  "return": {
+   "name": "",
+   "help": "A numeric value which is the value of LASTDRIVE directive in CONFIG.SYS."
+  }
+ },
+ {
+  "label": "NUMHIGH(<xNumber>) --> nByte",
+  "documentation": "Gets the higher value byte of the lower value word of a number",
+  "arguments": [
+   {
+    "label": "<xNumber>",
+    "documentation": "is either a decimal number or a hexadecimal string of digits."
+   }
+  ],
+  "name": "NUMHIGH",
+  "return": {
+   "name": "",
+   "help": "A numeric value which is the higher value byte of the lower value word of the input number."
+  }
+ },
+ {
+  "label": "NUMLINE(<cString>,[<nLineLength>]) --> nNumber",
+  "arguments": [
+   {
+    "label": "<cString>",
+    "documentation": "Designates the character string that is processed."
+   },
+   {
+    "label": "<nLineLength>",
+    "documentation": "Designates the length of an output line. The default value is 80 characters."
+   }
+  ],
+  "name": "NUMLINE",
+  "return": {
+   "name": "",
+   "help": "Returns the number of lines required for text output."
+  }
+ },
+ {
+  "label": "NUMLOW(<xNumber>) --> nByte",
+  "documentation": "Gets the lower value byte of a number",
+  "arguments": [
+   {
+    "label": "<xNumber>",
+    "documentation": "is either a decimal number or a hexadecimal string of digits."
+   }
+  ],
+  "name": "NUMLOW",
+  "return": {
+   "name": "",
+   "help": "A numeric value which is the lower value byte of the input number."
+  }
+ },
+ {
+  "label": "NUMMIRR( <nNumber|cHexNum>[, <l8/16bit>] ) -> <nResult>",
+  "documentation": "Bitwise mirror operation on 8-bit and 16-bit numbers",
+  "arguments": [],
+  "name": "NUMMIRR"
+ },
+ {
+  "label": "NUMMIRRX( <nSignificativeBits>, <nNumber|cHexNum> ) -> <nResult>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   }
+  ],
+  "name": "NUMMIRRX",
+  "return": {
+   "name": "",
+   "help": "NUMMIRR() returns a value by which the bit opposite the first parameter is mirrored."
+  }
+ },
+ {
+  "label": "NUMNOT( <nWORD|cHexWORD> ) -> <nWordNOT>",
+  "documentation": "Bitwise logical NOT operation on 16-bit numbers",
+  "arguments": [],
+  "name": "NUMNOT"
+ },
+ {
+  "label": "NUMNOTX( <nSignificativeBits>, <nLONG|cHexLONG> ) -> <nLONGNOT>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   }
+  ],
+  "name": "NUMNOTX",
+  "return": {
+   "name": "",
+   "help": "NUMNOTX() return the negated binary value of the nLONG parameter. The 0 bits become 1, and 1 bits become 0."
+  }
+ },
+ {
+  "label": "NUMOR( <nWORD1|cHexWORD>1, <nWORD2|cHexWORD2>[, ..<nWORDn|cHexWORDn>) -> <nWordOR>",
+  "documentation": "Bitwise logical OR operation on 16-bit numbers",
+  "arguments": [],
+  "name": "NUMOR"
+ },
+ {
+  "label": "NUMORX( <nSignificativeBits>, <nLONG1|cHexLONG>1, <nLONG2|cHexLONG2> [, ..<nLONGn|cHexLONGn>) -> <nLONGOR>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   }
+  ],
+  "name": "NUMORX",
+  "return": {
+   "name": "",
+   "help": "NUMORX() join all designated parameters with the logical \"OR\" and return the result."
+  }
+ },
+ {
+  "label": "NUMROL( <nWORD1|cHexWORD1>, <nWORD1|cHexWORD1>[, <lLowByte>] ) -> <nWordROL>",
+  "documentation": "Bitwise ROL (rotate left) operation on 16-bit numbers",
+  "arguments": [],
+  "name": "NUMROL"
+ },
+ {
+  "label": "NUMROLX( <nSignificativeBits>, <nLONG|cHexLONG>, <nWORD|cHexWORD> ) -> <nLONGROL>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   },
+   {
+    "label": "<nWORD | cHexWORD>",
+    "documentation": "Designate a number of rotations in the range of 1 to <nSignificativeBits>; as either numeric or hexadecimal."
+   }
+  ],
+  "name": "NUMROLX",
+  "return": {
+   "name": "",
+   "help": "NUMROLX() return the rotation result."
+  }
+ },
+ {
   "label": "NumToken( <cString>, [<cTokenizer>], [<nSkipWidth>] ) -> nTokenCount",
   "documentation": "Retrieves the number of tokens in a string",
   "arguments": [],
   "name": "NumToken"
+ },
+ {
+  "label": "NUMXOR( <nWORD1|cHexWORD1>, <nWORD2|cHexWORD2> ) -> <nWordXOR>",
+  "documentation": "Bitwise logical XOR operation on 16-bit numbers",
+  "arguments": [],
+  "name": "NUMXOR"
+ },
+ {
+  "label": "NUMXORX( <nSignificativeBits>, <nLONG1|cHexLONG1>, <nLONG2|cHexLONG2> ) -> <nLONGXOR>",
+  "arguments": [
+   {
+    "label": "<SignificativeBits>",
+    "documentation": "Designate a number in the range of 0 to 32, indicating the LSB of nLONGx|cHexLONGx that will be used."
+   },
+   {
+    "label": "<nLONG | cHexLONG>",
+    "documentation": "Designate either decimal or hexadecimal number string."
+   }
+  ],
+  "name": "NUMXORX",
+  "return": {
+   "name": "",
+   "help": "NUMXORX() join all designated parameters with the logical \"XOR\" and return the result."
+  }
+ },
+ {
+  "label": "Occurs( <cSearch> , <cTarget> ) ---> nTimes",
+  "documentation": "Return the number of times that a substring occurs in a string.",
+  "arguments": [
+   {
+    "label": "<cSearch>",
+    "documentation": "The substring for which to search."
+   },
+   {
+    "label": "<cTarget>",
+    "documentation": "The string in which to search.  (To specIFy an offset, use Occurs3())."
+   }
+  ],
+  "name": "Occurs",
+  "return": {
+   "name": "",
+   "help": "The number of times that <cSearch> appears in <cTarget>."
+  }
  },
  {
   "label": "OctalToDec( <cN> ) --> <cNr>",
@@ -12259,6 +14389,21 @@
    }
   ],
   "name": "ordCondSet"
+ },
+ {
+  "label": "ORDCONSET([<cForCondition>], [<bForCondition>], [<lAll>], [<bWhileCondition>], [<bEval>], [<nInterval>], [<nStart>], [<nNext>], [<nRecord>], [<lRest>], [<lDescend>], [<lAdditive>], [<lCurrent>], [<lCustom>], [<lNoOptimize>])",
+  "documentation": "Set the Condition and scope for an order",
+  "arguments": [
+   {
+    "label": "<cForCondition>",
+    "documentation": "is a string that specifies the FOR condition for the order."
+   },
+   {
+    "label": "<bForCondition>",
+    "documentation": "is a code block that defines a FOR condition that each record within the scope must meet in order to be processed. If a record does not meet the specified condition,it is ignored and the next  record is processed.Duplicate keys values are not added to the index file when a FOR condition is Used."
+   }
+  ],
+  "name": "ORDCONSET"
  },
  {
   "label": "ordCreate( <cOrderBagName>,[<cOrderName>], <cExpKey>, [<bExpKey>], [<lUnique>] )",
@@ -12341,6 +14486,114 @@
   }
  },
  {
+  "label": "ORDLISTADD(<cOrderBagName> [, <cOrderName>]) --> NIL",
+  "documentation": "Add Orders to the Order List",
+  "arguments": [
+   {
+    "label": "<cOrderBagName>",
+    "documentation": "is the name of a disk file containing one or more Orders.  You may specify <cOrderBagName> as the filename with or without the pathname or appropriate extension.  If you do not include the extension as part of <cOrderBagName> HARBOUR uses the default extension of the current RDD."
+   },
+   {
+    "label": "<cOrderName>",
+    "documentation": "the name of the specific Order from the Order Bag to be added to the Order List of the current work area.  If you do not specify"
+   },
+   {
+    "label": "<cOrderName>",
+    "documentation": ", all orders in the Order Bag are added to the Order List of the current work area."
+   }
+  ],
+  "name": "ORDLISTADD",
+  "return": {
+   "name": "",
+   "help": "ORDLISTADD() always returns NIL."
+  }
+ },
+ {
+  "label": "ORDLISTCLEAR() --> NIL",
+  "documentation": "Clear the current Order List",
+  "arguments": [],
+  "name": "ORDLISTCLEAR",
+  "return": {
+   "name": "",
+   "help": "ORDLISTCLEAR() always returns NIL."
+  }
+ },
+ {
+  "label": "ORDLISTREBUILD() --> NIL",
+  "documentation": "Rebuild all Orders in the Order List of the current work area",
+  "arguments": [],
+  "name": "ORDLISTREBUILD",
+  "return": {
+   "name": "",
+   "help": "ORDLISTREBUILD() always returns NIL."
+  }
+ },
+ {
+  "label": "ORDNAME(<nOrder>[,<cOrderBagName> --> cOrderName",
+  "documentation": "Return the name of an Order in the Order List",
+  "arguments": [
+   {
+    "label": "<nOrder>",
+    "documentation": "is an integer that identifies the position in the Order List of the target Order whose database name is sought."
+   },
+   {
+    "label": "<cOrderBagName>",
+    "documentation": "is the name of a disk file containing one or more Orders.  You may specify <cOrderBagName> as the filename with or without the pathname or appropriate extension.  If you do not include the extension as part of <xcOrderBagName> HARBOUR uses the default extension of the current RDD."
+   }
+  ],
+  "name": "ORDNAME",
+  "return": {
+   "name": "",
+   "help": "ORDNAME() returns the name of the specified Order in the current Order List or the specified Order Bag if opened in the Current Order list."
+  }
+ },
+ {
+  "label": "ORDNUMBER(<cOrderName> [, <cOrderBagName>]) --> nOrderNo",
+  "documentation": "Return the position of an Order in the current Order List",
+  "arguments": [
+   {
+    "label": "<cOrderName>",
+    "documentation": "the name of the specific Order whose position in the Order List is sought."
+   },
+   {
+    "label": "<cOrderBagName>",
+    "documentation": "is the name of a disk file containing one or more Orders.  You may specify <cOrderBagName> as the filename with or without the pathname or appropriate extension.  If you do not include the extension as part of <cOrderBagName> HARBOUR uses the default extension of the current RDD."
+   }
+  ],
+  "name": "ORDNUMBER",
+  "return": {
+   "name": "",
+   "help": "Returns nOrderNo, an integer that represents the position of the specified Order in the Order List."
+  }
+ },
+ {
+  "label": "ORDSETFOCUS([<cOrderName> | <nOrder>] [,<cOrderBagName>]) --> cPrevOrderNameInFocus ",
+  "documentation": "Set focus to an Order in an Order List",
+  "arguments": [
+   {
+    "label": "<cOrderName>",
+    "documentation": "is the name of the selected Order, a logical ordering of a database.  ORDSETFOCUS() ignores any invalid values of"
+   },
+   {
+    "label": "<cOrderName>",
+    "documentation": "."
+   },
+   {
+    "label": "<nOrder>",
+    "documentation": "is a number representing the position in the Order List of the selected Order."
+   },
+   {
+    "label": "<cOrderBagName>",
+    "documentation": "is the name of a disk file containing one or more Orders.  You may specify <cOrderBagName> as the filename with or without the pathname or appropriate extension.  If you do not include the extension as part of <cOrderBagName> HARBOUR uses the default extension of the current RDD."
+   }
+  ],
+  "name": "ORDSETFOCUS",
+  "return": {
+   "name": "",
+   "help": "ORDSETFOCUS() returns the Order Name of the previous controlling Order."
+  }
+ },
+ {
   "label": "OS() --> cOperatingSystem",
   "documentation": "Return the current operating system.",
   "arguments": [],
@@ -12348,6 +14601,146 @@
   "return": {
    "name": "<cOperatinSystem>",
    "help": "The current operating system."
+  }
+ },
+ {
+  "label": "OS_IsWin2000() => < lResult >",
+  "documentation": "Returns .T. if running on Windows 2000",
+  "arguments": [],
+  "name": "OS_IsWin2000",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows 2000"
+  }
+ },
+ {
+  "label": "OS_IsWin2003() => < lResult >",
+  "documentation": "Returns .T. if running on Windows 2003",
+  "arguments": [],
+  "name": "OS_IsWin2003",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows 2003"
+  }
+ },
+ {
+  "label": "OS_IsWin95() => < lResult >",
+  "documentation": "Returns .T. if running on Windows 95",
+  "arguments": [],
+  "name": "OS_IsWin95",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows 95"
+  }
+ },
+ {
+  "label": "OS_IsWin98() => < lResult >",
+  "documentation": "Returns .T. if running on Windows 98",
+  "arguments": [],
+  "name": "OS_IsWin98",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows 98"
+  }
+ },
+ {
+  "label": "OS_IsWin9X() => < lResult >",
+  "documentation": "Returns .T. if running on Windows NT platform ( 95, 98, ME )",
+  "arguments": [],
+  "name": "OS_IsWin9X",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows platform ( 95, 98, ME )"
+  }
+ },
+ {
+  "label": "OS_IsWinME() => < lResult >",
+  "documentation": "Returns .T. if running on Windows ME",
+  "arguments": [],
+  "name": "OS_IsWinME",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows ME"
+  }
+ },
+ {
+  "label": "OS_IsWinNt() => < lResult >",
+  "documentation": "Returns .T. if running on Windows NT platform ( NT, 2000, XP, 2003 )",
+  "arguments": [],
+  "name": "OS_IsWinNt",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows NT platform ( NT, 2000, XP, 2003 )"
+  }
+ },
+ {
+  "label": "OS_IsWinNt351() => < lResult >",
+  "documentation": "Returns .T. if running on Windows NT 3.51",
+  "arguments": [],
+  "name": "OS_IsWinNt351",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows NT 3.51"
+  }
+ },
+ {
+  "label": "OS_IsWinNT4() => < lResult >",
+  "documentation": "Returns .T. if running on Windows NT 4.0",
+  "arguments": [],
+  "name": "OS_IsWinNT4",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows NT 4.0"
+  }
+ },
+ {
+  "label": "OS_IsWinXP() => < lResult >",
+  "documentation": "Returns .T. if running on Windows XP",
+  "arguments": [],
+  "name": "OS_IsWinXP",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows XP"
+  }
+ },
+ {
+  "label": "OS_ISWTSCLIENT() => < lResult >",
+  "documentation": "Returns .T. if running on Windows Terminal Server Client.",
+  "arguments": [],
+  "name": "OS_ISWTSCLIENT",
+  "return": {
+   "name": "",
+   "help": "Returns .T. if running on Windows Terminal Server Client"
+  }
+ },
+ {
+  "label": "OS_NETREGOK( [ < lSetIt > ] )",
+  "documentation": "Sets an entry in a registry key",
+  "arguments": [],
+  "name": "OS_NETREGOK",
+  "return": {
+   "name": "< lResult >",
+   "help": "-> True if registry set ok for safe networking"
+  }
+ },
+ {
+  "label": "OS_NETVREDIROK( [ <@nResult> ] ) => < lResult >",
+  "documentation": "Sets an entry in a registry key",
+  "arguments": [],
+  "name": "OS_NETVREDIROK",
+  "return": {
+   "name": "< lResult >",
+   "help": "-> .T. if the file VREDIR.VXD for Win95 is OK or not running on Win95 OS. Else .F. and the VREDIR patch should be applied for reliable networking."
+  }
+ },
+ {
+  "label": "OS_VERSIONINFO() => < aData >",
+  "documentation": "Gives specific data about operating system",
+  "arguments": [],
+  "name": "OS_VERSIONINFO",
+  "return": {
+   "name": "",
+   "help": "Returns an array of OS version infomation"
   }
  },
  {
@@ -12580,10 +14973,86 @@
   "name": "PosUpper"
  },
  {
+  "label": "PRINTEREXISTS( <cPrinterName>) -> <bInstalled>",
+  "documentation": "See if a printer is installed",
+  "arguments": [
+   {
+    "label": "<cPrinter>",
+    "documentation": "= a string that represents a printer name e.g. \"HP LaserJet 1200 Series PCL\""
+   }
+  ],
+  "name": "PRINTEREXISTS",
+  "return": {
+   "name": "<bInstalled>",
+   "help": "> .T. if the printer with the passed name is installed on the machine"
+  }
+ },
+ {
+  "label": "PRINTERPORTTONAME( <cPortName>, [ < lPartialMatch> ]) -> cPrinterName",
+  "documentation": "Get the name of the printer attached to the cPortName",
+  "arguments": [
+   {
+    "label": "<cPortName>",
+    "documentation": "= is a valid Windows printer port e.g. LPT1, COM1"
+   },
+   {
+    "label": "<lPartialMatch>",
+    "documentation": "= optional parameter matches lpt1 to LPT1: ( i.e. only the first LEN( cPortName ) are used to match"
+   }
+  ],
+  "name": "PRINTERPORTTONAME",
+  "return": {
+   "name": "< cPrinterName >",
+   "help": "e.g. \"HP LaserJet 1200 Series PCL\". IF not found then an empty string is returned \"\""
+  }
+ },
+ {
+  "label": "PRINTFILERAW( <cPrinterName>, <cFileName> [, <cDocName>]) -> <nResult>",
+  "documentation": "Print a file to a windows printer in RAW mode",
+  "arguments": [
+   {
+    "label": "<cPrinter>",
+    "documentation": "= a valid windows printer name"
+   },
+   {
+    "label": "<cFileName>",
+    "documentation": "= a valid filename that exists and can be printed"
+   },
+   {
+    "label": "<cDocName>",
+    "documentation": "= option text to appear as the document name in the spooler"
+   }
+  ],
+  "name": "PRINTFILERAW",
+  "return": {
+   "name": "<nResult>",
+   "help": "> 0 printed OK else if < 0 then error (See example)"
+  }
+ },
+ {
   "label": "PrintReady( [<nPrinter>] ) -> lPrinterReady",
   "documentation": "",
   "arguments": [],
   "name": "PrintReady"
+ },
+ {
+  "label": "PRINTSEND(<cCharacter|nCharacter>, <nPrinter>) -> nRemaining",
+  "documentation": "Sends characters to printer",
+  "arguments": [
+   {
+    "label": "<cCharacter|nCharacter>",
+    "documentation": "Code for an individual character from 0 to 255 or a string."
+   },
+   {
+    "label": "<nPrinter>",
+    "documentation": "The printer port where output is done."
+   }
+  ],
+  "name": "PRINTSEND",
+  "return": {
+   "name": "",
+   "help": "Returns the number of characters that could not be sent to printer."
+  }
  },
  {
   "label": "PrintStat( [<nPrinter>] ) -> nState",
@@ -12660,10 +15129,39 @@
   }
  },
  {
+  "label": "PVALUE( <nArg>, [ <xNewValue> ] ) --> <xExp>",
+  "documentation": "Retrieves the value of an argument.",
+  "arguments": [
+   {
+    "label": "<nArg>",
+    "documentation": "is a number that indicates the argument to check."
+   },
+   {
+    "label": "<xNewValue>",
+    "documentation": "is an optional value to be assigned to that argument.   </par>"
+   }
+  ],
+  "name": "PVALUE",
+  "return": {
+   "name": "<xExp>",
+   "help": "Returns the value stored by an argument.   </par>"
+  }
+ },
+ {
   "label": "Quarter( [<dDate>] ) -> nQuarter",
   "documentation": "Returns a number equal to the quarter in which a date falls",
   "arguments": [],
   "name": "Quarter"
+ },
+ {
+  "label": "QueryRegistry( <nHkey>, <cKeyName>, <cEntryName>, < xValueOfEntry > [, < lSetIt > ] ) => < lResult >",
+  "documentation": "Tests if the registry contains the current key with specified value.",
+  "arguments": [],
+  "name": "QueryRegistry",
+  "return": {
+   "name": "< lResult >",
+   "help": "-> True if the cEntryName exists in cKey with a value of < xValueOfEntry >."
+  }
  },
  {
   "label": "RangeRem( <cChar1|nChar1>, <cChar2|nChar2>, <cString> ) -> cString",
@@ -12676,6 +15174,41 @@
   "documentation": "Replace characters within a certain ASCII range from a string",
   "arguments": [],
   "name": "RangeRepl"
+ },
+ {
+  "label": "RASCAN( <aDestino>, <xBuscar>, [<nInicio>], [<nContador>], [<lExacto>], [<lAceptarCaract>] ) --> nParadoEn",
+  "documentation": "Busca en un array en �rden por un valor o hasta que el codeblock devuelva .T.",
+  "arguments": [
+   {
+    "label": "<aDestino>",
+    "documentation": "es el nombre del array a examinar"
+   },
+   {
+    "label": "<xBuscar>",
+    "documentation": "es la expresi�n a encontrar en <aDestino>"
+   },
+   {
+    "label": "<nInicio>",
+    "documentation": "es la posici�n a la cual comenzar la b�squeda"
+   },
+   {
+    "label": "<nContador>",
+    "documentation": "es el n�mero de elementos a examinar"
+   },
+   {
+    "label": "<lExacto>",
+    "documentation": "Si <lExacto> es VERDADERO, RASCAN buscar� for una cadena de caracteres que sea exactamente igual. Si <lExacto> es FALSO, la comparaci�n de cadenas de caracteres depender� del estado de SET EXACT."
+   },
+   {
+    "label": "<lAceptarCaract>",
+    "documentation": "Esta bandera indica si las cadenas de s�lo un caracter pueden ser consideradas como valores num�ricos."
+   }
+  ],
+  "name": "RASCAN",
+  "return": {
+   "name": "",
+   "help": "RASCAN() retorna un valor num�rico <nParadoEn>, de la posici�n donde <xBuscar> fu� encontrada."
+  }
  },
  {
   "label": "RAt( <cSearch>, <cString> ) --> nPos",
@@ -12732,6 +15265,46 @@
   "return": {
    "name": "<lSucess>",
    "help": ".T. IF SUCCESSFUL; otherwise .F."
+  }
+ },
+ {
+  "label": "RDDLIST([<nRDDType>]) --> aRDDList",
+  "documentation": "Return an array of the available Replaceable Database Drivers",
+  "arguments": [
+   {
+    "label": "<nRDDType>",
+    "documentation": "is an integer that represents the type of the RDD you wish to list.  The constants RDT_FULL and RDT_TRANSFER represent the two types of RDDs currently available. RDDType Summary ������������������������������������������������������������������������ Constant       Value     Meaning ������������������������������������������������������������������������ RDT_FULL       1         Full RDD implementation RDT_TRANSFER   2         Import/Export only driver ������������������������������������������������������������������������ RDT_FULL identifies full-featured RDDs that have all the capabilities associated with an RDD. RDT_TRANSFER identifies RDDs of limited capability.  They can only transfer records between files.  You cannot use these limited RDD drivers to open a file in a work area.  The SDF and DELIM drivers are examples of this type of RDD.  They are only used in the implementation of APPEND FROM and COPY TO with SDF or DELIMITED files."
+   }
+  ],
+  "name": "RDDLIST",
+  "return": {
+   "name": "",
+   "help": "RDDLIST() returns a one-dimensional array of the RDD names registered with the application as <nRDDType>."
+  }
+ },
+ {
+  "label": "RDDNAME() --> cRDDName",
+  "documentation": "Return the name of the currently active RDD",
+  "arguments": [],
+  "name": "RDDNAME",
+  "return": {
+   "name": "",
+   "help": "Returns a character string, cRDDName, the registered name of the active RDD in the current or specified work area."
+  }
+ },
+ {
+  "label": "RDDSETDEFAULT([<cNewDefaultRDD>]) --> cPreviousDefaultRDD ",
+  "documentation": "Set or return the default RDD for the application",
+  "arguments": [
+   {
+    "label": "<cNewDefaultRDD>",
+    "documentation": "is a character string, the name of the RDD that is to be made the new default RDD in the application."
+   }
+  ],
+  "name": "RDDSETDEFAULT",
+  "return": {
+   "name": "",
+   "help": "RDDSETDEFAULT() returns a character string, cPreviousDefaultRDD, the name of the previous default driver.  The default driver is the driver that HARBOUR uses if you do not explicitly specify an RDD with the VIA clause of the USE command."
   }
  },
  {
@@ -12806,6 +15379,25 @@
   "documentation": "Remove certain characters at the right of a string",
   "arguments": [],
   "name": "RemRight"
+ },
+ {
+  "label": "RENAMEFILE(<cOldFileName>, <cNewFileName>) --> nErrorCode",
+  "documentation": "Fault tolerant renaming of a file.",
+  "arguments": [
+   {
+    "label": "<cOldFileName>",
+    "documentation": "Designates the name and path of the existing file."
+   },
+   {
+    "label": "<cNewFileName>",
+    "documentation": "Designates the new name and path for the file."
+   }
+  ],
+  "name": "RENAMEFILE",
+  "return": {
+   "name": "",
+   "help": "The FUNCTION RETURNs a 0 when the file can be renamed; otherwise, it RETURNs an error code.  The codes are defined below: Code    Definition 0      No error found -2      File not found -3      Path not found -5      Access denied (e.g., in network) -17     Target file not on same network"
+  }
  },
  {
   "label": "ReplAll( <cString>, <cReplace|nReplace>, [<cSearch|nSearch>] ) -> cString",
@@ -12958,6 +15550,62 @@
   }
  },
  {
+  "label": "SAYDOWN(<cCharacterstring>, [<nDelay>], [<nLine>], [<nColumn>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "Designates vertical output for the string."
+   },
+   {
+    "label": "<nDelay>",
+    "documentation": "Designates that the time delay is set in milliseconds. The default value is 4."
+   },
+   {
+    "label": "<nLine>",
+    "documentation": "Designates from which line to begin the output. The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates from which column to begin the output. The default is the cursor column."
+   }
+  ],
+  "name": "SAYDOWN",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
+  "label": "SAYMOVEIN(<cCharacterstring>, [<nDelay>], [<nLine>], [<nColumn>], [<lDirection>])  --> cNull",
+  "arguments": [
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "Designates the string to be output with the \"move in\" effect."
+   },
+   {
+    "label": "<nDelay>",
+    "documentation": "Designates a time delay in milliseconds. The default value is 4."
+   },
+   {
+    "label": "<nLine>",
+    "documentation": "Designates the line where the result is output. The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the column where the result is output. The default is the cursor column."
+   },
+   {
+    "label": "<lDirection>",
+    "documentation": "Designates the direction that the characters are moved onto the screen.  If you omit this parameter or designate it as .F., the movement is from the left.  If you designate it as .T., the movement is from the right onto the screen.  The default is movement from the left (.F.)."
+   }
+  ],
+  "name": "SAYMOVEIN",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
   "label": "SayScreen( <cString>, [<nRow>], [<nCol>] ) -> <cEmptyString>",
   "documentation": "",
   "arguments": [
@@ -12975,6 +15623,32 @@
    }
   ],
   "name": "SayScreen",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
+  }
+ },
+ {
+  "label": "SAYSPREAD(<cCharacterstring>, [<nDelay>], [<nLine>], [<nColumn>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "Designates the string to output with the spread effect."
+   },
+   {
+    "label": "<nDelay>",
+    "documentation": "Designates a time delay in milliseconds.  The default value is 4."
+   },
+   {
+    "label": "<nLine>",
+    "documentation": "Designates the line from which the output begins.  The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the column from which the output begins.  The default is the cursor column."
+   }
+  ],
+  "name": "SAYSPREAD",
   "return": {
    "name": "",
    "help": "Returns an empty string."
@@ -13000,10 +15674,96 @@
   }
  },
  {
+  "label": "SCREENFILE(<cFileName>, [<lOverwrite>], [<nOffset>]), [<lTrim>] --> nBytesWritten",
+  "arguments": [
+   {
+    "label": "<cFileName>",
+    "documentation": "Designates the name and path of the screen file."
+   },
+   {
+    "label": "<lOverwrite>",
+    "documentation": "Designates whether you are to append to an existing file (.T.), or to overwrite it (.F.).  The default is overwrite (.F.)."
+   },
+   {
+    "label": "<nOffset>",
+    "documentation": "Designates the file offset from which you append, when"
+   },
+   {
+    "label": "<lOverwrite>",
+    "documentation": "is designated as .T..  The default is the end of file."
+   },
+   {
+    "label": "<lTrim>",
+    "documentation": "If this optional parameter is designated as .T., the function trims the file when the written data ends and before the last byte of the file.  The default is do not trim (.F.)."
+   }
+  ],
+  "name": "SCREENFILE",
+  "return": {
+   "name": "",
+   "help": "Returns the number of bytes written to the screen file."
+  }
+ },
+ {
+  "label": "SCREENMARK(<cSearchString>, <cAttr|nAttr>, <lUpperLower>, [<lAll>], [<cForwardDelimiter>], [<cTrailingDelimiter>]) --> lFound",
+  "arguments": [
+   {
+    "label": "<cSearchString>",
+    "documentation": "Designates the character string to search for in screen memory."
+   },
+   {
+    "label": "<cAttr|nAttr>",
+    "documentation": "Designates the new color attribute to use in the sequence located in screen memory. Can be specified as a numeric or in the manner required under CA-Clipper."
+   },
+   {
+    "label": "<lUpperLower>",
+    "documentation": "Designates whether the function is case sensitive (.T.) or not (.F.)."
+   },
+   {
+    "label": "<lAll>",
+    "documentation": "Designates whether to mark each occurrence (.T.) or only the first (.F.).  The default marks only the first (.F.)."
+   },
+   {
+    "label": "<cForwardDelimiter>",
+    "documentation": "This optional parameter designates which character preceding the <cSearchString> to use as a delimiter.  The default is no delimiter considered."
+   },
+   {
+    "label": "<cTrailingDelimiter>",
+    "documentation": "This optional parameter designates which character after the <cSearchString> to use as a delimiter. The default is no delimiter considered."
+   }
+  ],
+  "name": "SCREENMARK",
+  "return": {
+   "name": "",
+   "help": "Returns a .T. when it locates the designated string at least once."
+  }
+ },
+ {
   "label": "ScreenMix( <cCharString>, <cAttributeString>, [<nRow>], [<nCol>] ) -> <cEmptyString>",
   "documentation": "",
   "arguments": [],
   "name": "ScreenMix"
+ },
+ {
+  "label": "SCREENSTR ([<nRow>], [<nColumn>], [<nCharCount>]) --> cCharacterstring",
+  "arguments": [
+   {
+    "label": "<nRow>",
+    "documentation": "Designates the first line to read.  The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the first column to read.  The default is the cursor column."
+   },
+   {
+    "label": "<nCharCount>",
+    "documentation": "Designates how many characters to read.  The default is to the end of the window or screen area."
+   }
+  ],
+  "name": "SCREENSTR",
+  "return": {
+   "name": "",
+   "help": "Returns the character string that contains all of the bytes read from the screen."
+  }
  },
  {
   "label": "ScreenText( <nTop>, <nLeft>, <nBottom>, <nRight> )",
@@ -13123,6 +15883,11 @@
   }
  },
  {
+  "label": "SETBIT( <nLONG|cHexLONG>, <nBitPos1>[,...<nBitPos32>] ) -> <nNewValue>",
+  "arguments": [],
+  "name": "SETBIT"
+ },
+ {
   "label": "SetDate( <dDate>, [<lMode>] ) --> lSet",
   "documentation": "Sets the system date",
   "arguments": [
@@ -13139,6 +15904,43 @@
   "return": {
    "name": "",
    "help": "SetDate() RETURNs .T. when the date is successfully set."
+  }
+ },
+ {
+  "label": "SETFCREATE([<nNewFileAttr>]) --> <nOldFileAttr>",
+  "arguments": [
+   {
+    "label": "<nNewFileAttr>",
+    "documentation": "- a file attribute for a new file"
+   }
+  ],
+  "name": "SETFCREATE",
+  "return": {
+   "name": "",
+   "help": "Returns the current default attribute or the previous file attribute, if the parameter is specified."
+  }
+ },
+ {
+  "label": "SETFDATI(<cFilename>, [<dDate>], [<cTime>]) --> lDone",
+  "documentation": "Sets file date and time",
+  "arguments": [
+   {
+    "label": "<cFilename>",
+    "documentation": "is the name of the file whose date/time are to be changed."
+   },
+   {
+    "label": "<dDate>",
+    "documentation": "is the date to set. The default value is the current date."
+   },
+   {
+    "label": "<cTime>",
+    "documentation": "is the time to set. The default value is the current time."
+   }
+  ],
+  "name": "SETFDATI",
+  "return": {
+   "name": "",
+   "help": ".T. if the date/time was changed."
   }
  },
  {
@@ -13169,6 +15971,36 @@
   "name": "SetFont"
  },
  {
+  "label": "SETINKEYAFTERBLOCK( [<bBlock>]) --> bOldBlock",
+  "documentation": "Sets a codeblock that is called AFTER each INKEY() call but before returning from INKEY()",
+  "arguments": [
+   {
+    "label": "<bBlock>",
+    "documentation": "is the codeblock to execute. If no parameter is passed then the function returns bOldBlock only. To remove an existing codeblock the function must explicitly pass NIL"
+   }
+  ],
+  "name": "SETINKEYAFTERBLOCK",
+  "return": {
+   "name": "",
+   "help": "the existing codeblock or NIL if none present"
+  }
+ },
+ {
+  "label": "SETINKEYBEFOREBLOCK( [<bBlock>]) --> bOldBlock",
+  "documentation": "Sets a codeblock that is called before each INKEY() call",
+  "arguments": [
+   {
+    "label": "<bBlock>",
+    "documentation": "is the codeblock to execute. If no parameter is passed then the function returns bOldBlock only. To remove an existing codeblock the function must explicitly pass NIL"
+   }
+  ],
+  "name": "SETINKEYBEFOREBLOCK",
+  "return": {
+   "name": "",
+   "help": "the existing codeblock or NIL if none present"
+  }
+ },
+ {
   "label": "SetKey( <anKey> [, <bAction> [, <bCondition> ] ] )",
   "documentation": "Assign an action block to a key",
   "arguments": [
@@ -13189,6 +16021,20 @@
   "return": {
    "name": "",
    "help": "Current assigned action-block"
+  }
+ },
+ {
+  "label": "SETLASTKEY( <nKeyValue> ) -> <cNull>",
+  "arguments": [
+   {
+    "label": "<nKeyValue>",
+    "documentation": "Designates the character code passed to LASTKEY()."
+   }
+  ],
+  "name": "SETLASTKEY",
+  "return": {
+   "name": "",
+   "help": "SETLASTKEY() always returns a null string."
   }
  },
  {
@@ -13226,6 +16072,16 @@
   }
  },
  {
+  "label": "SetRegistry( <nHkey>, <cKeyName>, <cEntryName>, < xValueOfEntry > ) => < lResult >",
+  "documentation": "Sets an entry in a registry key",
+  "arguments": [],
+  "name": "SetRegistry",
+  "return": {
+   "name": "< lResult >",
+   "help": "-> .T. if the cEntryName was created with value < xValueOfEntry > else .F. if failed"
+  }
+ },
+ {
   "label": "SetTime( <cTime>, [<lMode>] ) --> lSet",
   "documentation": "Sets the system clock",
   "arguments": [
@@ -13260,6 +16116,41 @@
   }
  },
  {
+  "label": "SHOWTIME([<nRow>], [<nColumn>], [<lMode>], [<cAttr|nAttr>], [<l12/24>], [<lAM/PM>]) --> cNull",
+  "documentation": "Continuously displays the time at desired screen position",
+  "arguments": [
+   {
+    "label": "<nRow>",
+    "documentation": "Designates the row where the time is displayed.  The default is the cursor row."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the column where the time is displayed.  The default is the cursor column. The maximum column is calculated by FUNCTION if it�s exceed showtime string length."
+   },
+   {
+    "label": "<lMode>",
+    "documentation": "Designates whether seconds are to appear in the time display (.F.), or not (.T.).  The default is display seconds (.F.)."
+   },
+   {
+    "label": "<cAttr|nAttr>",
+    "documentation": "Designates to the screen attribute to use for the time display.  Strings in the form \"NN/NN\" or \"CC/CC\" (e.g., \"0/7\" or \"B/GR\") are possible.  The default is the setting for SetColor()."
+   },
+   {
+    "label": "<l12/24>",
+    "documentation": "By designating this parameter as .T., a 12-hour display is selected.  The default is a 24-hour display (.F.)."
+   },
+   {
+    "label": "<lAM/PM>",
+    "documentation": "If you have a 12-hour display, you may want to switch on an am/pm display.  When you specify this parameter as .T., an \"a\" or \"p\" (as in DOS), appears to reflect the time.  The default is no display (.F.). A call in ShowTime() without parameters uninstalls the time display."
+   }
+  ],
+  "name": "SHOWTIME",
+  "return": {
+   "name": "",
+   "help": "SHOWTIME() always RETURNs a null string."
+  }
+ },
+ {
   "label": "Sign( <nNumber> ) -> nSign",
   "documentation": "Sign of a number",
   "arguments": [
@@ -13272,6 +16163,21 @@
   "return": {
    "name": "<nSign>",
    "help": "sign of <nNumber>"
+  }
+ },
+ {
+  "label": "SIN (nRadiant) -> nSine",
+  "documentation": "Sine of the argument",
+  "arguments": [
+   {
+    "label": "<nRadiant>",
+    "documentation": "an angle size given in radiants"
+   }
+  ],
+  "name": "SIN",
+  "return": {
+   "name": "<nSine>",
+   "help": "the sine of <nRadiant>"
   }
  },
  {
@@ -13324,6 +16230,41 @@
   "documentation": "Select the \"STANDARD\" color value for output",
   "arguments": [],
   "name": "Standard"
+ },
+ {
+  "label": "StartThread( @FuncName() [, param1, ....., paramN] ) --> THREAD StartThread( \"funcname\" [, param1, ....., paramN] ) --> THREAD StartThread( { CodeBlock } [, param1, ....., paramN] ) --> THREAD StartThread( Object, MtdPtr [, param1, ....., paramN] ) --> THREAD StartThread( Object, \"MtdName\" [, param1, ....., paramN] ) --> THREAD",
+  "documentation": "Create An New thread",
+  "arguments": [],
+  "name": "StartThread",
+  "return": {
+   "name": "<THREAD>",
+   "help": "An Thread id"
+  }
+ },
+ {
+  "label": "STOD ([<cDate>]) -> dDate",
+  "documentation": "Convert ANSI date string to Harbour date",
+  "arguments": [],
+  "name": "STOD"
+ },
+ {
+  "label": "StopThread( THREAD [, MUTEX ] ) --> NIL",
+  "documentation": "Stops an thread",
+  "arguments": [
+   {
+    "label": "<THREAD>",
+    "documentation": "An Thread Id Value"
+   },
+   {
+    "label": "<MUTEX>",
+    "documentation": "An optional Mutex Id value"
+   }
+  ],
+  "name": "StopThread",
+  "return": {
+   "name": "",
+   "help": "NIL This function always return nil"
+  }
  },
  {
   "label": "Str( <nNumber>, [<nLength>], [<nDecimals>] ) --> cNumber",
@@ -13380,6 +16321,40 @@
   }
  },
  {
+  "label": "STRFILE(<cCharacterstring>, <cFile>, [<lOverwrite>], [<nOffset>], [<lCutOff>]) --> nRecordedByte",
+  "arguments": [
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "Designates the character string to write to a file."
+   },
+   {
+    "label": "<cFile>",
+    "documentation": "Designates a file name.  Drive and path designations are permitted, but no wildcards."
+   },
+   {
+    "label": "<lOverwrite>",
+    "documentation": "If not designated or designated as .F., determines whether or not a new file is created.  When .T., it writes to an existing file.  The default is create new file (.F.)."
+   },
+   {
+    "label": "<nOffset>",
+    "documentation": "Designates an offset within the file from which the"
+   },
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "string is to be written.  The default is End of file."
+   },
+   {
+    "label": "<lCutOff>",
+    "documentation": "When this optional parameter is designated as .T., the function truncates the file if data written ends before the last file byte.  The default is no cut off (.F.)."
+   }
+  ],
+  "name": "STRFILE",
+  "return": {
+   "name": "",
+   "help": "Returns the actual number of bytes written."
+  }
+ },
+ {
   "label": "StrFormat( <cMask>[, <cPar1>[, <cParn>[, ...]] ) --> cString",
   "documentation": "Format a string",
   "arguments": [
@@ -13396,6 +16371,28 @@
   "return": {
    "name": "<cString>",
    "help": "Return the mask with all the parameters inserted.   </par>"
+  }
+ },
+ {
+  "label": "STRSCREEN(<cCharacterstring>, [<nRow>], [<nColumn>]) --> cNull",
+  "arguments": [
+   {
+    "label": "<cCharacterstring>",
+    "documentation": "Designates the character string to display."
+   },
+   {
+    "label": "<nRow>",
+    "documentation": "Designates the starting line for the output.  The default is the cursor line."
+   },
+   {
+    "label": "<nColumn>",
+    "documentation": "Designates the starting column for output."
+   }
+  ],
+  "name": "STRSCREEN",
+  "return": {
+   "name": "",
+   "help": "Returns an empty string."
   }
  },
  {
@@ -13456,6 +16453,52 @@
   "return": {
    "name": "",
    "help": "StrZero() returns <nNumber> formatted as a character string. If the optional length and decimal arguments are not specified, StrZero() returns the character string according to the following rules: Results of StrZero() with No Optional Arguments <table> Expression               Return Value Length Field Variable           Field length plus decimals Expressions/constants    Minimum of 10 digits plus decimals Val()                    Minimum of 3 digits Month()/Day()            3 digits Year()                   5 digits RecNo()                  7 digits </table>"
+  }
+ },
+ {
+  "label": "Subscribe( MUTEX [, nMaxMilliSecs [, @bStatus]] ) --> ANY",
+  "documentation": "Subscribe an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   },
+   {
+    "label": "<nMaxMilliSec>",
+    "documentation": "Optional how many mili seconds to wait"
+   },
+   {
+    "label": "<bStatus>",
+    "documentation": "Optional logical parameter passed by reference that has the result of the operation"
+   }
+  ],
+  "name": "Subscribe",
+  "return": {
+   "name": "<ANY>",
+   "help": "This function can return any value"
+  }
+ },
+ {
+  "label": "SubscribeNow( MUTEX [,nMaxMilliSecs [, @bStatus]] ) --> ANY",
+  "documentation": "Subscribe an mutex",
+  "arguments": [
+   {
+    "label": "<MUTEX>",
+    "documentation": "An Mutex handle"
+   },
+   {
+    "label": "<nMaxMilliSec>",
+    "documentation": "Optional how many mili seconds to wait"
+   },
+   {
+    "label": "<bStatus>",
+    "documentation": "Optional logical parameter passed by reference that has the result of the operation"
+   }
+  ],
+  "name": "SubscribeNow",
+  "return": {
+   "name": "<ANY>",
+   "help": "This function can return any value"
   }
  },
  {
@@ -13625,6 +16668,31 @@
   "return": {
    "name": "<oBrowse>",
    "help": "An new Browse Object"
+  }
+ },
+ {
+  "label": "ThreadGetCurrent()  --> THREAD",
+  "documentation": "Get the current thread Id",
+  "arguments": [],
+  "name": "ThreadGetCurrent",
+  "return": {
+   "name": "<THREAD>",
+   "help": "An Thread Id Value"
+  }
+ },
+ {
+  "label": "ThreadSleep( <nMillisec> ) --> NIL",
+  "documentation": "Put an thread to sleep",
+  "arguments": [
+   {
+    "label": "<nMillisec>",
+    "documentation": "Number of mili second to put the thread to sleep"
+   }
+  ],
+  "name": "ThreadSleep",
+  "return": {
+   "name": "",
+   "help": "This function alwarys return nil"
   }
  },
  {
@@ -14070,6 +17138,16 @@
   "return": {
    "name": "",
    "help": "W2Bin() return two bytes character string that contains 16-bit encoded unsigned short integer (least significant byte first)."
+  }
+ },
+ {
+  "label": "WaitForThreads() -> NIL",
+  "documentation": "Wait for all thread",
+  "arguments": [],
+  "name": "WaitForThreads",
+  "return": {
+   "name": "",
+   "help": "This function alwarys return nil"
   }
  },
  {

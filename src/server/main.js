@@ -29,6 +29,15 @@ let docs = [];
 /** the list of undocumented harbour base functions
  * @type {Array<string>} */
 let missing = [];
+/** Functions found via "DYNAMIC <name>" declarations in .hbx export files
+ * under harbour.extraIncludePaths -- lets a custom/forked compiler's own
+ * native functions (baked into the compiler binary, so never seen by the
+ * workspace .prg/.ch scan) be recognized for completion, hover and the
+ * undefined-function check, the same way standard RTL functions from
+ * `missing` are. Only names are available here (a .hbx has no parameter
+ * docs), so hover shows a minimal placeholder for these.
+ * @type {Array<[string,string]>} [name, .hbx file name] */
+let customFunctions = [];
 
 /**
  * @typedef dbInfo
@@ -157,6 +166,7 @@ connection.onDidChangeConfiguration(params => {
     const oldDepth = workspaceDepth;
     includeDirs = params.settings.harbour.extraIncludePaths;
     includeDirs.splice(0, 0, ".")
+    scanCustomHbxFunctions();
     workspaceDepth = params.settings.harbour.workspaceDepth;
     const newAliases = params.settings.harbour.aliases || {};
     const customKeywords = (newAliases.customKeywords || []).slice();
@@ -192,6 +202,56 @@ connection.onDidChangeConfiguration(params => {
         });
     }
 })
+
+/** (Re)builds `customFunctions` by scanning `.hbx` export files under each
+ * `harbour.extraIncludePaths` entry (resolved against every workspace root,
+ * like `ParseInclude`'s own include-dir lookup) for "DYNAMIC <name>" lines
+ * -- the same declaration `.hbx` files use to export a function to the
+ * linker. This is a cheap, synchronous, best-effort scan (small "include"
+ * style directories, bounded recursion depth) run once per config change,
+ * not per keystroke/hover.
+ */
+function scanCustomHbxFunctions() {
+    const found = [];
+    const seen = {};
+    // anchored to the whole (trimmed) line -- a bare "DYNAMIC <name>" is the
+    // real export declaration; matching it unanchored would also catch the
+    // word "DYNAMIC" inside comments/prose (e.g. "...EXTERNAL/DYNAMIC list.")
+    const dynamicRegEx = /^DYNAMIC\s+([_a-zA-Z][_a-zA-Z0-9]*)$/i;
+    function scanDir(dir, depth) {
+        let entries;
+        try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+        for (const entry of entries) {
+            const p = path.join(dir, entry.name);
+            if (entry.isFile() && entry.name.toLowerCase().endsWith(".hbx")) {
+                let text;
+                try { text = fs.readFileSync(p, "utf8"); } catch (e) { continue; }
+                const lines = text.split(/\r?\n/);
+                for (const line of lines) {
+                    const m = dynamicRegEx.exec(line.trim());
+                    if (m && !(m[1].toLowerCase() in seen)) {
+                        seen[m[1].toLowerCase()] = true;
+                        found.push([m[1], entry.name]);
+                    }
+                }
+            } else if (entry.isDirectory() && depth > 0) {
+                scanDir(p, depth - 1);
+            }
+        }
+    }
+    for (const dir of includeDirs) {
+        if (path.isAbsolute(dir)) {
+            scanDir(dir, 5);
+        } else {
+            for (const root of workspaceRoots) {
+                const uri = Uri.parse(root);
+                if (uri.scheme != "file") continue;
+                scanDir(path.join(uri.fsPath, dir), 5);
+            }
+        }
+    }
+    customFunctions = found;
+}
 
 function parseWorkspace() {
     let nOpenend=0, fileQueue = [];
@@ -1056,6 +1116,10 @@ function isKnownFunction(nameCmp, pp, includeChain) {
         if (missing[i][0] && missing[i][0].toLowerCase() == nameCmp)
             return true;
     }
+    for (var i = 0; i < customFunctions.length; i++) {
+        if (customFunctions[i][0] && customFunctions[i][0].toLowerCase() == nameCmp)
+            return true;
+    }
     return false;
 }
 
@@ -1434,6 +1498,11 @@ connection.onCompletion((param, cancelled) => {
             if(c) c.detail = missing[i][1];
             if (cancelled.isCancellationRequested) return server.CompletionList.create(completions, true);
         }
+        for (var i = 0; i < customFunctions.length; i++) {
+            const c = CheckAdd(customFunctions[i][0], server.CompletionItemKind.Function, "A")
+            if(c) c.detail = customFunctions[i][1];
+            if (cancelled.isCancellationRequested) return server.CompletionList.create(completions, true);
+        }
         //AddCommands(param, completions)
     }
     if (wordBasedSuggestions && !pp) {
@@ -1732,6 +1801,18 @@ function rtlMissingHoverContent(name, library) {
     return { contents: { kind: 'markdown', value: `xHarbour/Harbour RTL function (library \`${library}\`).\n\nNo documentation available.` } };
 }
 
+/** Builds a minimal hover for a function found via a "DYNAMIC <name>" export
+ * in a `.hbx` file under `harbour.extraIncludePaths` (see
+ * `scanCustomHbxFunctions`) -- a custom/forked compiler's own native
+ * function, which only has a name available, no parameter docs.
+ * @param {string} name
+ * @param {string} hbxFile
+ * @returns {{contents: {kind: string, value: string}}}
+ */
+function customFunctionHoverContent(name, hbxFile) {
+    return { contents: { kind: 'markdown', value: `Custom function exported by \`${hbxFile}\`.\n\nNo documentation available.` } };
+}
+
 connection.onHover((params, cancelled) => {
     const w = GetWord(params);
     if(w.length==0) return undefined;
@@ -1800,6 +1881,11 @@ connection.onHover((params, cancelled) => {
     for (let i = 1; i < missing.length; i++) {
         if (missing[i][0] && missing[i][0].toLowerCase() == wordCmp) {
             return rtlMissingHoverContent(missing[i][0], missing[i][1]);
+        }
+    }
+    for (let i = 0; i < customFunctions.length; i++) {
+        if (customFunctions[i][0] && customFunctions[i][0].toLowerCase() == wordCmp) {
+            return customFunctionHoverContent(customFunctions[i][0], customFunctions[i][1]);
         }
     }
     return undefined;

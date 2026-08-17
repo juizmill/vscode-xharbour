@@ -17,3 +17,12 @@ they intended.
 Thanks to Antonino Perricone and contributors (including
 [Edgard Lorraine Messias](https://github.com/edgardmessias) for the syntax
 highlighting work) for the original implementation this fork builds on.
+
+## RTL function documentation (`hbdocs.json`)
+
+The parameter/return documentation shown for standard RTL functions (hover,
+signature help, completion) is extracted from the `$DOC$`-tagged comment
+blocks in the [xHarbour project](https://github.com/xHarbour-org/xharbour)'s
+own `doc/` source files, via `src/server/parseHBDoc.js`. Those doc files are
+themselves credited to their individual Harbour/xHarbour project authors
+(see e.g. `doc/en/array.txt` in that repository).

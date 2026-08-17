@@ -9,6 +9,27 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.7 - 2026-08-17
+
+### Added
+- `hbdocs.json` grew from 833 to 1025 documented RTL functions (192 net
+  new), re-extracted from the actual xHarbour project's own `doc/` source
+  (the same repo `Dockerfile` builds `harbour.compilerExecutable`'s Docker
+  image from) via a fixed `src/server/parseHBDoc.js` -- it previously
+  produced zero output against this source because these doc files use a
+  `*`-prefixed comment-continuation style the parser didn't strip, and
+  rejected any function whose syntax had a space before `(` (e.g.
+  `ADDASCII (...)`) as if it were a multi-word command. `hbdocs.missing`
+  shrank by the same 192 entries (existing entries were left untouched, not
+  regenerated from scratch, so nothing that already had docs was touched).
+- Custom/forked compilers' own native functions -- not visible to the
+  workspace `.prg`/`.ch` scan since they're baked into the compiler binary
+  -- are now recognized for completion, hover and the undefined-function
+  check if a `.hbx` export file declaring them (`DYNAMIC <name>` lines) is
+  found under `harbour.extraIncludePaths`. No parameter docs are available
+  from a `.hbx` (just names), so hover shows a minimal placeholder, like it
+  already does for undocumented standard RTL functions.
+
 ## 0.0.6 - 2026-08-17
 
 ### Added

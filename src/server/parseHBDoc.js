@@ -1,213 +1,161 @@
+/**
+ * Dev-only tool (not bundled into the extension) that (re)generates
+ * hbdocs.json/hbdocs.missing from a Harbour/xHarbour source checkout's
+ * "$DOC$" documentation blocks (the *.txt files under doc/, e.g.
+ * doc/en/array.txt), the same format the upstream Harbour project uses.
+ *
+ * Usage:
+ *   node src/server/parseHBDoc.js <sourceDir>
+ *
+ * <sourceDir> is any directory containing such *.txt files -- for this
+ * fork, the natural source is the actual xHarbour checkout already used to
+ * build harbour.compilerExecutable's Docker image (see ../../Dockerfile):
+ *   docker run --rm -v /tmp/xh-doc:/out xharbour-linux:latest \
+ *       bash -c "cp -r /opt/xharbour/doc /out/"
+ *   node src/server/parseHBDoc.js /tmp/xh-doc/doc
+ *
+ * Unlike a from-scratch regeneration, this MERGES into the existing
+ * hbdocs.json/hbdocs.missing instead of replacing them:
+ *  - a name already documented in hbdocs.json is left untouched (so this
+ *    can be re-run against a different/newer checkout without regressing
+ *    already-reviewed entries);
+ *  - a name newly found here that was previously in hbdocs.missing (known
+ *    to exist, no docs) is promoted into hbdocs.json and removed from
+ *    hbdocs.missing;
+ *  - a name found here that wasn't tracked at all (missing its own
+ *    "DYNAMIC" line in whatever .hbx export list originally seeded
+ *    hbdocs.missing -- this xHarbour checkout doesn't ship a comprehensive
+ *    one) is simply added to hbdocs.json.
+ * This also means hbdocs.missing's own completeness isn't derived here --
+ * it's inherited as-is from whatever generated the current hbdocs.missing.
+ */
 const fs = require("fs");
-const readline = require("readline");
-const path = require("path")
+const path = require("path");
 
-let nTodo = 0;
-const docs = [];
-const stdMethods = [];
-
-//walkPath(/home/perry/harbour-src)
-walkPath("c:\\harbour")
-function walkPath(dir) {
-	console.debug(`listing: ${dir}...`)
-	fs.readdir(dir, function (err, ff) {
-		if (ff == undefined)
-			return;
-		for (let i = 0; i < ff.length; i++) {
-			const completePath = path.join(dir, ff[i]);
-			const info = fs.statSync(completePath);
-			const lowerFileName = ff[i].toLocaleLowerCase();
-			if(lowerFileName.endsWith(".txt")) {
-				new parseFile(completePath);
-			} else if(lowerFileName.endsWith(".hbx")) {
-				parseHBX(completePath);
-			} else if(info.isDirectory()) {
-				walkPath(completePath)
-			}
-		}
-	});
+const sourceDir = process.argv[2];
+if (!sourceDir) {
+	console.error("Usage: node src/server/parseHBDoc.js <sourceDir>");
+	process.exit(1);
 }
 
-////parseDocEn(path.join(hbPath,"doc","en")); // parsed 332 procedures (over 1579 standard)
-//parseDocEn(hbPath); //parsed 833 procedures (over 1579 standard)
-////parseDocEn("c:\\harbour\\contrib\\rddads\\doc\\en")
-//parseHBX(path.join(hbPath,"include","harbour.hbx"));
+const jsonPath = path.join(__dirname, "hbdocs.json");
+const missingPath = path.join(__dirname, "hbdocs.missing");
 
-function parseHBX(completePath)
-{
-	nTodo++;
-	const fileName = path.parse(completePath).name
-	const ck = /DYNAMIC\s+([_a-z0-9]+)/i;
-	const reader = readline.createInterface({input:fs.createReadStream(completePath,"utf8")});
-	reader.on("line",l =>
-	{
-		const m = l.match(ck);
-		if(m && m[1])
-		{
-			stdMethods.push([m[1],fileName]);
-		}
-	});
-	reader.on("close",() =>
-	{
-		nTodo--;
-		if(nTodo==0)
-			createDoc();
-	})
-}
-function parseFile(path)
-{
-	//console.debug(`parsing: ${path}...`)
-	nTodo++;
-	this.inDoc = false;
-	this.lastSpecifyLine = ""
-	this.nFound = 0
-	this.reader = readline.createInterface({input:fs.createReadStream(path,"utf8")});
-	this.reader.on("line",l => this.parseLine(l));
-	this.reader.on("close",() =>
-	{
-		if(this.nFound>0)
-			console.debug(`${path}: found ${this.nFound} doc...`)
-		nTodo--;
-		if(nTodo==0)
-			createDoc();
-	})
-}
+const newDocs = [];
 
-function createDoc()
-{
-	console.debug(`parsed ${docs.length} procedures (over ${stdMethods.length} standard)`)
-	docs.sort( (a,b) => a.name.localeCompare(b.name));
-	stdMethods.sort( (a,b) => a[0].localeCompare(b[0]));
-	const unDoc = [], extra = [];
-	let is = 0, id =0;
-	while(is<stdMethods.length && id<docs.length)
-	{
-		switch(stdMethods[is][0].localeCompare(docs[id].name))
-		{
-			case  0: id++; is++; break; //are the same, go ahead both
-			case -1: unDoc.push(stdMethods[is]); is++; break; // Cathed! undocumentated method.
-			case 1: extra.push(docs[id].label); id++; break; // I don't write it anywhere, but extra contains documentated proc absent in hbx
-		}
+walk(sourceDir);
+merge();
+
+function walk(dir) {
+	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+		const p = path.join(dir, entry.name);
+		if (entry.isDirectory()) walk(p);
+		else if (entry.name.toLowerCase().endsWith(".txt")) parseFile(p);
 	}
-	let msg = "[\r\n"
-	for(let i=0;i<unDoc.length;i++)
-		msg += `["${unDoc[i][0]}","${unDoc[i][1]}"],\r\n`;
-	msg=msg.slice(0,msg.length-3)
-	msg += "\r\n]";
-	fs.writeFile("src/hbdocs.missing",	msg, (err)=>{if(err) console.error(err);});
-	fs.writeFile("src/hbdocs.json",	JSON.stringify(docs,undefined,1),(err)=>{if(err) console.error(err);});
 }
 
 /**
- * @param {String} line
+ * Parses every "/* $DOC$ ... $END$ *\/" block in one .txt file.
+ * Each line inside the block may optionally be prefixed with a "*"
+ * comment-continuation marker (this xHarbour checkout's doc/ files use
+ * that C-comment style; plain Harbour doc files usually don't -- both are
+ * handled the same way here since the marker is just stripped if present).
+ * @param {string} file
  */
-parseFile.prototype.parseLine = function(line)
-{
-	line = line.trim()
-	if(!this.inDoc)
-	{
-		this.inDoc = line == "/* $DOC$";
-		if(this.inDoc){
-			this.nFound++;
-			this.doc = {};
-			this.doc["label"] = undefined;
-			this.doc["documentation"] = undefined;
-			this.doc["arguments"] = [];
+function parseFile(file) {
+	const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
+	let inDoc = false, doc, lastSpecify = "";
+	for (const raw of lines) {
+		let line = raw.trim();
+		if (!inDoc) {
+			inDoc = /^\/\*\s*\$DOC\$\s*$/.test(line);
+			if (inDoc) doc = { label: undefined, documentation: undefined, arguments: [] };
+			continue;
 		}
-		return
-	}
-	if(line == "*/")
-	{
-		if(this.doc && this.doc.label)
-			docs.push(this.doc);
-		this.doc = undefined;
-		this.inDoc = false;
-		return;
-	}
-	if(line.startsWith("$"))
-	{
-		this.lastSpecifyLine = line;
-		return
-	}
-	switch(this.lastSpecifyLine)
-	{
-		case "$TEMPLATE$":
-			this.currentTemplate = line;
-			break;
-		case "$ONELINER$":
-			if(this.doc)
-			{
-				if(this.doc["documentation"])
-					this.doc["documentation"] += " " +line;
-				else
-					this.doc["documentation"] = line;
-			}
-			break;
-		case "$SYNTAX$":
-			if(this.doc)
-			{
-				if(line == "C Prototype")
-					this.doc = undefined;
-				else
-				if(this.doc["label"])
-					this.doc["label"] += " " + line;
-				else
-				{
-					const p = line.indexOf("(");
-					if(p<0)
-					{
-						this.doc = undefined;
-						break;
+		if (line === "*/") {
+			if (doc && doc.label) newDocs.push(doc);
+			doc = undefined; inDoc = false;
+			continue;
+		}
+		if (line.startsWith("*")) line = line.substring(1).trim();
+		if (line === "$END$") {
+			if (doc && doc.label) newDocs.push(doc);
+			doc = undefined; inDoc = false;
+			continue;
+		}
+		if (line.startsWith("$")) { lastSpecify = line; continue; }
+		switch (lastSpecify) {
+			case "$ONELINER$":
+				if (doc) doc.documentation = doc.documentation ? doc.documentation + " " + line : line;
+				break;
+			case "$SYNTAX$":
+				if (doc) {
+					// A "C Prototype" syntax block documents the C-level API
+					// (e.g. hb_setInitialize() for C extension authors), not a
+					// callable Harbour/xHarbour function -- skip the whole entry.
+					if (line === "C Prototype") { doc = undefined; inDoc = false; break; }
+					if (doc.label) doc.label += " " + line;
+					else {
+						const p = line.indexOf("(");
+						if (p < 0) { doc = undefined; inDoc = false; break; }
+						// trim: some syntax lines have a space before "(", e.g.
+						// "ADDASCII (<cString>, ...)" -- without trimming, the
+						// trailing space would make this look like a multi-word
+						// command syntax and get rejected below.
+						const name = line.substring(0, p).trim();
+						if (name.indexOf(" ") > 0) { doc = undefined; inDoc = false; break; } // multi-word: a command/class syntax, not a function
+						doc.name = name; doc.label = line;
 					}
-					const name = line.substring(0,p)
-					if(name.indexOf(" ")>0)
-					{
-						this.doc = undefined;
-						break;
-					}
-					this.doc["name"] = name;
-					this.doc["label"] = line;
 				}
-			}
-			break;
-		case "$ARGUMENTS$":
-			if(this.doc && line.length>0) {
-				var ck = /^\s*<[^>]+>/;
-				var mm = line.match(ck);
-				if(mm) {
-					var arg = {label:mm[0],documentation: line.replace(mm[0],"").trim()};
-					this.doc.arguments.push(arg);
-				}else if(this.doc.arguments.length>0)
-					this.doc.arguments[this.doc.arguments.length-1].documentation += " " + line;
-			}
-			break;
-		case "$RETURNS$":
-			if(this.doc && line.length>0) {
-				var ck = /^\s*<[^>]+>/;
-				var mm = line.match(ck);
-				if(mm) {
-					if(this.doc.return) {
-						this.doc.return.help += " " + line;
+				break;
+			case "$ARGUMENTS$":
+				if (doc && line.length > 0) {
+					const mm = line.match(/^\s*<[^>]+>/);
+					if (mm) doc.arguments.push({ label: mm[0], documentation: line.replace(mm[0], "").trim() });
+					else if (doc.arguments.length > 0) doc.arguments[doc.arguments.length - 1].documentation += " " + line;
+				}
+				break;
+			case "$RETURNS$":
+				if (doc && line.length > 0) {
+					const mm = line.match(/^\s*<[^>]+>/);
+					if (mm) {
+						if (doc.return) doc.return.help += " " + line;
+						else doc.return = { name: mm[0], help: line.replace(mm[0], "").trim() };
 					} else {
-						var arg = {name:mm[0], help: line.replace(mm[0],"").trim()};
-						this.doc.return = arg;
+						if (doc.return) doc.return.help += " " + line;
+						else doc.return = { name: "", help: line };
 					}
-				} else {
-					if(this.doc.return) {
-						this.doc.return.help += " " + line;
-					} else
-						this.doc.return = {name:"", help: line};
-
 				}
-			}
-			break;
+				break;
+		}
 	}
-	/* templates:
-		Document
-		Function
-		Command
-		Procedure
-		Run time error
-		Class
-	*/
+}
+
+function merge() {
+	const oldDocs = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+	const oldMissing = JSON.parse(fs.readFileSync(missingPath, "utf8"));
+	const oldNames = new Set(oldDocs.map(d => d.name.toLowerCase()));
+
+	const seen = new Set();
+	const added = [];
+	for (const d of newDocs) {
+		const k = d.name.toLowerCase();
+		if (seen.has(k) || oldNames.has(k)) continue; // first occurrence wins; never overwrite an existing entry
+		seen.add(k);
+		added.push(d);
+	}
+
+	const finalDocs = oldDocs.concat(added);
+	finalDocs.sort((a, b) => a.name.localeCompare(b.name));
+	const finalMissing = oldMissing.filter(m => !seen.has((m[0] || "").toLowerCase()));
+
+	fs.writeFileSync(jsonPath, JSON.stringify(finalDocs, undefined, 1));
+	// one compact ["name","lib"] pair per line -- matches the original
+	// generator's format; JSON.stringify(arr, undefined, N) would instead
+	// indent every nested array onto its own lines, ~3x the file size for
+	// no benefit (it's not meant to be hand-edited).
+	fs.writeFileSync(missingPath, "[\n" + finalMissing.map(m => " " + JSON.stringify(m)).join(",\n") + "\n]");
+
+	console.log(`Added ${added.length} newly documented functions (hbdocs.json: ${oldDocs.length} -> ${finalDocs.length}).`);
+	console.log(`hbdocs.missing: ${oldMissing.length} -> ${finalMissing.length}.`);
 }
