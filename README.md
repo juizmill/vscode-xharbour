@@ -25,6 +25,7 @@ and, where it matters, the compiler — about your own macro conventions.
 - [Commands](#commands)
 - [Settings reference](#settings-reference)
 - [Code formatting](#code-formatting)
+- [File icons](#file-icons)
 - [Debugging](#debugging)
 - [Build tasks](#build-tasks)
 - [Snippets](#snippets)
@@ -59,12 +60,18 @@ container-based wrappers that only mount that directory still see them.
   constants. This works across the whole indexed workspace, not just the
   file you're editing — hovering a call to a function defined in another
   `.prg` still shows its comment (as long as `harbour.workspaceDepth > 0`,
-  see [below](#settings-reference)).
+  see [below](#settings-reference)). Also works for the **standard
+  xHarbour/Harbour RTL** (parameters, description, return value — e.g.
+  hovering `Len()`), and for a **custom/forked compiler's own native
+  functions** if a `.hbx` export file declaring them is found under
+  `harbour.extraIncludePaths` (name only, since a `.hbx` doesn't carry
+  parameter docs).
 - **Go to definition** / **Find all references**, also workspace-wide.
 - **Document symbols** (`Ctrl+Shift+O` / `Cmd+Shift+O`) and **workspace
   symbols** (`Ctrl+T` / `Cmd+T`).
 - **Completion** and **signature help**, including for `harbour.aliases.callSuffixes`
-  call styles (see below).
+  call styles (see below), the standard RTL, and any custom `.hbx`-exported
+  functions (see Hover above).
 - **Semantic tokens**, **folding ranges**, and bracket/`IF`-`ENDIF`/`FOR`-`NEXT`-style
   decoration of matching pairs (`harbour.decorator`).
 - **Document formatting**, configured through a dedicated settings editor
@@ -202,6 +209,12 @@ container wrapper that only mounts that one directory. The first word of
 | `harbour.aliases.callSuffixMode` | `"either"` |
 | `harbour.aliases.commandRules` | `[]` |
 
+**Icons** — see [File icons](#file-icons).
+
+| Setting | Default |
+|---|---|
+| `harbour.iconTheme.baseIconTheme` | `""` |
+
 **Formatter** — set via `harbour.setupCodeFormat`, or directly:
 
 | Setting | Default |
@@ -222,6 +235,42 @@ Run **Harbour: setup code style** to open a live-preview editor for the
 `harbour.formatter.*` settings above — check the boxes/pick the options you
 want and the sample on the right updates immediately; changes are written
 straight to your settings.
+
+## File icons
+
+The extension contributes a VS Code **File Icon Theme** named "xHarbour
+Icons" that shows a custom icon for `.prg`/`.ch`/`.hbx`/`.hb` files in the
+Explorer. Select it with `Ctrl+K Ctrl+T` (`Cmd+K Cmd+T` on macOS) → *File
+Icon Theme*, or set it directly:
+
+```jsonc
+"workbench.iconTheme": "xharbour-icons"
+```
+
+A File Icon Theme is a VS Code-wide setting, not per-workspace, and only one
+can be active at a time — for *every* file type, not just xHarbour's. On its
+own, "xHarbour Icons" only knows about xHarbour files, so everything else
+falls back to a plain generic file/folder icon.
+
+To keep the icons from a theme you already use (Catppuccin, Material Icon
+Theme, Seti, etc.) for every other file, and only add the xHarbour icon on
+top of it, point `harbour.iconTheme.baseIconTheme` at that theme's `id`:
+
+```jsonc
+"workbench.iconTheme": "xharbour-icons",
+"harbour.iconTheme.baseIconTheme": "catppuccin-mocha"
+```
+
+The `id` isn't the label shown in the theme picker — it's the `id` the base
+theme's own extension declares under `contributes.iconThemes` in its
+`package.json`. This works by regenerating a local copy of "xHarbour Icons"
+from that base theme's own icon definitions each time the extension
+activates or the setting changes; nothing from the base theme is bundled or
+redistributed with this extension, it's only read from your own
+already-installed copy of it. Leave the setting unset (or pointed at a
+theme that isn't installed) to fall back to the plain generic icons.
+**Reload the window** (`Ctrl+Shift+P` → *Reload Window*) after changing
+`harbour.iconTheme.baseIconTheme` — icon theme content isn't re-read live.
 
 ## Debugging
 
