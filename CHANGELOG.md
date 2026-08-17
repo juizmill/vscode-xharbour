@@ -9,6 +9,19 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.5 - 2026-08-17
+
+### Fixed
+- The compiler-backed validator could report a compiler warning (e.g.
+  `Ambiguous reference`) on the wrong line -- one that only *mentions* the
+  identifier inside a string literal (e.g. `Local a := "Mensagem do Erro()
+  ..."`) -- and misidentify that occurrence as the real one. Two bugs
+  combined to cause this: the identifier-column search matched raw line text
+  without excluding string literals/comments, and the "line continuation"
+  check used to walk backward from the reported line to find the real
+  reference matched a `;` anywhere in a line instead of only a trailing one,
+  so it could wander into unrelated lines. Both are fixed.
+
 ## 0.0.4 - 2026-08-17
 
 ### Fixed

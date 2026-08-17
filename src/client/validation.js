@@ -25,7 +25,45 @@ function deactivate()
 }
 
 const valRegEx = /^\r?(?:([^\(]*)\((\d+)\)\s+)?(Warning|Error)\s+([^\r\n]*)/
-const lineContRegEx = /;(\s*(\/\/|&&|\/\*))?/
+// Anchored at end-of-line: a bare trailing ";" (Harbour's statement
+// continuation), optionally followed by a "//"/"&&" line comment or an
+// unclosed "/*" block comment. Unanchored, this used to match a ";" anywhere
+// on the line (e.g. "if x; y := 1; endif" on one line), making the
+// backward line-continuation walk below run on lines that were not actually
+// continuations.
+const lineContRegEx = /;\s*(\/\/.*|&&.*|\/\*(?:(?!\*\/).)*)?$/
+/**
+ * Blanks out (same length, so column offsets stay valid) string literals and
+ * "//" line comments in `text`, so the identifier-column search below never
+ * matches occurrences of the name that only appear inside a string or a
+ * comment (e.g. an error message like "Erro() nao encontrado").
+ * @param {string} text
+ */
+function stripStringsAndComments(text)
+{
+	let out = "";
+	let i = 0;
+	while(i < text.length)
+	{
+		const c = text[i];
+		if(c == '"' || c == "'")
+		{
+			const end = text.indexOf(c, i + 1);
+			if(end < 0) { out += " ".repeat(text.length - i); break; }
+			out += c + " ".repeat(end - i - 1) + c;
+			i = end + 1;
+			continue;
+		}
+		if(c == "/" && text[i + 1] == "/")
+		{
+			out += " ".repeat(text.length - i);
+			break;
+		}
+		out += c;
+		i++;
+	}
+	return out;
+}
 /**
  * Whether the text right after a matched identifier is ":<suffix>(", where
  * <suffix> is one of harbour.aliases.callSuffixes -- i.e. the identifier is
@@ -97,7 +135,8 @@ function validate(textDocument)
 				const rr = new RegExp('\\b'+subject[0].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")+'\\b',"ig")
 				let testLine = line;
 				do {
-					while(m=rr.exec(testLine.text))
+					const searchText = stripStringsAndComments(testLine.text);
+					while(m=rr.exec(searchText))
 					{
 						putAll = false;
 						if(r[4].indexOf("Ambiguous reference")>=0 &&
