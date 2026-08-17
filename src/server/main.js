@@ -1696,6 +1696,42 @@ function commentHoverContent(info) {
     return { contents: { kind: 'plaintext', value: info.comment.replace(/\r\n/g, '\n').trim() } };
 }
 
+/** Builds a hover for a standard xHarbour/Harbour RTL function from its
+ * `hbdocs.json` entry -- the same shape `GetHelpFromDoc`/`getStdHelp` use to
+ * build signature help -- so hovering a call to e.g. `Len()` shows its
+ * parameters and behavior, the same way hovering a workspace-defined
+ * function shows its doc-comment.
+ * @param {object} doc entry from `docs` (hbdocs.json)
+ * @returns {{contents: {kind: string, value: string}}}
+ */
+function rtlHoverContent(doc) {
+    let value = "```harbour\n" + doc.label + "\n```";
+    if (doc.documentation)
+        value += "\n\n" + doc.documentation;
+    if (doc.arguments && doc.arguments.length > 0) {
+        value += "\n\n**Parameters**";
+        for (let i = 0; i < doc.arguments.length; i++) {
+            const arg = doc.arguments[i];
+            value += "\n- `" + arg.label + "`";
+            if (arg.documentation) value += " — " + arg.documentation;
+        }
+    }
+    if (doc.return && doc.return.help)
+        value += "\n\n**Returns**: " + doc.return.help;
+    return { contents: { kind: 'markdown', value: value } };
+}
+
+/** Builds a minimal hover for an RTL function that's known to exist (from
+ * `hbdocs.missing`) but has no parsed documentation, so hovering it still
+ * confirms it's a recognized RTL function instead of showing nothing.
+ * @param {string} name
+ * @param {string} library
+ * @returns {{contents: {kind: string, value: string}}}
+ */
+function rtlMissingHoverContent(name, library) {
+    return { contents: { kind: 'markdown', value: `xHarbour/Harbour RTL function (library \`${library}\`).\n\nNo documentation available.` } };
+}
+
 connection.onHover((params, cancelled) => {
     const w = GetWord(params);
     if(w.length==0) return undefined;
@@ -1750,6 +1786,20 @@ connection.onHover((params, cancelled) => {
         const otherFuncInfo = findFuncCommentInfo(otherPp.funcList, wordCmp);
         if (otherFuncInfo) {
             return commentHoverContent(otherFuncInfo);
+        }
+    }
+    // Not defined anywhere in the workspace -- fall back to the standard
+    // xHarbour/Harbour RTL (the same `docs`/`missing` data isKnownFunction
+    // and signature help already use), so e.g. Len() shows its parameters
+    // and behavior too, not just workspace-defined functions.
+    for (let i = 0; i < docs.length; i++) {
+        if (docs[i].name && docs[i].name.toLowerCase() == wordCmp) {
+            return rtlHoverContent(docs[i]);
+        }
+    }
+    for (let i = 1; i < missing.length; i++) {
+        if (missing[i][0] && missing[i][0].toLowerCase() == wordCmp) {
+            return rtlMissingHoverContent(missing[i][0], missing[i][1]);
         }
     }
     return undefined;

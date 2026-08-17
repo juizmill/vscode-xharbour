@@ -9,6 +9,17 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.6 - 2026-08-17
+
+### Added
+- Hover now shows parameters, description and return value for standard
+  xHarbour/Harbour RTL functions (e.g. `Len()`), reusing the same
+  `hbdocs.json` data already powering signature help and completion --
+  previously hover only worked for functions defined in the workspace.
+  RTL functions known to exist but without parsed documentation
+  (`hbdocs.missing`) get a minimal "no documentation available" hover
+  instead of nothing.
+
 ## 0.0.5 - 2026-08-17
 
 ### Fixed
