@@ -2,7 +2,7 @@
     "name": "vscode-xharbour-lang",
     "displayName": "vscode xHarbour",
     "description": "xHarbour/Harbour language support for Visual Studio Code (fork of harbourCodeExtension by Antonino Perricone, with configurable syntax aliases)",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "license": "GPL-3.0-or-later",
     "publisher": "juizmill",
     "icon": "harbourIcon.png",
@@ -294,6 +294,13 @@
                 "embeddedLanguages": {
                     "source.c": "c"
                 }
+            }
+        ],
+        "iconThemes": [
+            {
+                "id": "xharbour-icons",
+                "label": "xHarbour Icons",
+                "path": "./fileicons/xharbour-icon-theme.json"
             }
         ],
         "breakpoints": [

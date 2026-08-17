@@ -1,0 +1,20 @@
+{
+	"iconDefinitions": {
+		"_file": { "iconPath": "./generic-file.svg" },
+		"_folder": { "iconPath": "./generic-folder.svg" },
+		"_folder_open": { "iconPath": "./generic-folder-open.svg" },
+		"harbour_file": { "iconPath": "../harbour.svg" }
+	},
+	"file": "_file",
+	"folder": "_folder",
+	"folderExpanded": "_folder_open",
+	"fileExtensions": {
+		"prg": "harbour_file",
+		"ch": "harbour_file",
+		"hbx": "harbour_file",
+		"hb": "harbour_file"
+	},
+	"languageIds": {
+		"harbour": "harbour_file"
+	}
+}

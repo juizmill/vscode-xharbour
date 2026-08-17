@@ -9,6 +9,25 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.8 - 2026-08-17
+
+### Added
+- New extension/Marketplace icon (`harbourIcon.png`), rasterized from
+  `harbour.svg`.
+- File Icon Theme ("xHarbour Icons", `Ctrl+K Ctrl+T` to select it): shows
+  the `harbour.svg` icon for `.prg`/`.ch`/`.hbx`/`.hb` files in the
+  Explorer. Not selected automatically -- picking a file icon theme is a
+  user/global VS Code setting (`workbench.iconTheme`), so activating this
+  one replaces whatever icon theme is currently active for *all* files, not
+  just xHarbour ones; other file types fall back to a plain generic
+  file/folder icon since this theme doesn't attempt to also cover every
+  other language.
+
+### Fixed
+- `.vscodeignore`'s blanket `*.svg` rule was stripping every SVG (including
+  the ones the new icon theme needs) out of the packaged `.vsix`; added
+  explicit `!harbour.svg`/`!fileicons/**` exceptions.
+
 ## 0.0.7 - 2026-08-17
 
 ### Added

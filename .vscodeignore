@@ -3,6 +3,8 @@
 .vscodeignore
 debugger.md
 *.svg
+!harbour.svg
+!fileicons/**
 node_modules
 src
 test
