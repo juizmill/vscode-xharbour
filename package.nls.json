@@ -8,6 +8,7 @@
     "harbour.aliases.commandRules.match": "The pattern to match, using standard xHarbour #command syntax (e.g. \"DEFAULT <v> := <x>\")",
     "harbour.aliases.commandRules.replace": "What the matched pattern expands to (e.g. \"Default( <v>, <x> )\")",
     "harbour.aliases.customDefault": "Built-in support for the DEFAULT command (e.g. \"Default cNome := \\\"mundo\\\"\"), including cascading multiple assignments in one statement with \",;\" line continuation (e.g. \"Default cNome := x, cSobrenome := y\"), with no #command/commandRules setup needed. Also colors DEFAULT like a keyword. On by default; set to false to turn it off (e.g. if your own harbour.aliases.commandRules defines a conflicting DEFAULT command).",
+    "harbour.aliases.commandRulesUseFileDir": "Where to write the generated .ch file for commandRules/customDefault: the OS temp dir (default, keeps it out of your project folder) or, if enabled, next to the file being compiled. Only enable this if harbour.compilerExecutable is a wrapper (e.g. a Docker container) that can't see the OS temp dir -- otherwise leave it off.",
     "harbour.validating": "Every time a file is opened or saved the executable is called to validate the code(Lint)",
     "harbour.compilerExecutable": "complete path of the harbour executable",
     "harbour.extraOptions": "other options to pass to harbour compiler",

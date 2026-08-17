@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 
 
@@ -58,11 +59,12 @@ const DEFAULT_COMMAND_RULES =
  * harbour.aliases.customDefault is false. Returns the extra compiler args
  * needed to pick it up (-u+<file>), or [] if there is nothing to generate.
  *
- * The file is written inside fileCwd (the directory of the file being
- * compiled) rather than the OS temp dir: harbour.compilerExecutable can be a
- * wrapper (e.g. a Docker container) that only mounts/sees that directory, so
- * anything outside it -- like /tmp -- may not exist from the compiler's
- * point of view.
+ * The file is written to the OS temp dir by default. Set
+ * harbour.aliases.commandRulesUseFileDir to write it inside fileCwd (the
+ * directory of the file being compiled) instead: needed only when
+ * harbour.compilerExecutable is a wrapper (e.g. a Docker container) that
+ * only mounts/sees that directory, so the OS temp dir may not exist from the
+ * compiler's point of view. Most projects don't need this.
  * @param {string} fileCwd
  * @return {Array<string>}
  */
@@ -77,7 +79,9 @@ function getAliasCommandArgs(fileCwd) {
         lines.unshift(DEFAULT_COMMAND_RULES);
     if (lines.length == 0)
         return [];
-    const chPath = path.join(fileCwd, ".vscode-xharbour-lang-command-rules.ch");
+    const useFileDir = section.aliases && section.aliases.commandRulesUseFileDir === true;
+    const chDir = useFileDir ? fileCwd : os.tmpdir();
+    const chPath = path.join(chDir, ".vscode-xharbour-lang-command-rules.ch");
     fs.writeFileSync(chPath, lines.join("\n") + "\n");
     return ["-u+" + chPath];
 }

@@ -9,6 +9,8 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.3 - 2026-08-17
+
 ### Added
 - `harbour.aliases.customKeywords` — color custom words as keywords.
 - `harbour.aliases.callSuffixes` — treat `identifier:Suffix(...)` as a call
@@ -18,6 +20,10 @@ it isn't reproduced here since none of it is specific to this fork.
 - `harbour.aliases.commandRules` — declare `#command`-style macro rules in
   settings instead of pasting a `#command` line into every file; applied to
   the compiler via a generated `.ch` and `-u+`.
+- `harbour.aliases.commandRulesUseFileDir` — write that generated `.ch` next
+  to the file being compiled instead of the OS temp dir; only needed when
+  `harbour.compilerExecutable` is a containerized wrapper (e.g. Docker) that
+  can't see the OS temp dir. Off by default.
 - `harbour.checkUndefinedFunctions` — opt-in, workspace-aware "possibly
   undefined function" hints from the language server, independent of the
   compiler-backed validator.
@@ -41,7 +47,10 @@ it isn't reproduced here since none of it is specific to this fork.
   temp directory, which a containerized `harbour.compilerExecutable` (e.g.
   a Docker wrapper that only mounts the compiled file's own directory)
   can't see — validation/build failed with `Can't open standard rule file`.
-  It's now written next to the file being compiled.
+  It's written next to the file being compiled when
+  `harbour.aliases.commandRulesUseFileDir` is enabled (see Added); off by
+  default it goes back to the OS temp dir, so most projects don't get this
+  file cluttering their working directory.
 - The compiler-backed validator silently dropped any compiler message that
   didn't have a `file(line)` prefix (such as the error above) into a
   diagnostics bucket for an empty filename, so it never reached the
