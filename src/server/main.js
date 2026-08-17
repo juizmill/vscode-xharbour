@@ -2022,6 +2022,30 @@ connection.onFoldingRanges((params) => {
     return ranges;
 })
 
+/** Used by the compiler-backed validator (src/client/validation.js) to
+ * scope harbour.aliases.allowBareCalls: the compiler's "Ambiguous
+ * reference" warning fires for any identifier not immediately followed by
+ * "(", which could be a real bare function call OR a genuinely
+ * undeclared/misspelled variable -- the compiler itself can't tell them
+ * apart. This runs the exact same `isKnownFunction` check
+ * harbour.checkUndefinedFunctions uses (workspace, RTL, .hbx exports,
+ * harbour.aliases.customFunctions) so "allow bare calls" only ever
+ * suppresses the warning for names that really are known functions,
+ * leaving a real undeclared-variable warning alone.
+ * @param {{textDocument:{uri:string}, names:string[]}} params
+ * @returns {Object.<string, boolean>} same names as keys, whether each is known
+ */
+connection.onRequest("harbour/isKnownFunction", (params) => {
+    const doc = documents.get(params.textDocument.uri);
+    const pp = doc ? getDocumentProvider(doc) : undefined;
+    const includeChain = (pp && doc) ? resolveIncludeChain(pp, doc.uri) : undefined;
+    const result = {};
+    for (const name of (params.names || [])) {
+        result[name] = isKnownFunction(name.toLowerCase(), pp, includeChain);
+    }
+    return result;
+})
+
 connection.onRequest("harbour/groupAtPosition", (params) => {
     const doc = documents.get(params.textDocument.uri);
     if(!doc) return [];

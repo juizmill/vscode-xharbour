@@ -6,9 +6,15 @@ const readline = require("readline");
 const getAliasCommandArgs = require("./utils.js").getAliasCommandArgs;
 
 let diagnosticCollection;
+let languageClient;
 
-function activate(context)
+/**
+ * @param {import("vscode").ExtensionContext} context
+ * @param {import("vscode-languageclient").LanguageClient} cl
+ */
+function activate(context, cl)
 {
+    languageClient = cl;
     diagnosticCollection = vscode.languages.createDiagnosticCollection('harbour');
 	context.subscriptions.push(diagnosticCollection);
 
@@ -80,13 +86,14 @@ function isCallSuffixUsage(lineText, afterIndex, callSuffixesLower)
 	return m ? callSuffixesLower.indexOf(m[1].toLowerCase()) >= 0 : false;
 }
 // The compiler only ever emits "Ambiguous reference" for an identifier that
-// is NOT immediately followed by "(" -- i.e. the old Clipper-style bare
-// 0-arg call (e.g. "x := MinhaFuncao" or "IF MinhaFuncao"), where it can't
-// tell a function call apart from an undeclared/misspelled variable. There's
-// nothing more specific to check for that case (unlike the ":<suffix>("
-// case above) -- suppressing it means trusting that every such bare
-// identifier in this codebase really is meant as a call, not a typo, which
-// is exactly why harbour.aliases.allowBareCalls defaults to off.
+// is NOT immediately followed by "(" -- either the old Clipper-style bare
+// 0-arg call (e.g. "x := MinhaFuncao" instead of "x := MinhaFuncao()"), or a
+// genuinely undeclared/misspelled variable; the compiler itself can't tell
+// them apart. With harbour.aliases.allowBareCalls on, every such reference
+// is checked against the language server's own "is this a known function"
+// index (harbour/isKnownFunction -- the same one harbour.checkUndefinedFunctions
+// uses) before being suppressed, so an actual undeclared variable used the
+// same way still gets flagged.
 function validate(textDocument)
 {
 	if(textDocument.languageId !== 'harbour' )
@@ -110,6 +117,8 @@ function validate(textDocument)
 	const diagnostics = {};
 	diagnostics[textDocument.fileName] = [];
 	const doneSubjects = {};
+	/** @type {Array<{file:string, diag:import("vscode").Diagnostic, name:string}>} */
+	const pendingBareCalls = [];
 	function parseLine(subLine)
 	{
 		const r = valRegEx.exec(subLine);
@@ -148,9 +157,10 @@ function validate(textDocument)
 					while(m=rr.exec(searchText))
 					{
 						putAll = false;
+						let isBareCallCandidate = false;
 						if(r[4].indexOf("Ambiguous reference")>=0) {
 							if(isCallSuffixUsage(testLine.text, m.index+subject[0].length, callSuffixesLower)) continue;
-							if(allowBareCalls) continue;
+							if(allowBareCalls) isBareCallCandidate = true;
 						}
 						const diag = new vscode.Diagnostic(new vscode.Range(lineNr,m.index,lineNr,m.index+subject[0].length), r[4],
 							r[3]=="Warning"? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error)
@@ -158,6 +168,7 @@ function validate(textDocument)
 							diag.tags = [vscode.DiagnosticTag.Unnecessary];
 						}
 						diagnostics[r[1]].push(diag)
+						if(isBareCallCandidate) pendingBareCalls.push({ file: r[1], diag: diag, name: subject[0] });
 					}
 					if(lineNr==0) break;
 					testLine = textDocument.lineAt(--lineNr);
@@ -178,12 +189,37 @@ function validate(textDocument)
 	//process.stdout.on('data', (v) => parseData(v,false));
 	process.on("exit",function(code)
 	{
-		for (const file in diagnostics) {
-			if (diagnostics.hasOwnProperty(file)) {
-				const infos = diagnostics[file];
-				diagnosticCollection.set(vscode.Uri.file(file), infos);
+		function publish() {
+			for (const file in diagnostics) {
+				if (diagnostics.hasOwnProperty(file)) {
+					const infos = diagnostics[file];
+					diagnosticCollection.set(vscode.Uri.file(file), infos);
+				}
 			}
 		}
+		if (pendingBareCalls.length == 0 || !languageClient) {
+			publish();
+			return;
+		}
+		// Ask the language server which of these bare references are
+		// actually known functions (see harbour/isKnownFunction), and drop
+		// only those from the diagnostics before publishing -- a genuine
+		// undeclared/misspelled variable used the same bare way stays
+		// flagged. If the request fails for any reason, fail safe: publish
+		// with every candidate still shown, same as allowBareCalls being off.
+		languageClient.sendRequest("harbour/isKnownFunction", {
+			textDocument: { uri: textDocument.uri.toString() },
+			names: pendingBareCalls.map(p => p.name)
+		}).then(known => {
+			for (const p of pendingBareCalls) {
+				if (known && known[p.name]) {
+					const arr = diagnostics[p.file];
+					const idx = arr ? arr.indexOf(p.diag) : -1;
+					if (idx >= 0) arr.splice(idx, 1);
+				}
+			}
+			publish();
+		}, () => publish());
 	});
 }
 

@@ -7,6 +7,7 @@
         "**/.DS_Store": true,
         "**/.hbmk": true
     },
+    "harbour.aliases.allowBareCalls": true,
     "harbour.warningLevel": 3,
     "harbour.checkUndefinedFunctions": true,
     "harbour.workspaceDepth": 2,

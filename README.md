@@ -168,11 +168,17 @@ on that style:
 "harbour.aliases.allowBareCalls": true // default false
 ```
 
-This is a plain on/off switch, not scoped to known functions the way the
-`:<suffix>(` suppression above is — turning it on suppresses *every* bare
-`Ambiguous reference` warning, so a genuine typo/undeclared variable used
-the same way would go unflagged too. That tradeoff is why it defaults to
-off; only enable it if you're sure.
+Unlike the `:<suffix>(` suppression above, the compiler gives no syntactic
+hint here — `Ambiguous reference` looks identical whether the identifier is
+a real function or an actual undeclared/misspelled variable. So when this
+is on, the validator asks the language server (the same index
+`harbour.checkUndefinedFunctions` uses: workspace functions, standard RTL,
+`.hbx`-discovered and `harbour.aliases.customFunctions`-declared ones) for
+each flagged name, and only drops the warning for the ones that really are
+known functions — a genuine undeclared variable used the same bare way
+still gets flagged. Off by default anyway, since it's still one more layer
+of "trust the extension's index" than the default, warning-preserving
+behavior.
 
 ### `harbour.aliases.commandRules`
 

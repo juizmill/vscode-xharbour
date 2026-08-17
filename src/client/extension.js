@@ -18,8 +18,6 @@ function activate(context) {
 			indentNextLinePattern: /;((?:\/\/|&&).*)?$/
 		}
 	});
-	validation.activate(context);
-
 	const serverModule = context.asAbsolutePath(path.join('dist','hb_server.js'));
 	const debugOptions = { execArgv: ["--nolazy", "--inspect-brk=21780"] };
 	const serverOptions = {
@@ -35,6 +33,7 @@ function activate(context) {
 	const cl = new client.LanguageClient('HarbourServer', 'Harbour Server', serverOptions, clientOptions);
 	cl.registerProposedFeatures()
 	context.subscriptions.push(cl.start());
+	validation.activate(context, cl);
 	vscode.commands.registerCommand('harbour.getDbgCode', () => { getDbgCode(context); })
 	vscode.commands.registerCommand("harbour.debugList", DebugList)
 	vscode.commands.registerCommand("harbour.setupCodeFormat", () => { formatEditor.showEditor(context); })

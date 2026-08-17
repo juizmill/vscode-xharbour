@@ -9,6 +9,20 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.12 - 2026-08-17
+
+### Fixed
+- `harbour.aliases.allowBareCalls` suppressed the compiler's "Ambiguous
+  reference" warning for *every* bare (no-parentheses) identifier, since
+  the compiler-backed validator (`src/client/validation.js`) had no way to
+  tell a real function apart from a genuinely undeclared/misspelled
+  variable used the same way -- so turning it on also hid real
+  undeclared-variable bugs, not just legitimate bare function calls. The
+  validator now asks the language server (new `harbour/isKnownFunction`
+  request, backed by the same index `harbour.checkUndefinedFunctions`
+  uses) which of the flagged names are actually known functions, and only
+  drops the warning for those.
+
 ## 0.0.11 - 2026-08-17
 
 ### Added
