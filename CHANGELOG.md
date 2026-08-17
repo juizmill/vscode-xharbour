@@ -9,6 +9,17 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.4 - 2026-08-17
+
+### Fixed
+- `harbour.checkUndefinedFunctions` reported a false "not found" hint for
+  functions defined only in an `#include`d `.ch` file: the hover doc-comment
+  lookup already walked a document's `#include` chain, but the
+  undefined-function check (and `harbour.aliases.callSuffixMode` checks) only
+  consulted the directory-scanned `harbour.workspaceDepth` index, never the
+  `#include` chain. Both now check the same resolved include chain hover
+  uses.
+
 ## 0.0.3 - 2026-08-17
 
 ### Added

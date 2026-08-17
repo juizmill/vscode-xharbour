@@ -973,9 +973,39 @@ documents.listen(connection);
 
 const callableKinds = { "function": true, "procedure": true, "function*": true, "procedure*": true, "C-FUNC": true, "method": true };
 
+/** Resolves a document's full `#include` chain (transitively) to an array of
+ * parsed Providers, using the same on-demand `ParseInclude` lookup
+ * `connection.onHover` uses to find doc-comments in included `.ch` files --
+ * independent of `harbour.workspaceDepth`/the directory-scanned `files`
+ * index, since a project's shared includes (e.g. a common `.ch` with
+ * function definitions) are often outside the scanned tree.
+ * @param {provider.Provider} pp
+ * @param {string} docUri
+ * @returns {Array<provider.Provider>}
+ */
+function resolveIncludeChain(pp, docUri) {
+    const result = [];
+    const thisDone = docUri in files;
+    const startDir = path.dirname(Uri.parse(docUri).fsPath);
+    const pending = pp.includes.slice();
+    let i = 0;
+    while (i < pending.length) {
+        const pInc = ParseInclude(startDir, pending[i], thisDone);
+        if (pInc) {
+            result.push(pInc);
+            for (let j = 0; j < pInc.includes.length; j++) {
+                if (pending.indexOf(pInc.includes[j]) < 0)
+                    pending.push(pInc.includes[j]);
+            }
+        }
+        i++;
+    }
+    return result;
+}
+
 /** Is `nameCmp` (already lowercased) a known function/procedure defined in
- * `pp` itself or anywhere in the indexed workspace (RTL not included -- see
- * `isKnownFunction` for that).
+ * `pp` itself, anywhere in the indexed workspace, or in `pp`'s resolved
+ * `#include` chain (RTL not included -- see `isKnownFunction` for that).
  * `pp` is checked directly (not just via the global `files` index) because a
  * document's provider may not be registered in `files` yet -- e.g. right
  * after the language server (re)starts and a config change re-runs this
@@ -983,9 +1013,10 @@ const callableKinds = { "function": true, "procedure": true, "function*": true, 
  * the document.
  * @param {string} nameCmp
  * @param {provider.Provider} [pp]
+ * @param {Array<provider.Provider>} [includeChain] see `resolveIncludeChain`
  * @returns {boolean}
  */
-function isKnownWorkspaceFunction(nameCmp, pp) {
+function isKnownWorkspaceFunction(nameCmp, pp, includeChain) {
     function hasIt(prov) {
         for (const fn in prov.funcList) {
             const info = prov.funcList[fn];
@@ -999,18 +1030,24 @@ function isKnownWorkspaceFunction(nameCmp, pp) {
         if (files[file] === pp) continue; // already checked above
         if (hasIt(files[file])) return true;
     }
+    if (includeChain) {
+        for (let i = 0; i < includeChain.length; i++) {
+            if (hasIt(includeChain[i])) return true;
+        }
+    }
     return false;
 }
 
 /** Is `nameCmp` (already lowercased) a known function/procedure -- either
- * defined in `pp` itself, anywhere in the indexed workspace, or part of the
- * standard xHarbour/Harbour RTL?
+ * defined in `pp` itself, anywhere in the indexed workspace, in `pp`'s
+ * resolved `#include` chain, or part of the standard xHarbour/Harbour RTL?
  * @param {string} nameCmp
  * @param {provider.Provider} [pp]
+ * @param {Array<provider.Provider>} [includeChain] see `resolveIncludeChain`
  * @returns {boolean}
  */
-function isKnownFunction(nameCmp, pp) {
-    if (isKnownWorkspaceFunction(nameCmp, pp)) return true;
+function isKnownFunction(nameCmp, pp, includeChain) {
+    if (isKnownWorkspaceFunction(nameCmp, pp, includeChain)) return true;
     for (var i = 0; i < docs.length; i++) {
         if (docs[i].name && docs[i].name.toLowerCase() == nameCmp)
             return true;
@@ -1029,16 +1066,18 @@ function isKnownFunction(nameCmp, pp) {
  * happen to be open, so a name "not found" would almost always just mean
  * "defined in a workspace file we never indexed", not "doesn't exist".
  * @param {provider.Provider} pp
+ * @param {import("vscode-languageserver-textdocument").TextDocument} doc
  * @returns {Array<object>}
  */
-function buildUndefinedFunctionDiagnostics(pp) {
+function buildUndefinedFunctionDiagnostics(pp, doc) {
     if (!checkUndefinedFunctionsEnabled || !(workspaceDepth > 0))
         return [];
+    const includeChain = resolveIncludeChain(pp, doc.uri);
     const diagnostics = [];
     for (const cmpName in pp.references) {
         const refs = pp.references[cmpName];
         if (!Array.isArray(refs)) continue;
-        if (isKnownFunction(cmpName, pp)) continue;
+        if (isKnownFunction(cmpName, pp, includeChain)) continue;
         for (let i = 0; i < refs.length; i++) {
             const ref = refs[i];
             if (ref.type != "function") continue;
@@ -1105,13 +1144,14 @@ function findReceiverBeforeColon(doc, ref) {
 function buildCallSuffixDiagnostics(pp, doc) {
     if (callSuffixMode == "either" || aliasConfig.callSuffixes.length == 0)
         return [];
+    const includeChain = resolveIncludeChain(pp, doc.uri);
     const diagnostics = [];
     if (callSuffixMode == "suffixOnly") {
         const suggestedSuffix = aliasConfig.callSuffixesRaw[0];
         for (var cmpName in pp.references) {
             var refs = pp.references[cmpName];
             if (!Array.isArray(refs)) continue;
-            if (!isKnownWorkspaceFunction(cmpName, pp)) continue;
+            if (!isKnownWorkspaceFunction(cmpName, pp, includeChain)) continue;
             for (var i = 0; i < refs.length; i++) {
                 var ref = refs[i];
                 if (ref.type != "function") continue;
@@ -1134,7 +1174,7 @@ function buildCallSuffixDiagnostics(pp, doc) {
                 if (ref.type != "method") continue;
                 const receiver = findReceiverBeforeColon(doc, ref);
                 if (!receiver) continue;
-                if (!isKnownWorkspaceFunction(receiver.name.toLowerCase(), pp)) continue;
+                if (!isKnownWorkspaceFunction(receiver.name.toLowerCase(), pp, includeChain)) continue;
                 diagnostics.push({
                     severity: server.DiagnosticSeverity.Error,
                     range: server.Range.create(ref.line, receiver.start, ref.line, ref.col + ref.howWrite.length),
@@ -1155,7 +1195,7 @@ function buildCallSuffixDiagnostics(pp, doc) {
  * @param {import("vscode-languageserver-textdocument").TextDocument} doc
  */
 function publishHarbourDiagnostics(pp, doc) {
-    const diagnostics = buildUndefinedFunctionDiagnostics(pp).concat(buildCallSuffixDiagnostics(pp, doc));
+    const diagnostics = buildUndefinedFunctionDiagnostics(pp, doc).concat(buildCallSuffixDiagnostics(pp, doc));
     connection.sendDiagnostics({ uri: doc.uri, diagnostics: diagnostics });
 }
 
