@@ -9,6 +9,23 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.9 - 2026-08-17
+
+### Added
+- `harbour.iconTheme.baseIconTheme` -- id of another installed File Icon
+  Theme (e.g. `"catppuccin-mocha"`) whose icons "xHarbour Icons" now clones
+  and keeps for every other file type, adding only the xHarbour icon on top
+  for `.prg`/`.ch`/`.hbx`/`.hb`. Activating "xHarbour Icons" no longer means
+  losing your current theme's icons for everything else -- VS Code only
+  supports one active File Icon Theme at a time, so this works by
+  regenerating `fileicons/xharbour-icon-theme.json` from a copy of the
+  configured base theme's own icon definitions (asset paths rewritten to
+  resolve correctly from this extension's folder) each time the extension
+  activates or the setting changes; asset files themselves are never copied
+  or redistributed, only referenced locally. Leave unset for the previous
+  plain generic-icon fallback. Changing the setting prompts for a window
+  reload, since icon theme content isn't re-read live.
+
 ## 0.0.8 - 2026-08-17
 
 ### Added

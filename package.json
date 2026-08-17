@@ -2,7 +2,7 @@
     "name": "vscode-xharbour-lang",
     "displayName": "vscode xHarbour",
     "description": "xHarbour/Harbour language support for Visual Studio Code (fork of harbourCodeExtension by Antonino Perricone, with configurable syntax aliases)",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "license": "GPL-3.0-or-later",
     "publisher": "juizmill",
     "icon": "harbourIcon.png",
@@ -19,7 +19,8 @@
         "onLanguage:harbour",
         "onCommand:harbour.getdbgcode",
         "onCommand:harbour.setupCodeFormat",
-        "workspaceContains:**/*.prg"
+        "workspaceContains:**/*.prg",
+        "onStartupFinished"
     ],
     "engines": {
         "vscode": "^1.40.0"
@@ -264,6 +265,11 @@
                     "type": "boolean",
                     "description": "%harbour.aliases.commandRulesUseFileDir%",
                     "default": false
+                },
+                "harbour.iconTheme.baseIconTheme": {
+                    "type": "string",
+                    "description": "%harbour.iconTheme.baseIconTheme%",
+                    "default": ""
                 }
             }
         },

@@ -8,6 +8,7 @@ const docCreator = require('./docCreator.js');
 const taskProvider = require('./taskProvider.js');
 const net = require("net");
 const formatEditor = require("./formatEditor.js");
+const iconTheme = require("./iconTheme.js");
 
 function activate(context) {
 	vscode.languages.setLanguageConfiguration('harbour', {
@@ -39,7 +40,8 @@ function activate(context) {
 	vscode.commands.registerCommand("harbour.setupCodeFormat", () => { formatEditor.showEditor(context); })
 	decorator.activate(context,cl);
 	docCreator.activate(context,cl);
-	taskProvider.activate();	
+	taskProvider.activate();
+	iconTheme.activate(context);
 	// https://code.visualstudio.com/updates/v1_30#:~:text=Finalized%20Debug%20Adapter%20Tracker%20API
 	/*vscode.debug.registerDebugAdapterTrackerFactory('harbour-dbg', {
 		createDebugAdapterTracker(  ) {
