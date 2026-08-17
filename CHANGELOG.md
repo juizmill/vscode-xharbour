@@ -9,6 +9,19 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.11 - 2026-08-17
+
+### Added
+- `harbour.aliases.allowBareCalls` -- suppresses the compiler's "Ambiguous
+  reference" warning for xHarbour's third calling style, the old
+  Clipper-style bare-name call with no parentheses at all, used as a value
+  (`x := Foo` / `IF Foo` instead of `Foo()`). Off by default: unlike the
+  `:<suffix>(` suppression, this one isn't scoped to any specific pattern
+  -- the compiler only emits this warning for identifiers not immediately
+  followed by `(`, so there's nothing more specific to check, and enabling
+  it means trusting every such bare reference in the codebase is really a
+  call and not an undeclared/misspelled variable.
+
 ## 0.0.10 - 2026-08-17
 
 ### Added

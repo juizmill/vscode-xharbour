@@ -15,5 +15,13 @@
     "harbour.aliases.callSuffixes": [
         "Exec"
     ],
-    "harbour.aliases.callSuffixMode": "suffixOnly"
+    "harbour.aliases.callSuffixMode": "suffixOnly",
+    "harbour.aliases.customFunctions": [
+      {
+        "name": "Mens",
+        "params": ["cMsg"],
+        "documentation": "Mostra <cMsg> como mensagem na tela.",
+        "returns": "NIL"
+      }
+    ]
 }

@@ -79,6 +79,14 @@ function isCallSuffixUsage(lineText, afterIndex, callSuffixesLower)
 	const m = /^\s*:\s*([A-Za-z_]\w*)\s*\(/.exec(lineText.substring(afterIndex));
 	return m ? callSuffixesLower.indexOf(m[1].toLowerCase()) >= 0 : false;
 }
+// The compiler only ever emits "Ambiguous reference" for an identifier that
+// is NOT immediately followed by "(" -- i.e. the old Clipper-style bare
+// 0-arg call (e.g. "x := MinhaFuncao" or "IF MinhaFuncao"), where it can't
+// tell a function call apart from an undeclared/misspelled variable. There's
+// nothing more specific to check for that case (unlike the ":<suffix>("
+// case above) -- suppressing it means trusting that every such bare
+// identifier in this codebase really is meant as a call, not a typo, which
+// is exactly why harbour.aliases.allowBareCalls defaults to off.
 function validate(textDocument)
 {
 	if(textDocument.languageId !== 'harbour' )
@@ -87,6 +95,7 @@ function validate(textDocument)
 	if(!section.validating)
 		return;
 	const callSuffixesLower = ((section.aliases && section.aliases.callSuffixes) || []).map(function(s) {return s.toLowerCase();});
+	const allowBareCalls = !!(section.aliases && section.aliases.allowBareCalls);
 	let args = ["-s", "-q0", "-m", "-n0", "-w"+section.warningLevel, textDocument.fileName ];
 	const file_cwd = path.dirname(textDocument.fileName);
 	for (let i = 0; i < section.extraIncludePaths.length; i++) {
@@ -139,9 +148,9 @@ function validate(textDocument)
 					while(m=rr.exec(searchText))
 					{
 						putAll = false;
-						if(r[4].indexOf("Ambiguous reference")>=0 &&
-							isCallSuffixUsage(testLine.text, m.index+subject[0].length, callSuffixesLower)) {
-							continue;
+						if(r[4].indexOf("Ambiguous reference")>=0) {
+							if(isCallSuffixUsage(testLine.text, m.index+subject[0].length, callSuffixesLower)) continue;
+							if(allowBareCalls) continue;
 						}
 						const diag = new vscode.Diagnostic(new vscode.Range(lineNr,m.index,lineNr,m.index+subject[0].length), r[4],
 							r[3]=="Warning"? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error)

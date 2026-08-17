@@ -21,6 +21,7 @@ and, where it matters, the compiler — about your own macro conventions.
 - [Aliasing features](#aliasing-features-fork-specific)
   - [`harbour.aliases.customKeywords`](#harbouraliasescustomkeywords)
   - [`harbour.aliases.callSuffixes` and `callSuffixMode`](#harbouraliasescallsuffixes-and-callsuffixmode)
+  - [`harbour.aliases.allowBareCalls`](#harbouraliasesallowbarecalls)
   - [`harbour.aliases.commandRules`](#harbouraliasescommandrules)
   - [`harbour.aliases.customFunctions`](#harbouraliasescustomfunctions)
 - [Commands](#commands)
@@ -154,6 +155,25 @@ specifically suppresses that one warning for identifiers immediately
 followed by `:<a configured suffix>(`, while leaving every other ambiguous
 reference on the same or other lines untouched.
 
+### `harbour.aliases.allowBareCalls`
+
+xHarbour actually allows a *third* calling style, inherited from Clipper: no
+parentheses at all, used as a value -- `x := Foo` or `IF Foo` instead of
+`x := Foo()` / `IF Foo()`. The compiler can't tell that apart from an
+undeclared/misspelled variable either, so it emits the same
+`Ambiguous reference` warning for it. If your codebase intentionally relies
+on that style:
+
+```jsonc
+"harbour.aliases.allowBareCalls": true // default false
+```
+
+This is a plain on/off switch, not scoped to known functions the way the
+`:<suffix>(` suppression above is — turning it on suppresses *every* bare
+`Ambiguous reference` warning, so a genuine typo/undeclared variable used
+the same way would go unflagged too. That tradeoff is why it defaults to
+off; only enable it if you're sure.
+
 ### `harbour.aliases.commandRules`
 
 Declares `#command`/`#xcommand`-style macro rules once, in settings, instead
@@ -238,6 +258,7 @@ just not visible from any source the extension can scan.
 | `harbour.aliases.customKeywords` | `[]` |
 | `harbour.aliases.callSuffixes` | `[]` |
 | `harbour.aliases.callSuffixMode` | `"either"` |
+| `harbour.aliases.allowBareCalls` | `false` |
 | `harbour.aliases.commandRules` | `[]` |
 | `harbour.aliases.customFunctions` | `[]` |
 
