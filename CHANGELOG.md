@@ -9,6 +9,36 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.13 - 2026-08-17
+
+### Added
+- DocBlock-style (`@param`/`@return`/`@example`/...) doc-comments now
+  render as a structured hover card, same visual style as standard RTL
+  functions, instead of being shown verbatim. Purely additive and
+  auto-detected (only comments containing at least one `@tag` line are
+  parsed this way) -- free-form prose comments are unaffected. A file's
+  first function/procedure is always exempt, never DocBlock-parsed, so a
+  required banner-style header comment on it (some shops' custom compilers
+  enforce one) is never mistaken for a DocBlock. `@tags` and `<param>`
+  placeholders are also syntax-highlighted inside the comment now (reuses
+  the same scope/colors themes already define for JSDoc). See
+  [`test/docblock_demo.prg`](test/docblock_demo.prg) and the
+  [README](README.md#docblock-comments).
+
+### Fixed
+- `provider.js`'s blank-line handling never actually reset the
+  "accumulated doc-comment" state (`if(justStart) this.resetComments()`
+  referenced a *different*, not-yet-assigned local `justStart` due to `var`
+  hoisting, so the condition was always false) -- an unrelated comment
+  paragraph followed by a blank line and then a function's own doc-comment
+  would get glued together into one comment, shown as a single (wrong)
+  block on hover. Fixing the blank-line reset on its own then exposed a
+  second, previously-masked issue: a "/* ... */" comment whose closing
+  "*/" has nothing after it reaches the same blank-line check with its
+  now-blanked remainder, which was wiping the comment that had just been
+  accumulated -- fixed by only resetting on a line that was blank from the
+  start, not the tail end of a comment that just closed.
+
 ## 0.0.12 - 2026-08-17
 
 ### Fixed

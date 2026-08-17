@@ -303,7 +303,20 @@ Provider.prototype.linePP = function (line) {
         }
     }
     if (line.trim().length == 0) {
-        if(justStart) this.resetComments()
+        // A blank line ends whatever comment paragraph precedes it, so it
+        // doesn't get glued onto a later, unrelated one (e.g. a file-level
+        // header comment followed by a blank line and then a function's own
+        // doc-comment). This used to read "if(justStart) this.resetComments()",
+        // but `justStart` here referred to the local `var justStart` declared
+        // further down (line ~316) -- due to hoisting it was always
+        // `undefined` at this point, so the reset never actually ran.
+        //
+        // Only reset if `line` was blank from the start (i==0): a "/* ... */"
+        // block comment that closes with nothing after "*/" reaches this
+        // same check with `line` replaced by its blanked-out remainder
+        // (i>0, see above) -- that's not a separator line, it's the comment
+        // we just finished accumulating, which resetComments() would wipe.
+        if (i == 0) this.resetComments()
         this.lineStates.push(new lineState(this.cMode? 1 : 0))
         return "";
     }

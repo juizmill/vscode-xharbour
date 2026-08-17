@@ -18,6 +18,7 @@ and, where it matters, the compiler — about your own macro conventions.
 - [Requirements](#requirements)
 - [Language features](#language-features)
 - [Diagnostics / validation](#diagnostics--validation)
+- [DocBlock comments](#docblock-comments)
 - [Aliasing features](#aliasing-features-fork-specific)
   - [`harbour.aliases.customKeywords`](#harbouraliasescustomkeywords)
   - [`harbour.aliases.callSuffixes` and `callSuffixMode`](#harbouraliasescallsuffixes-and-callsuffixmode)
@@ -67,7 +68,9 @@ container-based wrappers that only mount that directory still see them.
   hovering `Len()`), and for a **custom/forked compiler's own native
   functions** if a `.hbx` export file declaring them is found under
   `harbour.extraIncludePaths` (name only, since a `.hbx` doesn't carry
-  parameter docs).
+  parameter docs). A doc-comment written in
+  [DocBlock style](#docblock-comments) (`@param`, `@return`, ...) renders
+  the same structured way.
 - **Go to definition** / **Find all references**, also workspace-wide.
 - **Document symbols** (`Ctrl+Shift+O` / `Cmd+Shift+O`) and **workspace
   symbols** (`Ctrl+T` / `Cmd+T`).
@@ -102,6 +105,52 @@ Two independent mechanisms feed the Problems panel:
    will always look "undefined" to it. It only runs at all when
    `harbour.workspaceDepth > 0` — with no cross-file index, every external
    call would be a false positive.
+
+## DocBlock comments
+
+A doc-comment above a function can optionally use JSDoc/PHPDoc-style
+`@tags` instead of free-form prose, and hover renders it as a structured
+card (same visual style used for standard RTL functions) instead of
+showing the comment verbatim:
+
+```harbour
+/**
+ * Mostra uma mensagem formatada na tela e registra no log.
+ *
+ * @param <cMsg>  Texto da mensagem a ser exibida.
+ * @param <nTipo> Tipo da mensagem (1=Info, 2=Erro). Opcional, padrão 1.
+ * @return .T. se a mensagem foi exibida com sucesso.
+ * @example
+ *   Mens("Processo concluído", 1)
+ */
+FUNCTION Mens(cMsg, nTipo)
+RETURN .T.
+```
+
+| Tag | Repeatable | Meaning |
+|---|---|---|
+| *(untagged text before the first `@tag`)* | — | Description, same as an explicit `@description` |
+| `@param <name> text` | yes, one per parameter | `<name>` is optional-looking syntax, not enforced — `@param name text` works too |
+| `@return` / `@returns` | no | Return value description |
+| `@example` | no | Rendered as a code block in the hover |
+| `@author`, `@since`, `@see`, `@deprecated`, or any other `@word` | no | Shown as-is under a bolded label |
+
+This is purely additive, detected automatically — a comment is only
+treated as a DocBlock if it contains at least one `@tag` line; anything
+else (free-form prose, an ASCII-art banner, `$DOC$`-style blocks) is shown
+exactly as before. **The first function/procedure in a file is never
+DocBlock-parsed**, even if its comment happens to contain an `@tag` — some
+shops' compilers require a fixed header format specifically on a file's
+first function (e.g. a boxed banner with `Referência`/`Objetivo`/...
+fields), and this keeps that comment always shown verbatim, unconditionally.
+
+`@tags` and `<param>` placeholders inside a `/* ... */` comment are also
+syntax-highlighted distinctly from the rest of the comment (reuses the
+same color themes already use for JSDoc), so the source itself is easier
+to scan even before hovering.
+
+See [`test/docblock_demo.prg`](test/docblock_demo.prg) for a runnable
+example of all three comment styles side by side.
 
 ## Aliasing features (fork-specific)
 

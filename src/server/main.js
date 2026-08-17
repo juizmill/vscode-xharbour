@@ -1809,7 +1809,120 @@ function findFuncCommentInfo(list, wordCmp) {
     return best;
 }
 
-function commentHoverContent(info) {
+const CALLABLE_KINDS_FOR_FIRST_CHECK = { "function": true, "procedure": true, "function*": true, "procedure*": true };
+
+/** Whether `info` is the first function/procedure *definition* in `list`
+ * (a file's own `funcList`, in source order) -- used to keep the very
+ * first function of a file (which some shops' custom compilers require a
+ * fixed banner-style header comment on) always shown as-is, never
+ * DocBlock-parsed, regardless of what its comment looks like.
+ * @param {provider.Info} info
+ * @param {Array<provider.Info>} list
+ * @returns {boolean}
+ */
+function isFirstFunctionInFile(info, list) {
+    if (!CALLABLE_KINDS_FOR_FIRST_CHECK[info.kind]) return false;
+    for (let i = 0; i < list.length; i++) {
+        const other = list[i];
+        if (other.foundLike != "definition") continue;
+        if (!CALLABLE_KINDS_FOR_FIRST_CHECK[other.kind]) continue;
+        if (other.startLine < info.startLine) return false;
+    }
+    return true;
+}
+
+/** Parses a "/** ... *\/"-style doc-comment into structured fields if it
+ * looks like a DocBlock (JSDoc/PHPDoc-style, at least one "@tag" line) --
+ * returns undefined otherwise, so the caller falls back to showing the
+ * comment verbatim (unchanged behavior for free-form prose or a banner
+ * like the one some shops require on a file's first function).
+ * @param {string} comment
+ * @returns {{description:string, params:Array<{name:string,doc:string}>, returns:string, example:string, extra:Array<{tag:string,text:string}>}|undefined}
+ */
+function parseDocBlock(comment) {
+    const rawLines = comment.replace(/\r\n/g, "\n").split("\n");
+    // strip a leading docblock "gutter" ("/**", " * ", "*/") from each line
+    const lines = rawLines.map(l => l
+        .replace(/^\s*\/\*\*?\s?/, "")
+        .replace(/\*\/\s*$/, "")
+        .replace(/^\s*\*\s?/, ""));
+    if (!lines.some(l => /^\s*@[A-Za-z]+\b/.test(l))) return undefined;
+
+    const result = { description: "", params: [], returns: "", example: "", extra: [] };
+    let mode = "description", currentParam, currentExtra;
+    for (const rawLine of lines) {
+        const tagMatch = /^\s*@([A-Za-z]+)\b\s*(.*)$/.exec(rawLine);
+        if (tagMatch) {
+            const tag = tagMatch[1].toLowerCase();
+            const rest = tagMatch[2];
+            if (tag == "param") {
+                const pm = /^<?([A-Za-z_]\w*)>?\s*(.*)$/.exec(rest);
+                currentParam = { name: pm ? pm[1] : rest.trim(), doc: pm ? pm[2].trim() : "" };
+                result.params.push(currentParam);
+                mode = "param";
+            } else if (tag == "return" || tag == "returns") {
+                result.returns = rest.trim();
+                mode = "returns";
+            } else if (tag == "example") {
+                result.example = rest.trim();
+                mode = "example";
+            } else if (tag == "description") {
+                result.description = (result.description ? result.description + " " : "") + rest.trim();
+                mode = "description";
+            } else {
+                currentExtra = { tag: tag, text: rest.trim() };
+                result.extra.push(currentExtra);
+                mode = "extra";
+            }
+            continue;
+        }
+        const trimmed = rawLine.trim();
+        if (trimmed.length == 0) continue;
+        if (mode == "description") result.description += (result.description ? " " : "") + trimmed;
+        else if (mode == "param" && currentParam) currentParam.doc += (currentParam.doc ? " " : "") + trimmed;
+        else if (mode == "returns") result.returns += (result.returns ? " " : "") + trimmed;
+        else if (mode == "example") result.example += (result.example ? "\n" : "") + rawLine;
+        else if (mode == "extra" && currentExtra) currentExtra.text += (currentExtra.text ? " " : "") + trimmed;
+    }
+    return result;
+}
+
+/** Builds a hover for a parsed DocBlock (see `parseDocBlock`), in the same
+ * visual style `rtlHoverContent` uses for standard RTL functions.
+ * @param {ReturnType<typeof parseDocBlock>} parsed
+ * @param {provider.Info} info
+ * @returns {{contents: {kind: string, value: string}}}
+ */
+function docBlockHoverContent(parsed, info) {
+    const label = info.name + "(" + parsed.params.map(p => "<" + p.name + ">").join(", ") + ")";
+    let value = "```harbour\n" + label + "\n```";
+    if (parsed.description) value += "\n\n" + parsed.description;
+    if (parsed.params.length > 0) {
+        value += "\n\n**Parameters**";
+        for (const p of parsed.params) {
+            value += "\n- `<" + p.name + ">`";
+            if (p.doc) value += " — " + p.doc;
+        }
+    }
+    if (parsed.returns) value += "\n\n**Returns**: " + parsed.returns;
+    if (parsed.example) value += "\n\n**Example**\n```harbour\n" + parsed.example + "\n```";
+    for (const e of parsed.extra) {
+        value += "\n\n**" + e.tag.charAt(0).toUpperCase() + e.tag.slice(1) + "**: " + e.text;
+    }
+    return { contents: { kind: 'markdown', value: value } };
+}
+
+/**
+ * @param {provider.Info} info
+ * @param {Array<provider.Info>} [list] the file's own funcList `info` came
+ * from, used to detect/exempt the file's first function -- omit only when
+ * that check isn't meaningful (there isn't currently such a caller).
+ */
+function commentHoverContent(info, list) {
+    if (!(list && isFirstFunctionInFile(info, list))) {
+        const parsed = parseDocBlock(info.comment);
+        if (parsed) return docBlockHoverContent(parsed, info);
+    }
     return { contents: { kind: 'plaintext', value: info.comment.replace(/\r\n/g, '\n').trim() } };
 }
 
@@ -1874,7 +1987,7 @@ connection.onHover((params, cancelled) => {
         }
         const funcInfo = findFuncCommentInfo(pp.funcList, wordCmp);
         if (funcInfo) {
-            return commentHoverContent(funcInfo);
+            return commentHoverContent(funcInfo, pp.funcList);
         }
         const thisDone = doc.uri in files;
         const includes = pp.includes;
@@ -1889,7 +2002,7 @@ connection.onHover((params, cancelled) => {
                 }
                 const incFuncInfo = findFuncCommentInfo(pInc.funcList, wordCmp);
                 if (incFuncInfo) {
-                    return commentHoverContent(incFuncInfo);
+                    return commentHoverContent(incFuncInfo, pInc.funcList);
                 }
                 for (let j = 0; j < pInc.includes.length; j++) {
                     if (includes.indexOf(pInc.includes[j]) < 0)
@@ -1914,7 +2027,7 @@ connection.onHover((params, cancelled) => {
         }
         const otherFuncInfo = findFuncCommentInfo(otherPp.funcList, wordCmp);
         if (otherFuncInfo) {
-            return commentHoverContent(otherFuncInfo);
+            return commentHoverContent(otherFuncInfo, otherPp.funcList);
         }
     }
     // Not defined anywhere in the workspace -- fall back to a hand-declared

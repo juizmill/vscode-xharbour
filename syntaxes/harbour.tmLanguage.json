@@ -126,6 +126,16 @@
 							"match": "\\[[\\s,]*<\\w+>[\\s\\.]*\\]",
 							"name": "variable.optional.other.harbourdoc"
 						}]
+					},{
+						"match": "(@)([A-Za-z]+)\\b",
+						"name": "storage.type.class.jsdoc",
+						"captures": {
+							"1": {"name": "punctuation.definition.block.tag.jsdoc"},
+							"2": {"name": "storage.type.class.jsdoc"}
+						}
+					},{
+						"match": "<[A-Za-z_]\\w*>",
+						"name": "variable.other.harbourdoc"
 					}]
 				},
 				{
