@@ -38,6 +38,15 @@ let missing = [];
  * docs), so hover shows a minimal placeholder for these.
  * @type {Array<[string,string]>} [name, .hbx file name] */
 let customFunctions = [];
+/** Hand-declared functions from harbour.aliases.customFunctions -- for a
+ * project-specific/custom-compiler function that has neither a workspace
+ * definition nor a .hbx export to discover it from, but where the user
+ * still wants full hover/completion/signature-help docs (not just "known to
+ * exist" like `customFunctions`/`missing`). Same shape as `docs` entries
+ * (see buildCustomFunctionDocs), so every doc-consuming code path that
+ * already handles `docs` can treat these identically.
+ * @type {Array<object>} */
+let customFunctionDocs = [];
 
 /**
  * @typedef dbInfo
@@ -185,6 +194,7 @@ connection.onDidChangeConfiguration(params => {
         existingWords.push("default");
     }
     aliasConfig.customKeywords = customKeywords;
+    customFunctionDocs = buildCustomFunctionDocs(newAliases.customFunctions);
     aliasConfig.callSuffixesRaw = (newAliases.callSuffixes || []).slice();
     aliasConfig.callSuffixes = aliasConfig.callSuffixesRaw.map(s => s.toLowerCase());
     connection.languages.semanticTokens.refresh().catch(() => {});
@@ -251,6 +261,30 @@ function scanCustomHbxFunctions() {
         }
     }
     customFunctions = found;
+}
+
+/** Converts harbour.aliases.customFunctions entries (settings.json) into
+ * the same {name, label, documentation, arguments, return} shape `docs`
+ * (hbdocs.json) entries use, so hover/completion/signature-help can treat
+ * a hand-declared function (e.g. a native function only your own
+ * compiler build has) identically to a documented RTL one.
+ * @param {Array<{name:string, params?:string[], documentation?:string, returns?:string}>} entries
+ * @returns {Array<object>}
+ */
+function buildCustomFunctionDocs(entries) {
+    return (entries || []).filter(e => e && e.name).map(e => {
+        const params = (e.params || []).map(p => "<" + p + ">");
+        let label = e.name + "(" + params.join(", ") + ")";
+        if (e.returns) label += " --> " + e.returns;
+        const doc = {
+            name: e.name,
+            label: label,
+            documentation: e.documentation || "",
+            arguments: params.map(p => ({ label: p, documentation: "" }))
+        };
+        if (e.returns) doc.return = { name: "", help: e.returns };
+        return doc;
+    });
 }
 
 function parseWorkspace() {
@@ -1025,6 +1059,11 @@ function getStdHelp(word, nC) {
             signatures.push(GetHelpFromDoc(docs[i]));
         }
     }
+    for (let i = 0; i < customFunctionDocs.length; i++) {
+        if (customFunctionDocs[i].name.toLowerCase() == word) {
+            signatures.push(GetHelpFromDoc(customFunctionDocs[i]));
+        }
+    }
     return signatures;
 }
 
@@ -1118,6 +1157,10 @@ function isKnownFunction(nameCmp, pp, includeChain) {
     }
     for (var i = 0; i < customFunctions.length; i++) {
         if (customFunctions[i][0] && customFunctions[i][0].toLowerCase() == nameCmp)
+            return true;
+    }
+    for (var i = 0; i < customFunctionDocs.length; i++) {
+        if (customFunctionDocs[i].name && customFunctionDocs[i].name.toLowerCase() == nameCmp)
             return true;
     }
     return false;
@@ -1503,6 +1546,11 @@ connection.onCompletion((param, cancelled) => {
             if(c) c.detail = customFunctions[i][1];
             if (cancelled.isCancellationRequested) return server.CompletionList.create(completions, true);
         }
+        for (var i = 0; i < customFunctionDocs.length; i++) {
+            const c = CheckAdd(customFunctionDocs[i].name, server.CompletionItemKind.Function, "AA")
+            if (c) c.documentation = customFunctionDocs[i].documentation;
+            if (cancelled.isCancellationRequested) return server.CompletionList.create(completions, true);
+        }
         //AddCommands(param, completions)
     }
     if (wordBasedSuggestions && !pp) {
@@ -1869,10 +1917,18 @@ connection.onHover((params, cancelled) => {
             return commentHoverContent(otherFuncInfo);
         }
     }
-    // Not defined anywhere in the workspace -- fall back to the standard
-    // xHarbour/Harbour RTL (the same `docs`/`missing` data isKnownFunction
-    // and signature help already use), so e.g. Len() shows its parameters
-    // and behavior too, not just workspace-defined functions.
+    // Not defined anywhere in the workspace -- fall back to a hand-declared
+    // harbour.aliases.customFunctions entry first (lets a project-specific
+    // function's docs take precedence over a same-named RTL one, however
+    // unlikely), then the standard xHarbour/Harbour RTL (the same
+    // `docs`/`missing` data isKnownFunction and signature help already
+    // use), so e.g. Len() shows its parameters and behavior too, not just
+    // workspace-defined functions.
+    for (let i = 0; i < customFunctionDocs.length; i++) {
+        if (customFunctionDocs[i].name && customFunctionDocs[i].name.toLowerCase() == wordCmp) {
+            return rtlHoverContent(customFunctionDocs[i]);
+        }
+    }
     for (let i = 0; i < docs.length; i++) {
         if (docs[i].name && docs[i].name.toLowerCase() == wordCmp) {
             return rtlHoverContent(docs[i]);

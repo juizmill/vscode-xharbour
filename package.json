@@ -2,7 +2,7 @@
     "name": "vscode-xharbour-lang",
     "displayName": "vscode xHarbour",
     "description": "xHarbour/Harbour language support for Visual Studio Code (fork of harbourCodeExtension by Antonino Perricone, with configurable syntax aliases)",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "license": "GPL-3.0-or-later",
     "publisher": "juizmill",
     "icon": "harbourIcon.png",
@@ -260,6 +260,38 @@
                     "type": "boolean",
                     "description": "%harbour.aliases.customDefault%",
                     "default": true
+                },
+                "harbour.aliases.customFunctions": {
+                    "type": "array",
+                    "description": "%harbour.aliases.customFunctions%",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "%harbour.aliases.customFunctions.name%"
+                            },
+                            "params": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "%harbour.aliases.customFunctions.params%"
+                            },
+                            "documentation": {
+                                "type": "string",
+                                "description": "%harbour.aliases.customFunctions.documentation%"
+                            },
+                            "returns": {
+                                "type": "string",
+                                "description": "%harbour.aliases.customFunctions.returns%"
+                            }
+                        },
+                        "required": [
+                            "name"
+                        ]
+                    },
+                    "default": []
                 },
                 "harbour.aliases.commandRulesUseFileDir": {
                     "type": "boolean",

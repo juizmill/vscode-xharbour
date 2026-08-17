@@ -9,6 +9,18 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.10 - 2026-08-17
+
+### Added
+- `harbour.aliases.customFunctions` -- hand-declare a function that only
+  exists in your own compiler build (name, params, documentation, return),
+  so it gets full hover/completion/signature-help docs and stops
+  `harbour.checkUndefinedFunctions` from flagging it, the same as a
+  documented standard RTL function. Unlike `commandRules`, this doesn't
+  change how the function is called or generate anything passed to the
+  compiler -- it's a pure editor-side hint for a function that's already
+  valid to call, just invisible to any source the extension can scan.
+
 ## 0.0.9 - 2026-08-17
 
 ### Added

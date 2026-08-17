@@ -22,6 +22,7 @@ and, where it matters, the compiler — about your own macro conventions.
   - [`harbour.aliases.customKeywords`](#harbouraliasescustomkeywords)
   - [`harbour.aliases.callSuffixes` and `callSuffixMode`](#harbouraliasescallsuffixes-and-callsuffixmode)
   - [`harbour.aliases.commandRules`](#harbouraliasescommandrules)
+  - [`harbour.aliases.customFunctions`](#harbouraliasescustomfunctions)
 - [Commands](#commands)
 - [Settings reference](#settings-reference)
 - [Code formatting](#code-formatting)
@@ -178,6 +179,36 @@ container wrapper that only mounts that one directory. The first word of
 `match` (`DEFAULT` above) is also registered automatically as a
 `customKeyword`, so you don't need a separate entry for it.
 
+### `harbour.aliases.customFunctions`
+
+For a function that only exists in your own compiler build — a native
+function with no `.prg` source and no `.hbx` export for the extension to
+[discover](#language-features) it from — declare it directly, and it gets
+full hover, completion and signature-help docs, and stops
+`harbour.checkUndefinedFunctions` from flagging calls to it:
+
+```jsonc
+"harbour.aliases.customFunctions": [
+  {
+    "name": "Mens",
+    "params": ["cMsg"],
+    "documentation": "Shows <cMsg> as an on-screen message.",
+    "returns": "NIL"
+  }
+]
+```
+
+`params` and `returns` are just plain descriptive text shown in hover, not
+type-checked — `params` becomes `<cMsg>` in the shown signature
+(`Mens(<cMsg>) --> NIL`). Both are optional; a bare `{ "name": "Mens" }`
+still stops the "possibly undefined function" hint, it just won't have any
+parameter/return info to show on hover.
+
+Unlike `commandRules`, this doesn't change how the function is *called* or
+generate anything passed to the compiler — it's purely a hint for the
+editor, for a function that's already valid to call as-is (`Mens("hi")`),
+just not visible from any source the extension can scan.
+
 ## Commands
 
 | Command | Title | What it does |
@@ -208,6 +239,7 @@ container wrapper that only mounts that one directory. The first word of
 | `harbour.aliases.callSuffixes` | `[]` |
 | `harbour.aliases.callSuffixMode` | `"either"` |
 | `harbour.aliases.commandRules` | `[]` |
+| `harbour.aliases.customFunctions` | `[]` |
 
 **Icons** — see [File icons](#file-icons).
 
