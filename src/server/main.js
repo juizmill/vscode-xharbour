@@ -23,6 +23,51 @@ let wordBasedSuggestions = true;
 let files = {};
 /** @type {Object.<string, provider.Provider>} */
 let includes ={};
+/** Reverse index: lowercased identifier -> Set of `files` uris whose
+ * funcList contains an entry with that name (any kind). Lets
+ * `isKnownWorkspaceFunction` and `onHover`'s cross-workspace fallback jump
+ * straight to the handful of files that could possibly match instead of
+ * linearly scanning every indexed file's whole funcList on every keystroke
+ * (`checkUndefinedFunctions`) and every hover -- that O(files*funcs) scan is
+ * what made hover show "Loading..." for a long time on non-trivial
+ * workspaces. Kept in sync incrementally by `updateNameIndex`, called from
+ * `UpdateFile` whenever a file (re)enters `files`.
+ * @type {Object.<string, Set<string>>} */
+let nameToUris = Object.create(null);
+/** uri -> the list of lowercased names it last contributed to `nameToUris`,
+ * so `updateNameIndex` can retract stale entries before re-adding the
+ * current ones on re-parse.
+ * @type {Object.<string, Array<string>>} */
+let indexedNamesByUri = Object.create(null);
+
+/** Keeps `nameToUris` in sync for `uri` after `pp` has been (re)parsed.
+ * @param {string} uri
+ * @param {provider.Provider} pp
+ */
+function updateNameIndex(uri, pp) {
+    const old = indexedNamesByUri[uri];
+    if (old) {
+        for (let i = 0; i < old.length; i++) {
+            const set = nameToUris[old[i]];
+            if (set) {
+                set.delete(uri);
+                if (set.size == 0) delete nameToUris[old[i]];
+            }
+        }
+    }
+    const names = [];
+    const seen = Object.create(null);
+    for (const fn in pp.funcList) {
+        const nameCmp = pp.funcList[fn].nameCmp;
+        if (!nameCmp || seen[nameCmp]) continue;
+        seen[nameCmp] = true;
+        names.push(nameCmp);
+        let set = nameToUris[nameCmp];
+        if (!set) set = nameToUris[nameCmp] = new Set();
+        set.add(uri);
+    }
+    indexedNamesByUri[uri] = names;
+}
 /** the list of documentation harbour base functions
  * @type {Array<object>} */
 let docs = [];
@@ -378,6 +423,7 @@ function UpdateFile(pp) {
     const ext = path.extname(pp.currentDocument).toLowerCase();
     if (ext != ".prg") {
         files[doc] = pp;
+        updateNameIndex(doc, pp);
         return;
     }
     if (doc in files)
@@ -396,6 +442,7 @@ function UpdateFile(pp) {
             }
         }
     files[doc] = pp;
+    updateNameIndex(doc, pp);
     for (var db in pp.databases) {
         const ppDB = pp.databases[db];
         if (!(db in databases)) databases[db] = { name: ppDB.name, fields: {} };
@@ -1125,9 +1172,12 @@ function isKnownWorkspaceFunction(nameCmp, pp, includeChain) {
         return false;
     }
     if (pp && hasIt(pp)) return true;
-    for (const file in files) {
-        if (files[file] === pp) continue; // already checked above
-        if (hasIt(files[file])) return true;
+    const candidateUris = nameToUris[nameCmp];
+    if (candidateUris) {
+        for (const file of candidateUris) {
+            if (files[file] === pp) continue; // already checked above
+            if (hasIt(files[file])) return true;
+        }
     }
     if (includeChain) {
         for (let i = 0; i < includeChain.length; i++) {
@@ -1306,6 +1356,20 @@ function publishHarbourDiagnostics(pp, doc) {
     connection.sendDiagnostics({ uri: doc.uri, diagnostics: diagnostics });
 }
 
+/** Pending debounced reparse timers, keyed by document uri -- see
+ * `documents.onDidChangeContent` below.
+ * @type {Object.<string, NodeJS.Timeout>} */
+let reparseTimers = Object.create(null);
+/** Full reparse (funcList/references rebuild) + diagnostics is O(file size)
+ * and, before every keystroke ran it synchronously and immediately, was the
+ * main reason hover/completion could sit on "Loading..." on a file of any
+ * real size (1000+ lines): each request queues behind whatever reparse the
+ * previous keystroke just triggered on Node's single thread. Debouncing to
+ * "once typing pauses" keeps `files[uri]` (what hover/completion actually
+ * read, via `getDocumentProvider`) at most this many ms stale -- invisible
+ * in practice since hover/completion only fire after the user pauses too. */
+const REPARSE_DEBOUNCE_MS = 250;
+
 documents.onDidChangeContent((e) => {
     const uri = Uri.parse(e.document.uri);
     if (uri.scheme != "file") return;
@@ -1316,14 +1380,21 @@ documents.onDidChangeContent((e) => {
     if (!found) return; //not include file outside the current workspace
     const ext = path.extname(uri.fsPath).toLowerCase();
     const cMode = (ext.startsWith(".c") && ext != ".ch")
-    if (ext == ".prg" || ext == ".ch" || cMode) {
+    if (ext != ".prg" && ext != ".ch" && !cMode) return;
+
+    const docUri = e.document.uri;
+    if (reparseTimers[docUri]) clearTimeout(reparseTimers[docUri]);
+    reparseTimers[docUri] = setTimeout(() => {
+        delete reparseTimers[docUri];
+        const doc = documents.get(docUri);
+        if (!doc) return; // closed before the debounce fired
         let doGroups = false;
         if(uri in files) doGroups = files[uri].doGroups;
-        const pp = parseDocument(e.document, (p) => { p.cMode = cMode; p.doGroups = doGroups; })
+        const pp = parseDocument(doc, (p) => { p.cMode = cMode; p.doGroups = doGroups; })
         UpdateFile(pp);
         if (ext == ".prg")
-            publishHarbourDiagnostics(pp, e.document);
-    }
+            publishHarbourDiagnostics(pp, doc);
+    }, REPARSE_DEBOUNCE_MS);
 })
 
 /**
@@ -2016,18 +2087,25 @@ connection.onHover((params, cancelled) => {
     // Not found in this document or its own #include chain -- look across the
     // rest of the indexed workspace (same "files" index Go to Definition uses),
     // so hovering a call to a function defined in another workspace file still
-    // shows its doc-comment.
-    for (const file in files) {
-        if (file == doc.uri) continue;
-        if (cancelled.isCancellationRequested) return undefined;
-        const otherPp = files[file];
-        var result = otherPp.funcList.filter((v)=> v.kind=='define' && v.name==w);
-        if(result.length>0) {
-            return { contents: { language: 'harbour', value: result[0].body } };
-        }
-        const otherFuncInfo = findFuncCommentInfo(otherPp.funcList, wordCmp);
-        if (otherFuncInfo) {
-            return commentHoverContent(otherFuncInfo, otherPp.funcList);
+    // shows its doc-comment. Only visit files whose funcList actually mentions
+    // this identifier (via nameToUris) instead of every indexed file -- on a
+    // workspace with many files that linear scan was the main reason hover
+    // could sit on "Loading..." for a long time.
+    const hoverCandidateUris = nameToUris[wordCmp];
+    if (hoverCandidateUris) {
+        for (const file of hoverCandidateUris) {
+            if (file == doc.uri) continue;
+            if (cancelled.isCancellationRequested) return undefined;
+            const otherPp = files[file];
+            if (!otherPp) continue;
+            var result = otherPp.funcList.filter((v)=> v.kind=='define' && v.name==w);
+            if(result.length>0) {
+                return { contents: { language: 'harbour', value: result[0].body } };
+            }
+            const otherFuncInfo = findFuncCommentInfo(otherPp.funcList, wordCmp);
+            if (otherFuncInfo) {
+                return commentHoverContent(otherFuncInfo, otherPp.funcList);
+            }
         }
     }
     // Not defined anywhere in the workspace -- fall back to a hand-declared

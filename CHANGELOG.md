@@ -9,6 +9,24 @@ it isn't reproduced here since none of it is specific to this fork.
 
 ## Unreleased
 
+## 0.0.14 - 2026-08-24
+
+### Fixed
+- Hover and completion could sit on "Loading..." for a long time (or
+  effectively hang) on non-trivial workspaces, especially with
+  `harbour.checkUndefinedFunctions` enabled and files of 1000+ lines.
+  Two causes in the language server: (1) every keystroke triggered a full,
+  synchronous re-parse and diagnostics rebuild with no debounce, blocking
+  Node's single thread and making any hover/completion request queue
+  behind it; (2) the undefined-function check and hover's cross-file
+  fallback both did a full linear scan of every indexed file's function
+  list for every lookup (`O(files × functions)`), repeated on every
+  keystroke and every hover. Fixed by debouncing the re-parse/diagnostics
+  pipeline (250ms after typing pauses) and by maintaining an incremental
+  reverse index (name -> files that define it) so both lookups jump
+  straight to the handful of candidate files instead of scanning the
+  whole workspace.
+
 ## 0.0.13 - 2026-08-17
 
 ### Added
